@@ -1,103 +1,179 @@
-import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function Home() {
   return (
-    <div className='grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-sans sm:p-20'>
-      <main className='row-start-2 flex flex-col items-center gap-[32px] sm:items-start'>
-        <Image
-          className='dark:invert'
-          src='/next.svg'
-          alt='Next.js logo'
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className='list-inside list-decimal text-center font-mono text-sm/6 sm:text-left'>
-          <li className='mb-2 tracking-[-.01em]'>
-            Get started by editing{' '}
-            <code className='rounded bg-black/[.05] px-1 py-0.5 font-mono font-semibold dark:bg-white/[.06]'>
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className='tracking-[-.01em]'>
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className='bg-background min-h-screen p-8'>
+      <div className='mx-auto max-w-6xl space-y-8'>
+        {/* Header */}
+        <header className='space-y-4 text-center'>
+          <h1 className='text-foreground text-4xl font-bold'>🗓️ Planora</h1>
+          <p className='text-muted-foreground text-xl'>
+            Application SaaS de Gestion des Plannings avec IA
+          </p>
+        </header>
 
-        <div className='flex flex-col items-center gap-4 sm:flex-row'>
-          <a
-            className='bg-foreground text-background flex h-10 items-center justify-center gap-2 rounded-full border border-solid border-transparent px-4 text-sm font-medium transition-colors hover:bg-[#383838] sm:h-12 sm:w-auto sm:px-5 sm:text-base dark:hover:bg-[#ccc]'
-            href='https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app'
-            target='_blank'
-            rel='noopener noreferrer'
-          >
-            <Image
-              className='dark:invert'
-              src='/vercel.svg'
-              alt='Vercel logomark'
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className='flex h-10 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-4 text-sm font-medium transition-colors hover:border-transparent hover:bg-[#f2f2f2] sm:h-12 sm:w-auto sm:px-5 sm:text-base md:w-[158px] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]'
-            href='https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app'
-            target='_blank'
-            rel='noopener noreferrer'
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className='row-start-3 flex flex-wrap items-center justify-center gap-[24px]'>
-        <a
-          className='flex items-center gap-2 hover:underline hover:underline-offset-4'
-          href='https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app'
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          <Image
-            aria-hidden
-            src='/file.svg'
-            alt='File icon'
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className='flex items-center gap-2 hover:underline hover:underline-offset-4'
-          href='https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app'
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          <Image
-            aria-hidden
-            src='/window.svg'
-            alt='Window icon'
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className='flex items-center gap-2 hover:underline hover:underline-offset-4'
-          href='https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app'
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          <Image
-            aria-hidden
-            src='/globe.svg'
-            alt='Globe icon'
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        {/* Theme Demo Section */}
+        <section className='space-y-6'>
+          <h2 className='text-foreground text-2xl font-semibold'>
+            Démonstration du Thème Personnalisé
+          </h2>
+
+          <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+            {/* Primary Colors Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className='text-primary'>
+                  Couleurs Primaires
+                </CardTitle>
+                <CardDescription>
+                  Bleu professionnel pour l&apos;identité Planora
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <Button className='w-full'>Bouton Primaire</Button>
+                <Button variant='outline' className='w-full'>
+                  Bouton Outline
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Accent Colors Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className='text-accent-foreground bg-accent rounded px-3 py-1'>
+                  Couleurs d&apos;Accent
+                </CardTitle>
+                <CardDescription>
+                  Orange énergique pour les éléments interactifs
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <Button
+                  variant='secondary'
+                  className='bg-accent text-accent-foreground hover:bg-accent/90 w-full'
+                >
+                  Call-to-Action
+                </Button>
+                <div className='bg-accent h-4 rounded-full'></div>
+              </CardContent>
+            </Card>
+
+            {/* Form Elements Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Éléments de Formulaire</CardTitle>
+                <CardDescription>
+                  Champs optimisés pour la saisie de données
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <div className='space-y-2'>
+                  <Label htmlFor='demo-input'>Nom du projet</Label>
+                  <Input id='demo-input' placeholder='Entrez le nom...' />
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='demo-textarea'>Description</Label>
+                  <Textarea
+                    id='demo-textarea'
+                    placeholder='Décrivez votre planning...'
+                    rows={3}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Color Palette Display */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Palette de Couleurs Planora</CardTitle>
+              <CardDescription>
+                Thème professionnel optimisé pour la productivité et
+                l&apos;organisation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
+                <div className='space-y-2'>
+                  <div className='bg-primary h-16 rounded-lg border'></div>
+                  <p className='text-sm font-medium'>Primary</p>
+                  <p className='text-muted-foreground text-xs'>
+                    Bleu professionnel
+                  </p>
+                </div>
+                <div className='space-y-2'>
+                  <div className='bg-accent h-16 rounded-lg border'></div>
+                  <p className='text-sm font-medium'>Accent</p>
+                  <p className='text-muted-foreground text-xs'>
+                    Orange énergique
+                  </p>
+                </div>
+                <div className='space-y-2'>
+                  <div className='bg-secondary h-16 rounded-lg border'></div>
+                  <p className='text-sm font-medium'>Secondary</p>
+                  <p className='text-muted-foreground text-xs'>Gris clair</p>
+                </div>
+                <div className='space-y-2'>
+                  <div className='bg-muted h-16 rounded-lg border'></div>
+                  <p className='text-sm font-medium'>Muted</p>
+                  <p className='text-muted-foreground text-xs'>
+                    Arrière-plan neutre
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Features Preview */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Fonctionnalités à Venir</CardTitle>
+              <CardDescription>
+                Aperçu des fonctionnalités de gestion de planning
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
+                <div className='hover:bg-muted/50 rounded-lg border p-4 transition-colors'>
+                  <h3 className='mb-2 font-semibold'>
+                    📅 Planning Intelligent
+                  </h3>
+                  <p className='text-muted-foreground text-sm'>
+                    Génération automatique de plannings avec IA
+                  </p>
+                </div>
+                <div className='hover:bg-muted/50 rounded-lg border p-4 transition-colors'>
+                  <h3 className='mb-2 font-semibold'>👥 Multi-tenant</h3>
+                  <p className='text-muted-foreground text-sm'>
+                    Gestion sécurisée pour plusieurs organisations
+                  </p>
+                </div>
+                <div className='hover:bg-muted/50 rounded-lg border p-4 transition-colors'>
+                  <h3 className='mb-2 font-semibold'>📊 Analytics</h3>
+                  <p className='text-muted-foreground text-sm'>
+                    Tableaux de bord et rapports détaillés
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Footer */}
+        <footer className='text-muted-foreground text-center'>
+          <p>T004 - ShadCN/UI avec thème personnalisé Planora ✨</p>
+        </footer>
+      </div>
     </div>
   );
 }
