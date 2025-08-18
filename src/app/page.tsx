@@ -14,77 +14,76 @@ export default function HomePage() {
           </p>
         </header>
 
-        {/* T006 Completion Card */}
+        {/* T007 Completion Card */}
         <div className='rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-800'>
           <div className='mb-4'>
             <h2 className='text-2xl font-semibold text-gray-900 dark:text-white'>
-              ✅ T006 - Structure de Dossiers Organisée
+              ✅ T007 - TypeScript Configuration Stricte
             </h2>
             <p className='mt-2 text-gray-600 dark:text-gray-400'>
-              Architecture moderne et maintenable pour une application SaaS
-              complexe
+              Configuration TypeScript ultra-stricte avec types complets pour
+              une sécurité maximale
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
             <div className='rounded-lg border p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700'>
               <h3 className='mb-2 font-semibold text-gray-900 dark:text-white'>
-                🏗️ Architecture Modulaire
+                🔷 Configuration Ultra-Stricte
               </h3>
               <p className='mb-3 text-sm text-gray-600 dark:text-gray-400'>
-                Séparation claire des préoccupations et organisation logique
+                Tous les flags TypeScript stricts activés
               </p>
               <ul className='space-y-1 text-xs text-gray-500'>
-                <li>• Components réutilisables par type</li>
-                <li>• Lib organisée par domaine métier</li>
-                <li>• Hooks et store centralisés</li>
+                <li>• noImplicitAny, strictNullChecks</li>
+                <li>• noUnusedLocals, noImplicitReturns</li>
+                <li>• exactOptionalPropertyTypes</li>
               </ul>
             </div>
 
             <div className='rounded-lg border p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700'>
               <h3 className='mb-2 font-semibold text-gray-900 dark:text-white'>
-                📁 Structure Professionnelle
+                📝 Types Complets
               </h3>
               <p className='mb-3 text-sm text-gray-600 dark:text-gray-400'>
-                Dossiers organisés selon les meilleures pratiques
+                Types détaillés pour toute l&apos;application
               </p>
               <ul className='space-y-1 text-xs text-gray-500'>
-                <li>• App Router avec route groups</li>
-                <li>• Composants par fonctionnalité</li>
-                <li>• Types et validations centralisés</li>
+                <li>• Types de base de données</li>
+                <li>• Types API avec validation</li>
+                <li>• Types utilitaires globaux</li>
               </ul>
             </div>
 
             <div className='rounded-lg border p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700'>
               <h3 className='mb-2 font-semibold text-gray-900 dark:text-white'>
-                🔧 Outils & Utilitaires
+                🛡️ Sécurité & Maintenabilité
               </h3>
               <p className='mb-3 text-sm text-gray-600 dark:text-gray-400'>
-                Fonctions utilitaires et helpers prêts à l&apos;emploi
+                Détection d&apos;erreurs à la compilation
               </p>
               <ul className='space-y-1 text-xs text-gray-500'>
-                <li>• Utils pour CSS (cn function)</li>
-                <li>• Formatage de dates</li>
-                <li>• Helpers de validation</li>
+                <li>• Pas de types implicites</li>
+                <li>• Validation des null/undefined</li>
+                <li>• Refactoring sécurisé</li>
               </ul>
             </div>
           </div>
 
           <div className='mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20'>
             <h4 className='mb-2 font-semibold text-blue-800 dark:text-blue-200'>
-              🚀 Prêt pour le Développement
+              🚀 Sécurité TypeScript Maximale
             </h4>
             <p className='text-sm text-blue-700 dark:text-blue-300'>
-              La structure est maintenant en place pour accueillir toutes les
-              fonctionnalités de Planora :
+              Configuration stricte activée avec types complets pour :
             </p>
             <div className='mt-2 grid grid-cols-1 gap-2 text-sm text-blue-700 md:grid-cols-2 dark:text-blue-300'>
-              <div>• Authentification & autorisation</div>
-              <div>• Gestion des employés</div>
-              <div>• Génération de plannings IA</div>
-              <div>• Interface multi-tenant</div>
-              <div>• Analytics & rapports</div>
-              <div>• Configuration avancée</div>
+              <div>• Types de base de données complets</div>
+              <div>• API types avec validation</div>
+              <div>• Types globaux et utilitaires</div>
+              <div>• Composants type-safe</div>
+              <div>• Constantes typées</div>
+              <div>• Path mapping optimisé</div>
             </div>
           </div>
 
@@ -92,9 +91,9 @@ export default function HomePage() {
             <p className='text-sm text-green-700 dark:text-green-300'>
               💡{' '}
               <strong>
-                Architecture documentée dans{' '}
+                Configuration documentée dans{' '}
                 <code className='rounded bg-green-100 px-1 dark:bg-green-800'>
-                  docs/ARCHITECTURE.md
+                  docs/TYPESCRIPT.md
                 </code>
               </strong>
             </p>
@@ -126,9 +125,13 @@ export default function HomePage() {
                 id: 'T006',
                 name: 'Structure de dossiers',
                 completed: true,
+              },
+              {
+                id: 'T007',
+                name: 'TypeScript strict',
+                completed: true,
                 current: true,
               },
-              { id: 'T007', name: 'TypeScript strict', completed: false },
               { id: 'T008', name: 'Git optimisé', completed: false },
             ].map(task => (
               <div key={task.id} className='flex items-center space-x-3'>
@@ -169,7 +172,7 @@ export default function HomePage() {
 
         {/* Footer */}
         <footer className='text-center text-gray-500'>
-          <p>T006 - Structure de dossiers professionnelle ✨</p>
+          <p>T007 - TypeScript strict configuration ✨</p>
         </footer>
       </div>
     </div>
