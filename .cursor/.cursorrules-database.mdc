@@ -1,0 +1,401 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# MEDINOTE - Cursor Rules Database & Prisma
+
+## 🗄️ Architecture Base de Données
+
+### Prisma ORM Configuration
+```typescript
+// src/lib/prisma.ts
+import { PrismaClient } from "@prisma/client";
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: ["query", "error", "warn"],
+  });
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+```
+
+### Structure des Schémas
+```
+prisma/
+├── schema/
+│   ├── document.prisma      # Documents et partages
+│   ├── feedback.prisma      # Feedbacks utilisateur
+│   ├── interview-report.prisma  # Rapports d'entretien
+│   ├── mediatheque.prisma   # Médiathèque
+│   ├── note.prisma          # Notes vocales
+│   ├── patient.prisma       # Patients
+│   ├── practitioner.prisma  # Praticiens
+│   ├── user.prisma          # Utilisateurs
+│   └── profession.prisma    # Professions médicales
+└── seed.mjs                 # Données de seed
+```
+
+## 📋 Règles de Modélisation
+
+### 1. Convention de Nommage
+- **Modèles:** PascalCase (ex: `Document`, `SharedDocument`)
+- **Champs:** camelCase (ex: `userId`, `createdAt`)
+- **Relations:** Nom du modèle en camelCase (ex: `user`, `documents`)
+- **Indexes:** snake_case avec préfixe (ex: `idx_user_email`)
+
+### 2. Champs Standards
+```prisma
+model BaseModel {
+  id        String   @id @default(nanoid(32))
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+### 3. Relations et Contraintes
+```prisma
+model Document {
+  id       String @id @default(nanoid(32))
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  
+  // Indexes pour performance
+  @@index([userId])
+  @@index([createdAt])
+}
+```
+
+## 🔐 Sécurité et Permissions
+
+### Row Level Security Pattern
+```typescript
+// src/lib/database/queries.ts
+export async function getUserDocuments(userId: string) {
+  return prisma.document.findMany({
+    where: { 
+      userId, // Toujours filtrer par utilisateur
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+export async function getDocument(id: string, userId: string) {
+  const document = await prisma.document.findFirst({
+    where: { 
+      id,
+      userId, // Vérification de propriété
+    },
+  });
+  
+  if (!document) {
+    throw new Error("Document non trouvé ou accès non autorisé");
+  }
+  
+  return document;
+}
+```
+
+### Validation des Données
+```typescript
+// Toujours valider avant insertion
+import { z } from "zod";
+
+const DocumentSchema = z.object({
+  documentTitle: z.string().min(1).max(255),
+  templateType: z.string().optional(),
+  sections: z.array(z.any()).default([]),
+});
+
+export async function createDocument(data: unknown, userId: string) {
+  const validatedData = DocumentSchema.parse(data);
+  
+  return prisma.document.create({
+    data: {
+      ...validatedData,
+      userId,
+    },
+  });
+}
+```
+
+## 📊 Patterns de Requêtes
+
+### 1. Requêtes Optimisées
+```typescript
+// Include relations nécessaires seulement
+export async function getFullDocument(id: string, userId: string) {
+  return prisma.document.findFirst({
+    where: { id, userId },
+    include: {
+      user: {
+        select: { firstName: true, lastName: true, email: true }
+      },
+      sharedDocuments: {
+        include: {
+          patient: true,
+          practitioner: true,
+        }
+      }
+    }
+  });
+}
+
+// Pagination avec cursor
+export async function getDocumentsPaginated(
+  userId: string,
+  cursor?: string,
+  take = 10
+) {
+  return prisma.document.findMany({
+    where: { userId },
+    take,
+    skip: cursor ? 1 : 0,
+    cursor: cursor ? { id: cursor } : undefined,
+    orderBy: { createdAt: 'desc' },
+  });
+}
+```
+
+### 2. Transactions
+```typescript
+// Transaction pour opérations liées
+export async function shareDocument(
+  documentId: string,
+  email: string,
+  userId: string
+) {
+  return prisma.$transaction(async (tx) => {
+    // Vérifier que le document appartient à l'utilisateur
+    const document = await tx.document.findFirst({
+      where: { id: documentId, userId }
+    });
+    
+    if (!document) {
+      throw new Error("Document non trouvé");
+    }
+    
+    // Créer le partage
+    const sharedDocument = await tx.sharedDocument.create({
+      data: {
+        documentId,
+        userId,
+        email,
+        token: nanoid(64),
+      }
+    });
+    
+    return sharedDocument;
+  });
+}
+```
+
+### 3. Agrégations et Statistiques
+```typescript
+export async function getUserStats(userId: string) {
+  const [documentsCount, sharedCount, patientsCount] = await Promise.all([
+    prisma.document.count({ where: { userId } }),
+    prisma.sharedDocument.count({ where: { userId } }),
+    prisma.patient.count({ where: { userId } }),
+  ]);
+  
+  return {
+    documentsCount,
+    sharedCount,
+    patientsCount,
+  };
+}
+```
+
+## 🔄 Migrations et Seeds
+
+### Migrations Pattern
+```typescript
+// Migrations incrementales avec rollback
+-- Migration: 20250101000000_add_document_versioning
+CREATE TABLE "DocumentVersion" (
+    "id" TEXT NOT NULL,
+    "documentId" TEXT NOT NULL,
+    "version" INTEGER NOT NULL,
+    "content" JSONB NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT "DocumentVersion_pkey" PRIMARY KEY ("id")
+);
+
+-- Index pour performance
+CREATE INDEX "DocumentVersion_documentId_version_idx" ON "DocumentVersion"("documentId", "version");
+
+-- Foreign key
+ALTER TABLE "DocumentVersion" ADD CONSTRAINT "DocumentVersion_documentId_fkey" 
+FOREIGN KEY ("documentId") REFERENCES "Document"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+```
+
+### Seeds Structure
+```javascript
+// prisma/seed.mjs
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  // Professions médicales
+  const professions = await seedProfessions();
+  console.log(`Seeded ${professions.length} professions`);
+  
+  // Utilisateur test (développement uniquement)
+  if (process.env.NODE_ENV === 'development') {
+    await seedTestUsers();
+  }
+}
+
+async function seedProfessions() {
+  const professionsData = [
+    { name: "Médecin généraliste" },
+    { name: "Dentiste" },
+    { name: "Kinésithérapeute" },
+    // ...
+  ];
+  
+  return Promise.all(
+    professionsData.map(profession =>
+      prisma.profession.upsert({
+        where: { name: profession.name },
+        update: {},
+        create: profession,
+      })
+    )
+  );
+}
+```
+
+## 📈 Performance et Monitoring
+
+### Indexes Stratégiques
+```prisma
+model Document {
+  // Index pour recherche par utilisateur
+  @@index([userId])
+  @@index([userId, createdAt])
+  
+  // Index pour recherche textuelle
+  @@index([documentTitle])
+  
+  // Index composite pour filtres
+  @@index([userId, templateType])
+}
+
+model SharedDocument {
+  // Index unique pour tokens
+  @@unique([token])
+  
+  // Index pour recherche par email
+  @@index([email])
+  
+  // Index pour stats utilisateur
+  @@index([userId, createdAt])
+}
+```
+
+### Query Optimization
+```typescript
+// Utiliser select pour limiter les champs
+export async function getDocumentsList(userId: string) {
+  return prisma.document.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      documentTitle: true,
+      templateType: true,
+      createdAt: true,
+      updatedAt: true,
+      // Éviter de charger sections (JSON lourd)
+    },
+    orderBy: { updatedAt: 'desc' },
+  });
+}
+
+// Connection pooling
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+  // Configuration pour production
+  ...(process.env.NODE_ENV === 'production' && {
+    log: ['error'],
+    errorFormat: 'minimal',
+  }),
+});
+```
+
+## 🧪 Testing Database
+
+### Test Database Setup
+```typescript
+// tests/setup.ts
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient({
+  datasourceUrl: process.env.DATABASE_TEST_URL,
+});
+
+export async function setupTestDb() {
+  // Clean database
+  await prisma.sharedDocument.deleteMany();
+  await prisma.document.deleteMany();
+  await prisma.user.deleteMany();
+  
+  // Seed test data
+  const testUser = await prisma.user.create({
+    data: {
+      email: 'test@example.com',
+      firstName: 'Test',
+      lastName: 'User',
+    },
+  });
+  
+  return { testUser };
+}
+
+export async function teardownTestDb() {
+  await prisma.$disconnect();
+}
+```
+
+## 🔒 Bonnes Pratiques Sécurité
+
+### 1. Validation d'Entrée
+- Toujours valider avec Zod avant insertion
+- Sanitiser les données JSON
+- Limiter la taille des champs texte
+
+### 2. Protection contre Injection
+- Utiliser les requêtes Prisma (protection native)
+- Éviter le SQL brut sauf nécessité absolue
+- Valider les paramètres dynamiques
+
+### 3. Audit Trail
+```prisma
+model AuditLog {
+  id        String   @id @default(nanoid(32))
+  userId    String
+  action    String   // CREATE, UPDATE, DELETE
+  resource  String   // Document, Patient, etc.
+  resourceId String
+  oldValues Json?
+  newValues Json?
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id])
+  
+  @@index([userId, createdAt])
+  @@index([resource, resourceId])
+}
+```

@@ -1,0 +1,230 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# MEDINOTE - Cursor Rules Générales
+
+## 🏗️ Architecture du Projet
+
+**Medinote** est une application Next.js 14 de prise de notes médicales avec les caractéristiques suivantes :
+
+### Technologies Principales
+- **Framework:** Next.js 14.2.3 avec App Router
+- **Language:** TypeScript (strict mode)
+- **Styling:** Tailwind CSS avec configuration personnalisée
+- **Base de données:** Prisma ORM avec PostgreSQL
+- **Authentification:** NextAuth.js v5 (beta)
+- **State Management:** Zustand + React Query (TanStack)
+- **UI Components:** Radix UI + shadcn/ui
+- **Rich Text:** Tiptap Editor
+- **AI Integration:** OpenAI API (GPT-4, Whisper)
+- **File Upload:** AWS S3
+- **Email:** Resend
+- **Signatures:** YouSign
+
+### Structure des Dossiers
+
+```
+app/                    # App Router de Next.js
+├── (global-layout)/    # Route group avec sidebar
+├── api/               # API Routes
+├── auth/              # Pages d'authentification
+└── providers.tsx      # React Providers
+
+src/
+├── components/        # Composants UI réutilisables
+├── features/         # Fonctionnalités métier par domaine
+├── hooks/            # Custom React hooks
+├── lib/              # Utilitaires et configurations
+├── store/            # Zustand stores
+└── types/            # Définitions TypeScript
+
+prisma/
+└── schema/           # Modèles Prisma séparés par domaine
+```
+
+## 📋 Règles de Développement Générales
+
+### 1. Convention de Nommage
+- **Fichiers:** camelCase pour les fichiers utilitaires, PascalCase pour les composants
+- **Composants:** PascalCase (ex: `DocumentBuilder.tsx`)
+- **Hooks:** Préfixe "use" (ex: `useDocumentBuilder.ts`)
+- **Actions:** Suffixe ".actions.ts" (ex: `document.actions.ts`)
+- **Types:** Suffixe ".types.ts" ou dans dossier `types/`
+- **Schemas:** Suffixe ".schema.ts" (ex: `profil-schema.ts`)
+
+### 2. Structure des Composants
+```typescript
+// Pattern standard pour les composants
+import { FC } from "react";
+import { cn } from "@/lib/utils";
+
+interface ComponentProps {
+  className?: string;
+  // Props spécifiques
+}
+
+export const Component: FC<ComponentProps> = ({ 
+  className,
+  ...props 
+}) => {
+  return (
+    <div className={cn("base-classes", className)}>
+      {/* Contenu */}
+    </div>
+  );
+};
+```
+
+### 3. Gestion d'État
+- **État local:** `useState`, `useReducer`
+- **État global:** Zustand stores dans `src/store/`
+- **Cache serveur:** React Query (TanStack Query)
+- **Formulaires:** React Hook Form + Zod validation
+
+### 4. Authentification
+- Utiliser NextAuth.js v5 avec stratégie database
+- Session enrichie avec données utilisateur complètes
+- Middleware pour protection des routes
+- Hook `useUser()` pour accéder aux données utilisateur
+
+### 5. API et Server Actions
+- Privilégier les Server Actions pour les mutations
+- API Routes pour les endpoints complexes et webhooks
+- Validation avec Zod schemas
+- Gestion d'erreurs avec `ActionError`
+
+## 🎨 Standards UI/UX
+
+### Design System
+- **Couleurs principales:** 
+  - Primary Blue: #2684ff
+  - Secondary Blue: #0054CF
+  - Primary Green: #08dbb3
+  - Background: #F7FAFC
+- **Font:** Poppins
+- **Composants:** shadcn/ui avec Radix UI
+- **Animations:** Tailwind CSS + Framer Motion
+- **Shadow:** Style Apple avec `shadow-apple`
+
+### Responsive Design
+- Mobile-first approach
+- Breakpoints Tailwind standards
+- Sidebar responsive (mobile drawer)
+
+## 🔐 Sécurité
+
+### Règles de Sécurité
+1. Toujours valider les données côté serveur avec Zod
+2. Utiliser CSRF protection via NextAuth
+3. Sanitiser les inputs utilisateur
+4. Vérifier les permissions avant chaque action
+5. Never expose sensitive data in client components
+
+### Variables d'Environnement
+```typescript
+// Utiliser @t3-oss/env-nextjs pour validation
+export const env = createEnv({
+  server: {
+    NEXTAUTH_SECRET: z.string(),
+    DATABASE_URL: z.string(),
+    OPENAI_API_KEY: z.string(),
+    // ...
+  },
+  client: {
+    // Variables client si nécessaire
+  },
+});
+```
+
+## 📝 Bonnes Pratiques React 2025
+
+### 1. Performance
+- Utiliser `React.memo` pour les composants coûteux
+- `useMemo` et `useCallback` pour optimiser les re-renders
+- Lazy loading avec `React.lazy` et `Suspense`
+- Code splitting au niveau des routes
+
+### 2. Server Components
+- Privilégier les Server Components par défaut
+- Marquer "use client" uniquement quand nécessaire
+- Éviter les props drilling avec Server Components
+
+### 3. Concurrent Features
+- Utiliser `useTransition` pour les updates non-urgentes
+- `useDeferredValue` pour les listes filtrable
+- Suspense boundaries pour le loading states
+
+### 4. Error Handling
+```typescript
+// Error Boundary pattern
+"use client";
+import { ErrorBoundary } from "react-error-boundary";
+
+function ErrorFallback({error, resetErrorBoundary}) {
+  return (
+    <div role="alert">
+      <h2>Something went wrong:</h2>
+      <pre>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
+    </div>
+  );
+}
+
+// Usage
+<ErrorBoundary FallbackComponent={ErrorFallback}>
+  <SomeComponent />
+</ErrorBoundary>
+```
+
+## 🚀 Standards de Qualité
+
+### TypeScript
+- Mode strict activé
+- Pas de `any`, utiliser `unknown` si nécessaire
+- Interfaces pour les props, types pour les unions
+- Génériques pour la réutilisabilité
+
+### ESLint & Prettier
+- Configuration Next.js standard
+- Auto-fix activé
+- Format on save
+
+### Testing (À implémenter)
+- Jest + React Testing Library
+- Tests unitaires pour les utilities
+- Tests d'intégration pour les composants critiques
+- E2E tests avec Playwright
+
+## 🔄 Workflow Git
+
+### Convention de Commits
+```
+feat: nouvelle fonctionnalité
+fix: correction de bug
+docs: documentation
+style: formatting
+refactor: refactoring code
+test: ajout de tests
+chore: maintenance
+```
+
+### Branches
+- `main`: production
+- `develop`: développement
+- `feature/nom-feature`: nouvelles fonctionnalités
+- `fix/nom-bug`: corrections
+
+## 📦 Déploiement
+
+### Production
+- Build optimisé avec `next build`
+- Migrations Prisma automatiques
+- Seed des données de base
+- Variables d'environnement validées
+
+### Monitoring
+- Console.log pour development
+- Structured logging avec tslog en production
+- Error tracking (à implémenter)

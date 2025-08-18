@@ -1,0 +1,576 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+
+# Tolker - Cursor Rules UI Components & Design System
+
+## 🎨 Design System Tolker
+
+### Palette de Couleurs
+
+```css
+:root {
+  /* Couleurs principales */
+  --primary-blue: #2684ff;
+  --secondary-blue: #0054cf;
+  --primary-green: #08dbb3;
+  --secondary-green: #0cd3b7;
+  --main-bg: #f7fafc;
+
+  /* Système shadcn/ui */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --radius: 0.5rem;
+}
+```
+
+### Typography
+
+```css
+/* Font Poppins */
+.font-poppins {
+  font-family: "Poppins", sans-serif;
+}
+
+/* Hiérarchie des titres */
+.heading-1 {
+  @apply text-4xl font-bold text-gray-900;
+}
+.heading-2 {
+  @apply text-3xl font-semibold text-gray-800;
+}
+.heading-3 {
+  @apply text-2xl font-medium text-gray-700;
+}
+.heading-4 {
+  @apply text-xl font-medium text-gray-700;
+}
+.body-text {
+  @apply text-base text-gray-600;
+}
+.small-text {
+  @apply text-sm text-gray-500;
+}
+```
+
+## 🧩 Architecture des Composants
+
+### Structure Recommandée
+
+```
+src/components/
+├── ui/                    # Composants de base (shadcn/ui)
+│   ├── button.tsx
+│   ├── input.tsx
+│   ├── dialog.tsx
+│   └── ...
+├── forms/                 # Composants de formulaires
+├── layout/               # Composants de layout
+├── feedback/             # Notifications, alerts
+├── data-display/         # Tables, cards, etc.
+└── utils/                # Composants utilitaires
+```
+
+### Pattern de Composant Standard
+
+```typescript
+import { forwardRef } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+
+// Variants avec CVA
+const componentVariants = cva(
+  "base-classes", // Classes de base
+  {
+    variants: {
+      variant: {
+        default: "default-classes",
+        destructive: "destructive-classes",
+        outline: "outline-classes",
+      },
+      size: {
+        default: "default-size",
+        sm: "small-size",
+        lg: "large-size",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
+
+// Interface du composant
+interface ComponentProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof componentVariants> {
+  asChild?: boolean;
+}
+
+// Composant avec forwardRef
+const Component = forwardRef<HTMLDivElement, ComponentProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "div";
+
+    return (
+      <Comp
+        className={cn(componentVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+
+Component.displayName = "Component";
+
+export { Component, componentVariants };
+```
+
+## 🎯 Composants UI Spécifiques Tolker
+
+### 1. Button Component
+
+```typescript
+// src/components/ui/button.tsx
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-[8px] text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        outlineDocument:
+          "border border-input bg-background hover:bg-gray-300 focus:bg-none hover:bg-opacity-10",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+        invert: "bg-foreground text-background hover:bg-foreground/90",
+        success: "bg-success text-success-foreground hover:bg-success/90",
+        warning: "bg-warning text-warning-foreground hover:bg-warning/90",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        xl: "h-30 w-full max-w-40 rounded-lg px-10 flex-wrap p-2",
+        icon: "h-10 w-10",
+      },
+    },
+  }
+);
+```
+
+### 2. Card Component
+
+```typescript
+// Pattern card Tolker
+export function TolkerCard({
+  children,
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <Card
+      className={cn(
+        "shadow-apple border-0 bg-white/80 backdrop-blur-sm",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </Card>
+  );
+}
+```
+
+### 3. Form Components
+
+```typescript
+// Wrapper pour formulaires Tolker
+export function TolkerForm({
+  children,
+  onSubmit,
+  className,
+  ...props
+}: React.FormHTMLAttributes<HTMLFormElement>) {
+  return (
+    <form
+      className={cn(
+        "space-y-6 bg-white rounded-lg p-6 shadow-apple",
+        className
+      )}
+      onSubmit={onSubmit}
+      {...props}
+    >
+      {children}
+    </form>
+  );
+}
+
+// Field wrapper
+export function FormField({
+  label,
+  error,
+  required,
+  children,
+  ...props
+}: {
+  label: string;
+  error?: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-sm font-medium text-gray-700">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </Label>
+      {children}
+      {error && (
+        <p className="text-sm text-red-600">{error}</p>
+      )}
+    </div>
+  );
+}
+```
+
+## 🎭 Patterns d'Interface
+
+### 1. Loading States
+
+```typescript
+// Skeleton pattern
+export function DocumentSkeleton() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-8 w-[250px]" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-3/4" />
+    </div>
+  );
+}
+
+// Loading avec animation
+export function LoadingSpinner({ size = "default" }: { size?: "sm" | "default" | "lg" }) {
+  return (
+    <div className={cn(
+      "animate-spin rounded-full border-2 border-gray-300 border-t-primary-blue",
+      {
+        "h-4 w-4": size === "sm",
+        "h-8 w-8": size === "default",
+        "h-12 w-12": size === "lg",
+      }
+    )} />
+  );
+}
+```
+
+### 2. Empty States
+
+```typescript
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  action,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <Icon className="h-12 w-12 text-gray-400 mb-4" />
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+      <p className="text-gray-600 mb-6 max-w-sm">{description}</p>
+      {action}
+    </div>
+  );
+}
+```
+
+### 3. Feedback Components
+
+```typescript
+// Toast notifications (avec sonner)
+import { toast } from "sonner";
+
+export const showToast = {
+  success: (message: string) => toast.success(message),
+  error: (message: string) => toast.error(message),
+  warning: (message: string) => toast.warning(message),
+  info: (message: string) => toast.info(message),
+};
+
+// Confirmation Dialog
+export function ConfirmationDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  confirmText = "Confirmer",
+  cancelText = "Annuler",
+  variant = "default",
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  description: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: "default" | "destructive";
+}) {
+  return (
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onClose}>{cancelText}</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onConfirm}
+            className={variant === "destructive" ? "bg-destructive hover:bg-destructive/90" : ""}
+          >
+            {confirmText}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+```
+
+## 📱 Responsive Design
+
+### Breakpoints Tailwind
+
+```css
+/* Mobile first approach */
+sm: 640px   /* Tablette portrait */
+md: 768px   /* Tablette landscape */
+lg: 1024px  /* Desktop */
+xl: 1280px  /* Large desktop */
+2xl: 1536px /* Extra large */
+```
+
+### Responsive Patterns
+
+```typescript
+// Responsive Grid
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {items.map(item => <ItemCard key={item.id} item={item} />)}
+</div>
+
+// Responsive Layout
+<div className="flex flex-col lg:flex-row gap-6">
+  <aside className="lg:w-1/4">Sidebar</aside>
+  <main className="lg:w-3/4">Content</main>
+</div>
+
+// Responsive Typography
+<h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">
+  Responsive Heading
+</h1>
+```
+
+## 🎨 Animations et Transitions
+
+### Framer Motion Integration
+
+```typescript
+"use client";
+import { motion } from "framer-motion";
+
+// Fade in animation
+export function FadeIn({ children, delay = 0 }: {
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// Stagger animation pour listes
+export function StaggerContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: {
+            staggerChildren: 0.1
+          }
+        }
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+export function StaggerItem({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 }
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+### CSS Animations Custom
+
+```css
+/* Animations personnalisées Tolker */
+@keyframes gradient-y {
+  0%,
+  100% {
+    background-size: 400% 400%;
+    background-position: center top;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: center center;
+  }
+}
+
+@keyframes gradient-x {
+  0%,
+  100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+/* Usage */
+.animate-gradient-x {
+  animation: gradient-x 15s ease infinite;
+}
+.animate-gradient-y {
+  animation: gradient-y 15s ease infinite;
+}
+```
+
+## 🔧 Utilités et Helpers
+
+### cn() Utility
+
+```typescript
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+### Composant Polymorphique
+
+```typescript
+import { Slot } from "@radix-ui/react-slot";
+
+type PolymorphicProps<T extends React.ElementType> = {
+  as?: T;
+  asChild?: boolean;
+} & React.ComponentPropsWithoutRef<T>;
+
+export function PolymorphicComponent<T extends React.ElementType = "div">({
+  as,
+  asChild,
+  className,
+  ...props
+}: PolymorphicProps<T>) {
+  const Component = asChild ? Slot : (as || "div");
+
+  return (
+    <Component
+      className={cn("base-classes", className)}
+      {...props}
+    />
+  );
+}
+```
+
+## 🎯 Guidelines UI/UX Tolker
+
+### 1. Consistance Visuelle
+
+- Utiliser la palette de couleurs définie
+- Respecter la hiérarchie typographique
+- Maintenir les espacements cohérents (multiple de 4px)
+
+### 2. Accessibilité
+
+- Contraste minimum WCAG AA
+- Navigation au clavier
+- Attributs ARIA appropriés
+- Focus visible sur tous les éléments interactifs
+
+### 3. Performance
+
+- Lazy loading des images avec Next.js Image
+- Code splitting des composants lourds
+- Éviter les re-renders inutiles
+
+### 4. Mobile First
+
+- Commencer par le design mobile
+- Progressive enhancement pour desktop
+- Touch targets minimum 44px
+
+### 5. Feedback Utilisateur
+
+- Loading states pour toutes les actions
+- Messages d'erreur clairs et actionables
+- Confirmations pour les actions destructives
+- Toast notifications pour les succès

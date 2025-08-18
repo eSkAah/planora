@@ -1,0 +1,460 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# MEDINOTE - Cursor Rules Next.js & App Router
+
+## 🚀 Next.js 14 App Router - Règles Spécifiques
+
+### Structure App Router
+
+```
+app/
+├── (global-layout)/           # Route group avec layout partagé
+│   ├── layout.tsx            # Layout avec sidebar
+│   ├── dashboard/            # Pages dashboard
+│   ├── documents/            # Gestion documents
+│   ├── patients/             # Gestion patients
+│   └── ...
+├── api/                      # API Routes
+│   ├── auth/                 # NextAuth endpoints
+│   ├── documents/            # API documents
+│   └── webhooks/             # Webhooks externes
+├── auth/                     # Pages d'authentification
+│   ├── layout.tsx            # Layout auth spécifique
+│   ├── signin/
+│   ├── register/
+│   └── ...
+└── shared-document/          # Documents partagés (public)
+```
+
+## 📁 Conventions de Fichiers App Router
+
+### 1. Pages et Layouts
+```typescript
+// app/(global-layout)/dashboard/page.tsx
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dashboard - Medinote",
+  description: "Tableau de bord médical",
+};
+
+export default function DashboardPage() {
+  return (
+    <div>
+      {/* Contenu de la page */}
+    </div>
+  );
+}
+```
+
+### 2. Layouts Groupés
+```typescript
+// app/(global-layout)/layout.tsx
+import SideBarMenu from "@/features/navigation/SideBarMenu";
+import { getUserFromSession } from "@/lib/server-actions/safe-actions";
+
+export default async function GlobalLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const userSession = await getUserFromSession();
+  
+  return (
+    <main className="flex w-full min-h-screen">
+      <SideBarMenu userSession={userSession} />
+      <div className="flex-1">
+        {children}
+      </div>
+    </main>
+  );
+}
+```
+
+### 3. Pages Dynamiques
+```typescript
+// app/(global-layout)/documents/[id]/page.tsx
+interface DocumentPageProps {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
+export default async function DocumentPage({ 
+  params, 
+  searchParams 
+}: DocumentPageProps) {
+  const document = await getDocument(params.id);
+  
+  return (
+    <div>
+      {/* Contenu du document */}
+    </div>
+  );
+}
+```
+
+## 🔧 Server Components vs Client Components
+
+### Server Components (Par défaut)
+- Utiliser pour fetching data
+- Pas d'interactivité
+- Accès direct aux APIs serveur
+- SEO optimisé
+
+```typescript
+// Server Component
+import { prisma } from "@/lib/prisma";
+
+export default async function DocumentsList() {
+  const documents = await prisma.document.findMany({
+    where: { userId: "user-id" },
+  });
+
+  return (
+    <div>
+      {documents.map(doc => (
+        <DocumentCard key={doc.id} document={doc} />
+      ))}
+    </div>
+  );
+}
+```
+
+### Client Components
+- Marquer avec `"use client"`
+- Hooks React, événements, état local
+- Interactivité utilisateur
+
+```typescript
+"use client";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+
+export function InteractiveComponent() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <Button onClick={() => setCount(c => c + 1)}>
+      Count: {count}
+    </Button>
+  );
+}
+```
+
+## 📡 API Routes & Server Actions
+
+### API Routes
+```typescript
+// app/api/documents/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+
+export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Logique API
+  return NextResponse.json({ data: "success" });
+}
+
+export async function POST(request: NextRequest) {
+  const data = await request.json();
+  
+  // Validation Zod
+  const validatedData = schema.parse(data);
+  
+  // Logique métier
+  
+  return NextResponse.json({ success: true });
+}
+```
+
+### Server Actions (Privilégiées)
+```typescript
+// src/lib/server-actions/document.actions.ts
+"use server";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+export async function createDocument(formData: FormData) {
+  const title = formData.get("title") as string;
+  
+  // Validation
+  if (!title) {
+    return { error: "Titre requis" };
+  }
+
+  try {
+    const document = await prisma.document.create({
+      data: { title, userId: "user-id" },
+    });
+
+    revalidatePath("/documents");
+    redirect(`/documents/${document.id}`);
+  } catch (error) {
+    return { error: "Erreur lors de la création" };
+  }
+}
+```
+
+## 🛡️ Middleware et Protection
+
+### Middleware Global
+```typescript
+// middleware.ts
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+
+const PUBLIC_PATHS = new Set(["/auth/*", "/shared-document/*"]);
+
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  const sessionToken = cookies().get("authjs.session-token");
+
+  // Routes publiques
+  if (PUBLIC_PATHS.has(pathname) || pathname.includes("/api/auth")) {
+    return NextResponse.next();
+  }
+
+  // Vérification session
+  if (!sessionToken) {
+    return NextResponse.redirect(new URL("/auth/signin", req.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    "/((?!api|_next/static|favicon.ico|images/).*)",
+  ],
+};
+```
+
+## 🎯 Optimisations Next.js
+
+### 1. Metadata Dynamique
+```typescript
+// app/(global-layout)/documents/[id]/page.tsx
+import { Metadata } from "next";
+
+export async function generateMetadata({ 
+  params 
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  const document = await getDocument(params.id);
+  
+  return {
+    title: `${document.title} - Medinote`,
+    description: document.description,
+  };
+}
+```
+
+### 2. Static Generation
+```typescript
+// Pour pages statiques
+export async function generateStaticParams() {
+  const documents = await prisma.document.findMany({
+    select: { id: true },
+  });
+
+  return documents.map((doc) => ({
+    id: doc.id,
+  }));
+}
+```
+
+### 3. Streaming et Suspense
+```typescript
+import { Suspense } from "react";
+import { DocumentSkeleton } from "@/components/skeletons";
+
+export default function DocumentPage() {
+  return (
+    <div>
+      <h1>Document</h1>
+      <Suspense fallback={<DocumentSkeleton />}>
+        <DocumentContent />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+## 🔄 Cache et Revalidation
+
+### Cache Strategies
+```typescript
+// Cache statique
+export const revalidate = 3600; // 1 heure
+
+// Cache dynamique avec tags
+import { unstable_cache } from "next/cache";
+
+const getDocuments = unstable_cache(
+  async (userId: string) => {
+    return await prisma.document.findMany({ 
+      where: { userId } 
+    });
+  },
+  ["documents"],
+  { tags: ["documents"] }
+);
+
+// Revalidation
+import { revalidateTag } from "next/cache";
+
+await revalidateTag("documents");
+```
+
+## 📱 Configuration Next.js
+
+### next.config.mjs
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // Images externes
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "medinote-profil-storage.s3.eu-north-1.amazonaws.com",
+        pathname: "/images/**",
+      },
+    ],
+  },
+  
+  // Experimental features
+  experimental: {
+    serverActions: true,
+  },
+  
+  // Headers de sécurité
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+        ],
+      },
+    ];
+  },
+};
+```
+
+## 🎭 Loading States et Error Handling
+
+### Loading UI
+```typescript
+// app/(global-layout)/documents/loading.tsx
+import { DocumentSkeleton } from "@/components/skeletons";
+
+export default function Loading() {
+  return <DocumentSkeleton />;
+}
+```
+
+### Error Boundaries
+```typescript
+// app/(global-layout)/documents/error.tsx
+"use client";
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  return (
+    <div>
+      <h2>Une erreur est survenue</h2>
+      <button onClick={reset}>Réessayer</button>
+    </div>
+  );
+}
+```
+
+### Not Found
+```typescript
+// app/(global-layout)/documents/not-found.tsx
+import Link from "next/link";
+
+export default function NotFound() {
+  return (
+    <div>
+      <h2>Document non trouvé</h2>
+      <Link href="/documents">Retour aux documents</Link>
+    </div>
+  );
+}
+```
+
+## 🔗 Navigation et Routing
+
+### Navigation Programmatique
+```typescript
+"use client";
+import { useRouter } from "next/navigation";
+
+export function NavigationComponent() {
+  const router = useRouter();
+
+  const handleNavigation = () => {
+    router.push("/documents");
+    // router.replace("/documents"); // Sans historique
+    // router.back(); // Retour
+    // router.refresh(); // Refresh
+  };
+
+  return <button onClick={handleNavigation}>Naviguer</button>;
+}
+```
+
+### Liens Optimisés
+```typescript
+import Link from "next/link";
+
+<Link 
+  href="/documents/123"
+  prefetch={true} // Prefetch par défaut
+  className="text-blue-500"
+>
+  Voir le document
+</Link>
+```
+
+## 🎪 Bonnes Pratiques App Router 2025
+
+### 1. Composition over Configuration
+- Utiliser les layouts pour partager la logique
+- Composer les Server Components
+- Éviter les props drilling
+
+### 2. Data Fetching Patterns
+- Server Components pour initial data
+- Client Components pour interactions
+- React Query pour cache client
+
+### 3. Performance
+- Lazy loading des composants lourds
+- Code splitting automatique
+- Optimiser les bundles avec dynamic imports
+
+### 4. SEO et Accessibility
+- Metadata dynamique pour chaque page
+- Structured data quand pertinent
+- Navigation accessible avec focus states
