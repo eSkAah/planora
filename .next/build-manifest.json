@@ -8,8 +8,8 @@
     "static/chunks/node_modules_next_dist_build_polyfills_polyfill-nomodule.js"
   ],
   "lowPriorityFiles": [
-    "static/development/_ssgManifest.js",
-    "static/development/_buildManifest.js"
+    "static/OaHaBO8n7SJ1ReO8WOdWk/_buildManifest.js",
+    "static/OaHaBO8n7SJ1ReO8WOdWk/_ssgManifest.js"
   ],
   "rootMainFiles": [
     "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_6aaa83c7._.js",
