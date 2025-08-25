@@ -8,7 +8,7 @@
 
 import { redirect } from 'next/navigation';
 
-import { supabase } from '@/lib/database';
+import { prisma, supabase } from '@/lib/database';
 import { accountCreationSchema, userLoginSchema } from '@/lib/validations';
 
 type ActionResult<T = unknown> = {
@@ -53,11 +53,9 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
     const { company, user } = validation.data;
 
     // Check if company already exists
-    const { data: existingCompany } = await supabase
-      .from('companies')
-      .select('id')
-      .eq('name', company.name)
-      .single();
+    const existingCompany = await prisma.company.findUnique({
+      where: { name: company.name },
+    });
 
     if (existingCompany) {
       return {
@@ -67,22 +65,13 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
     }
 
     // Create company first
-    const { data: newCompany, error: companyError } = await supabase
-      .from('companies')
-      .insert({
+    const newCompany = await prisma.company.create({
+      data: {
         name: company.name,
         country: company.country,
         sector: company.sector,
-      })
-      .select('id')
-      .single();
-
-    if (companyError || !newCompany) {
-      return {
-        success: false,
-        error: `Failed to create company: ${companyError?.message || 'Unknown error'}`,
-      };
-    }
+      },
+    });
 
     // Create user account with Supabase Auth
     const { data: authUser, error: authError } = await supabase.auth.signUp({
@@ -100,7 +89,9 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
 
     if (authError || !authUser.user) {
       // Cleanup: remove company if user creation failed
-      await supabase.from('companies').delete().eq('id', newCompany.id);
+      await prisma.company.delete({
+        where: { id: newCompany.id },
+      });
 
       return {
         success: false,
@@ -109,21 +100,25 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
     }
 
     // Create user profile in our users table
-    const { error: profileError } = await supabase.from('users').insert({
-      id: authUser.user.id,
-      email: user.email,
-      first_name: user.firstName,
-      last_name: user.lastName,
-      role: user.role as 'admin' | 'manager' | 'employee',
-      company_id: newCompany.id,
-    });
-
-    if (profileError) {
+    try {
+      await prisma.user.create({
+        data: {
+          id: authUser.user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role.toUpperCase() as 'ADMIN' | 'MANAGER' | 'EMPLOYEE',
+          companyId: newCompany.id,
+        },
+      });
+    } catch {
       // Cleanup: remove auth user and company if profile creation failed
       if (authUser.user) {
         await supabase.auth.admin?.deleteUser(authUser.user.id);
       }
-      await supabase.from('companies').delete().eq('id', newCompany.id);
+      await prisma.company.delete({
+        where: { id: newCompany.id },
+      });
 
       return {
         success: false,

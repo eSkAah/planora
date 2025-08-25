@@ -1,14 +1,26 @@
 /**
  * Database Layer Exports
  *
- * This file exports all database-related utilities and schemas.
- * Supabase client, database schemas, query builders, migrations.
+ * This file exports all database-related utilities and clients.
+ * Prisma ORM, Supabase authentication, and database types.
  */
 
-export { supabase, supabaseAdmin } from './client';
+export { prisma, supabase, supabaseAdmin } from './client';
 export type { Database } from './types';
 
-// Examples of future database modules:
-// export { schema } from './schema';
-// export { migrations } from './migrations';
-// export { queryBuilder } from './query-builder';
+// Re-export Prisma types for convenience
+export type {
+  Company,
+  User,
+  Employee,
+  Contract,
+  ShiftTemplate,
+  Schedule,
+  ScheduleAssignment,
+  UserRole,
+  ContractType,
+  ShiftType,
+  ScheduleStatus,
+  AssignmentStatus,
+  GenerationMethod,
+} from '@/generated/prisma';

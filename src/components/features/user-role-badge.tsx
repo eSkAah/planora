@@ -5,8 +5,8 @@
  */
 
 import { USER_ROLES } from '@/lib/constants';
+import type { UserRole } from '@/lib/database';
 import { cn } from '@/lib/utils';
-import type { UserRole } from '@/types';
 
 interface UserRoleBadgeProps {
   role: UserRole;
