@@ -2,14 +2,12 @@ import { cn } from '@/lib/utils';
 
 export default function HomePage() {
   return (
-    <div className={cn('min-h-screen bg-gray-50 p-8 dark:bg-gray-900')}>
+    <div className={cn('bg-background min-h-screen p-8')}>
       <div className='mx-auto max-w-4xl space-y-8'>
         {/* Header */}
         <header className='space-y-4 text-center'>
-          <h1 className='text-4xl font-bold text-gray-900 dark:text-white'>
-            🗓️ Planora
-          </h1>
-          <p className='text-xl text-gray-600 dark:text-gray-300'>
+          <h1 className='text-foreground text-4xl font-bold'>🗓️ Planora</h1>
+          <p className='text-muted-foreground text-xl'>
             Application SaaS de Gestion des Plannings avec IA
           </p>
         </header>
