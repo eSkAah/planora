@@ -5,11 +5,10 @@
  * Supabase client, database schemas, query builders, migrations.
  */
 
+export { supabase, supabaseAdmin } from './client';
+export type { Database } from './types';
+
 // Examples of future database modules:
-// export { db } from './client';
 // export { schema } from './schema';
 // export { migrations } from './migrations';
 // export { queryBuilder } from './query-builder';
-// export type { Database } from './types';
-
-export {}; // Temporary export to avoid empty file error

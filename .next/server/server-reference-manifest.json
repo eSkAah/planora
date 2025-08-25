@@ -1,1 +1,17 @@
-{"node":{},"edge":{},"encryptionKey":"UV8k8+D6p1Wq4Q5Pvy0UPB7vtHZHTGCgc3eoRHCTGWA="}
+{
+  "node": {
+    "40ebff135d7bdeed6ce8bc64a759bdf630b2475ae1": {
+      "workers": {
+        "app/auth/register/page": {
+          "moduleId": "[project]/.next-internal/server/app/auth/register/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/lib/auth/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/auth/register/page": "action-browser"
+      }
+    }
+  },
+  "edge": {},
+  "encryptionKey": "UV8k8+D6p1Wq4Q5Pvy0UPB7vtHZHTGCgc3eoRHCTGWA="
+}
