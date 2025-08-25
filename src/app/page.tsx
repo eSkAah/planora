@@ -1,103 +1,180 @@
-import Image from "next/image";
+import { cn } from '@/lib/utils';
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className={cn('min-h-screen bg-gray-50 p-8 dark:bg-gray-900')}>
+      <div className='mx-auto max-w-4xl space-y-8'>
+        {/* Header */}
+        <header className='space-y-4 text-center'>
+          <h1 className='text-4xl font-bold text-gray-900 dark:text-white'>
+            🗓️ Planora
+          </h1>
+          <p className='text-xl text-gray-600 dark:text-gray-300'>
+            Application SaaS de Gestion des Plannings avec IA
+          </p>
+        </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        {/* T007 Completion Card */}
+        <div className='rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-800'>
+          <div className='mb-4'>
+            <h2 className='text-2xl font-semibold text-gray-900 dark:text-white'>
+              ✅ T007 - TypeScript Configuration Stricte
+            </h2>
+            <p className='mt-2 text-gray-600 dark:text-gray-400'>
+              Configuration TypeScript ultra-stricte avec types complets pour
+              une sécurité maximale
+            </p>
+          </div>
+
+          <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+            <div className='rounded-lg border p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700'>
+              <h3 className='mb-2 font-semibold text-gray-900 dark:text-white'>
+                🔷 Configuration Ultra-Stricte
+              </h3>
+              <p className='mb-3 text-sm text-gray-600 dark:text-gray-400'>
+                Tous les flags TypeScript stricts activés
+              </p>
+              <ul className='space-y-1 text-xs text-gray-500'>
+                <li>• noImplicitAny, strictNullChecks</li>
+                <li>• noUnusedLocals, noImplicitReturns</li>
+                <li>• exactOptionalPropertyTypes</li>
+              </ul>
+            </div>
+
+            <div className='rounded-lg border p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700'>
+              <h3 className='mb-2 font-semibold text-gray-900 dark:text-white'>
+                📝 Types Complets
+              </h3>
+              <p className='mb-3 text-sm text-gray-600 dark:text-gray-400'>
+                Types détaillés pour toute l&apos;application
+              </p>
+              <ul className='space-y-1 text-xs text-gray-500'>
+                <li>• Types de base de données</li>
+                <li>• Types API avec validation</li>
+                <li>• Types utilitaires globaux</li>
+              </ul>
+            </div>
+
+            <div className='rounded-lg border p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700'>
+              <h3 className='mb-2 font-semibold text-gray-900 dark:text-white'>
+                🛡️ Sécurité & Maintenabilité
+              </h3>
+              <p className='mb-3 text-sm text-gray-600 dark:text-gray-400'>
+                Détection d&apos;erreurs à la compilation
+              </p>
+              <ul className='space-y-1 text-xs text-gray-500'>
+                <li>• Pas de types implicites</li>
+                <li>• Validation des null/undefined</li>
+                <li>• Refactoring sécurisé</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className='mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20'>
+            <h4 className='mb-2 font-semibold text-blue-800 dark:text-blue-200'>
+              🚀 Sécurité TypeScript Maximale
+            </h4>
+            <p className='text-sm text-blue-700 dark:text-blue-300'>
+              Configuration stricte activée avec types complets pour :
+            </p>
+            <div className='mt-2 grid grid-cols-1 gap-2 text-sm text-blue-700 md:grid-cols-2 dark:text-blue-300'>
+              <div>• Types de base de données complets</div>
+              <div>• API types avec validation</div>
+              <div>• Types globaux et utilitaires</div>
+              <div>• Composants type-safe</div>
+              <div>• Constantes typées</div>
+              <div>• Path mapping optimisé</div>
+            </div>
+          </div>
+
+          <div className='mt-4 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-900/20'>
+            <p className='text-sm text-green-700 dark:text-green-300'>
+              💡{' '}
+              <strong>
+                Configuration documentée dans{' '}
+                <code className='rounded bg-green-100 px-1 dark:bg-green-800'>
+                  docs/TYPESCRIPT.md
+                </code>
+              </strong>
+            </p>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Progress Tracker */}
+        <div className='rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-800'>
+          <h2 className='mb-4 text-xl font-semibold text-gray-900 dark:text-white'>
+            📋 Progression du Setup
+          </h2>
+          <div className='space-y-3'>
+            {[
+              { id: 'T001', name: 'Setup Next.js', completed: true },
+              {
+                id: 'T002',
+                name: 'ESLint + Prettier + Husky',
+                completed: true,
+              },
+              { id: 'T003', name: 'Tailwind CSS', completed: true },
+              { id: 'T004', name: 'ShadCN/UI + Thème', completed: true },
+              {
+                id: 'T005',
+                name: "Variables d'environnement",
+                completed: false,
+                skipped: true,
+              },
+              {
+                id: 'T006',
+                name: 'Structure de dossiers',
+                completed: true,
+              },
+              {
+                id: 'T007',
+                name: 'TypeScript strict',
+                completed: true,
+                current: true,
+              },
+              { id: 'T008', name: 'Git optimisé', completed: false },
+            ].map(task => (
+              <div key={task.id} className='flex items-center space-x-3'>
+                <span
+                  className={
+                    task.completed
+                      ? 'text-green-500'
+                      : task.current
+                        ? 'text-blue-500'
+                        : task.skipped
+                          ? 'text-yellow-500'
+                          : 'text-gray-400'
+                  }
+                >
+                  {task.completed
+                    ? '✅'
+                    : task.current
+                      ? '🔄'
+                      : task.skipped
+                        ? '⏭️'
+                        : '⭕'}
+                </span>
+                <span
+                  className={cn(
+                    'text-gray-600 dark:text-gray-400',
+                    task.current &&
+                      'font-semibold text-gray-900 dark:text-white',
+                    task.skipped && 'line-through opacity-60'
+                  )}
+                >
+                  {task.id} - {task.name}
+                  {task.skipped && ' (ignoré)'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <footer className='text-center text-gray-500'>
+          <p>T007 - TypeScript strict configuration ✨</p>
+        </footer>
+      </div>
     </div>
   );
 }
