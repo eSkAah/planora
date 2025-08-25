@@ -1,457 +1,367 @@
-# 🗺️ ROADMAP COMPLET - PLANORA
+# 🗺️ ROADMAP EXÉCUTABLE - PLANORA
 
 ## Application SaaS de Gestion des Plannings avec IA
 
----
-
-## 📋 OVERVIEW DU PROJET
-
-**Objectif :** Créer une application SaaS multi-tenant de gestion automatisée des plannings mensuels avec intelligence artificielle OpenAI.
-
-**Stack technique :**
-
-- Next.js 15.2.3+ + TypeScript + React 19
-- Supabase (PostgreSQL + Auth + RLS)
-- Tailwind CSS + shadcn/ui
-- OpenAI GPT-4 API
-- Zustand + TanStack Query
-- Vercel (déploiement)
+**État actuel :** Phase 1 partiellement complétée (T001-T008 ✅)
+**Prochaine étape :** Finalisation infrastructure + ShadCN/UI
 
 ---
 
-## 🏗️ PHASE 1 - SETUP & INFRASTRUCTURE (Semaine 1-2)
+## 📋 LÉGENDE DES STATUTS
 
-### 1.1 Configuration initiale du projet
-
-- [ ] **T001** - Initialiser le projet Next.js 15.2.3+ avec TypeScript
-- [ ] **T002** - Configurer ESLint + Prettier + Husky pour la qualité du code
-- [ ] **T003** - Setup Tailwind CSS avec configuration personnalisée
-- [ ] **T004** - Installer et configurer shadcn/ui avec thème personnalisé
-- [ ] **T005** - Configurer les variables d'environnement (.env)
-- [ ] **T006** - Setup structure de dossiers selon l'architecture définie
-- [ ] **T007** - Configurer TypeScript avec types stricts
-- [ ] **T008** - Setup Git avec .gitignore optimisé
-
-### 1.2 Configuration Supabase
-
-- [ ] **T009** - Créer le projet Supabase
-- [ ] **T010** - Configurer la connexion Next.js <-> Supabase
-- [ ] **T011** - Setup authentification Supabase avec providers
-- [ ] **T012** - Configurer Row Level Security (RLS) pour multi-tenant
-- [ ] **T013** - Setup des politiques de sécurité de base
-- [ ] **T014** - Configurer les types TypeScript pour Supabase
-
-### 1.3 Architecture et design system
-
-- [ ] **T015** - Créer le design system avec shadcn/ui
-- [ ] **T016** - Définir la palette de couleurs et thème
-- [ ] **T017** - Créer les composants UI de base (Button, Input, Card, etc.)
-- [ ] **T018** - Setup des layouts responsive (Desktop/Mobile)
-- [ ] **T019** - Configurer les icônes (Lucide React)
-- [ ] **T020** - Créer le système de navigation
+- ✅ **TERMINÉ** - Tâche complétée et fonctionnelle
+- 🟡 **EN COURS** - Partiellement implémenté, à finaliser
+- ❌ **À FAIRE** - Pas encore commencé
+- 🔄 **DÉPENDANCE** - Attend une autre tâche
 
 ---
 
-## 🗄️ PHASE 2 - BASE DE DONNÉES & MODÈLES (Semaine 2-3)
+## 🏗️ PHASE 1 - INFRASTRUCTURE (SUITE)
 
-### 2.1 Modèle de données principal
+### 1.1 État actuel des tâches infrastructures
 
-- [ ] **T021** - Créer la table `companies` (multi-tenant)
-- [ ] **T022** - Créer la table `users` avec rôles (admin, manager, employee, etc.)
-- [ ] **T023** - Créer la table `employees` avec toutes les informations
-- [ ] **T024** - Créer la table `contracts` (types de contrats flexibles)
-- [ ] **T025** - Créer la table `shift_templates` (modèles de postes)
-- [ ] **T026** - Créer la table `schedules` (plannings générés)
-- [ ] **T027** - Créer la table `schedule_assignments` (affectations)
-- [ ] **T028** - Créer la table `legal_constraints` (règles par pays)
+- ✅ **T001** - Next.js 15.2.3+ avec TypeScript _(complété)_
+- ✅ **T002** - ESLint + Prettier + Husky _(complété)_
+- ✅ **T003** - Tailwind CSS configuré _(complété)_
+- 🟡 **T004** - ShadCN/UI structure créée, composants à implémenter
+- ❌ **T005** - Variables d'environnement (.env)
+- ✅ **T006** - Structure dossiers _(complété)_
+- ✅ **T007** - TypeScript strict _(complété)_
+- ✅ **T008** - Git + .gitignore _(complété)_
 
-### 2.2 Tables support et fonctionnalités avancées
+### 1.2 Tâches immédiates à exécuter
 
-- [ ] **T029** - Créer la table `leave_requests` (demandes de congés)
-- [ ] **T030** - Créer la table `leave_types` (types de congés)
-- [ ] **T031** - Créer la table `notifications`
-- [ ] **T032** - Créer la table `audit_logs` (traçabilité)
-- [ ] **T033** - Créer la table `company_settings` (configuration par entreprise)
-- [ ] **T034** - Créer la table `ai_prompts` (prompts personnalisés IA)
+**T005 - Configuration variables d'environnement**
 
-### 2.3 Relations et contraintes
+```bash
+# Créer les fichiers d'environnement
+touch .env.local .env.example
 
-- [ ] **T035** - Définir toutes les relations entre tables
-- [ ] **T036** - Créer les index pour optimiser les performances
-- [ ] **T037** - Setup des contraintes de données (CHECK, UNIQUE, etc.)
-- [ ] **T038** - Configurer les triggers pour audit automatique
-- [ ] **T039** - Créer les vues pour requêtes complexes
+# Variables nécessaires:
+# - NEXT_PUBLIC_SUPABASE_URL
+# - NEXT_PUBLIC_SUPABASE_ANON_KEY
+# - SUPABASE_SERVICE_ROLE_KEY
+# - OPENAI_API_KEY
+# - NEXT_PUBLIC_APP_URL
+```
 
-### 2.4 Row Level Security (Multi-tenant)
+**T004 - Finaliser ShadCN/UI**
 
-- [ ] **T040** - RLS pour isolation complète des données par entreprise
-- [ ] **T041** - Politiques d'accès par rôle (admin, manager, employee)
-- [ ] **T042** - Sécurité pour les API publiques
-- [ ] **T043** - Tests de sécurité multi-tenant
+```bash
+# Installer ShadCN/UI CLI
+npx shadcn@latest init
 
----
-
-## 🔐 PHASE 3 - AUTHENTIFICATION & AUTORISATION (Semaine 3-4)
-
-### 3.1 Système d'authentification
-
-- [ ] **T044** - Setup authentification email/password avec Supabase Auth
-- [ ] **T045** - Implémentation des rôles utilisateurs (5 types)
-- [ ] **T046** - Création du middleware d'autorisation Next.js
-- [ ] **T047** - Pages de login/register avec design premium
-- [ ] **T048** - Gestion des sessions et tokens
-- [ ] **T049** - Récupération de mot de passe
-- [ ] **T050** - Validation email lors de l'inscription
-
-### 3.2 Gestion des entreprises (Multi-tenant)
-
-- [ ] **T051** - Interface d'inscription entreprise
-- [ ] **T052** - Sélection du pays et règles légales associées
-- [ ] **T053** - Configuration initiale entreprise (secteur, taille, etc.)
-- [ ] **T054** - Invitation d'utilisateurs dans l'entreprise
-- [ ] **T055** - Gestion des permissions par entreprise
-- [ ] **T056** - Interface de gestion des utilisateurs
-
-### 3.3 Profils utilisateurs
-
-- [ ] **T057** - Page de profil utilisateur
-- [ ] **T058** - Modification des informations personnelles
-- [ ] **T059** - Gestion des préférences utilisateur
-- [ ] **T060** - Upload d'avatar utilisateur
+# Installer composants de base nécessaires
+npx shadcn@latest add button
+npx shadcn@latest add card
+npx shadcn@latest add input
+npx shadcn@latest add label
+npx shadcn@latest add select
+npx shadcn@latest add textarea
+npx shadcn@latest add table
+npx shadcn@latest add dialog
+npx shadcn@latest add toast
+npx shadcn@latest add form
+```
 
 ---
 
-## 👥 PHASE 4 - GESTION DES EMPLOYÉS (Semaine 4-5)
+## 🗄️ PHASE 2 - SUPABASE & BASE DE DONNÉES
 
-### 4.1 CRUD Employés
+### 2.1 Configuration Supabase
 
-- [ ] **T061** - Interface de listing des employés avec pagination
-- [ ] **T062** - Formulaire de création d'employé complet
-- [ ] **T063** - Page de détail employé avec toutes les informations
-- [ ] **T064** - Formulaire de modification employé
-- [ ] **T065** - Suppression employé avec confirmation
-- [ ] **T066** - Import en masse d'employés (CSV/Excel)
-- [ ] **T067** - Export des données employés
+**T009 - Créer projet Supabase**
 
-### 4.2 Informations employé avancées
+- Aller sur supabase.com
+- Créer nouveau projet "planora-prod"
+- Noter les clés API dans .env.local
+- Configurer région (Europe pour RGPD)
 
-- [ ] **T068** - Gestion des disponibilités et désidérata
-- [ ] **T069** - Gestion des qualifications/certifications
-- [ ] **T070** - Historique de performance
-- [ ] **T071** - Préférences de shifts
-- [ ] **T072** - Gestion des congés programmés
-- [ ] **T073** - Calcul automatique des heures annuelles
-- [ ] **T074** - Suivi des heures supplémentaires
+**T010 - Connection Next.js ↔ Supabase**
 
-### 4.3 Types de contrats
+```bash
+npm install @supabase/supabase-js @supabase/ssr
+```
 
-- [ ] **T075** - Configuration des types de contrats (24h, 35h, 40h, etc.)
-- [ ] **T076** - Gestion des contrats temps partiel
-- [ ] **T077** - Règles spécifiques par type de contrat
-- [ ] **T078** - Validation des contraintes légales par pays
+Créer `src/lib/database/supabase.ts` :
 
----
+```typescript
+import { createClient } from '@supabase/supabase-js';
+import { Database } from '@/types/database';
 
-## 🏢 PHASE 5 - CONFIGURATION DES POSTES (Semaine 5-6)
+export const supabase = createClient<Database>(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+```
 
-### 5.1 Modèles de postes
+**T011 - Setup authentification Supabase**
 
-- [ ] **T079** - Interface de création de postes/shifts
-- [ ] **T080** - Configuration horaires fixes (ex: 8h-16h)
-- [ ] **T081** - Configuration créneaux variables (Matin/AM/Soir/Nuit)
-- [ ] **T082** - Postes hybrides selon les besoins
-- [ ] **T083** - Templates de postes réutilisables
-- [ ] **T084** - Duplication et modification de postes existants
+```bash
+npm install @supabase/auth-ui-react @supabase/auth-ui-shared
+```
 
-### 5.2 Contraintes et règles métier
+### 2.2 Schéma de base de données (SQL à exécuter)
 
-- [ ] **T085** - Configuration nombre max de jours consécutifs
-- [ ] **T086** - Temps de repos minimum entre shifts
-- [ ] **T087** - Gestion des rotations obligatoires/optionnelles
-- [ ] **T088** - Équipes minimales par créneau/poste
-- [ ] **T089** - Règles spécifiques par département
+**T021-T034 - Création tables principales**
 
-### 5.3 Contraintes légales par pays
+Exécuter dans l'éditeur SQL Supabase :
 
-- [ ] **T090** - Implémentation règles France (35h/semaine, repos dominical)
-- [ ] **T091** - Implémentation règles Luxembourg (40h/semaine)
-- [ ] **T092** - Système extensible pour autres pays
-- [ ] **T093** - Validation automatique des contraintes
-- [ ] **T094** - Alertes en cas de non-conformité
+```sql
+-- Extension UUID
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
----
+-- Table companies (multi-tenant)
+CREATE TABLE companies (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  name VARCHAR NOT NULL,
+  country VARCHAR DEFAULT 'FR',
+  industry VARCHAR,
+  size VARCHAR,
+  settings JSONB DEFAULT '{}',
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
 
-## 🤖 PHASE 6 - INTÉGRATION IA OPENAI (Semaine 6-8)
+-- Table users (avec rôles)
+CREATE TABLE users (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  email VARCHAR UNIQUE NOT NULL,
+  first_name VARCHAR NOT NULL,
+  last_name VARCHAR NOT NULL,
+  role VARCHAR CHECK (role IN ('owner', 'admin', 'manager', 'employee', 'viewer')),
+  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  avatar_url VARCHAR,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
 
-### 6.1 Configuration OpenAI
+-- Table contract_types
+CREATE TABLE contract_types (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  name VARCHAR NOT NULL,
+  weekly_hours INTEGER NOT NULL,
+  max_daily_hours INTEGER DEFAULT 8,
+  max_consecutive_days INTEGER DEFAULT 6,
+  min_rest_hours INTEGER DEFAULT 11,
+  is_part_time BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT NOW()
+);
 
-- [ ] **T095** - Setup OpenAI API avec Next.js
-- [ ] **T096** - Configuration des modèles GPT-4
-- [ ] **T097** - Gestion sécurisée des clés API
-- [ ] **T098** - Rate limiting et gestion des coûts
-- [ ] **T099** - Monitoring des appels API
+-- Table employees
+CREATE TABLE employees (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  employee_number VARCHAR,
+  first_name VARCHAR NOT NULL,
+  last_name VARCHAR NOT NULL,
+  email VARCHAR,
+  phone VARCHAR,
+  hire_date DATE NOT NULL,
+  contract_type_id UUID REFERENCES contract_types(id),
+  department VARCHAR,
+  position VARCHAR,
+  skills TEXT[],
+  availability_preferences JSONB DEFAULT '{}',
+  annual_hours_target INTEGER,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
 
-### 6.2 Moteur IA de génération de planning
+-- Table shift_templates
+CREATE TABLE shift_templates (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  name VARCHAR NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  break_duration INTEGER DEFAULT 0,
+  color VARCHAR DEFAULT '#3B82F6',
+  required_skills TEXT[],
+  min_employees INTEGER DEFAULT 1,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW()
+);
 
-- [ ] **T100** - Création du prompt de base pour génération planning
-- [ ] **T101** - Intégration des contraintes légales dans le prompt
-- [ ] **T102** - Optimisation multi-critères (coûts, satisfaction, équité)
-- [ ] **T103** - Apprentissage des préférences d'équipe
-- [ ] **T104** - Prédiction des absences probables
-- [ ] **T105** - Système de scoring de qualité des plannings
+-- RLS (Row Level Security)
+ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contract_types ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shift_templates ENABLE ROW LEVEL SECURITY;
 
-### 6.3 Interface de génération IA
+-- Politiques RLS de base
+CREATE POLICY "Users can only see their company data" ON companies
+  FOR ALL USING (id IN (
+    SELECT company_id FROM users WHERE id = auth.uid()
+  ));
 
-- [ ] **T106** - Interface de génération avec paramètres personnalisables
-- [ ] **T107** - Prompts IA personnalisables par secteur
-- [ ] **T108** - Prévisualisation avec score de qualité
-- [ ] **T109** - Système de régénération partielle
-- [ ] **T110** - Historique des générations et comparaisons
-
-### 6.4 Algorithme de remplacement automatique
-
-- [ ] **T111** - Calcul en temps réel des remplaçants disponibles
-- [ ] **T112** - Vérification heures annuelles restantes
-- [ ] **T113** - Respect des contraintes légales pour remplacements
-- [ ] **T114** - Notification automatique des employés concernés
-- [ ] **T115** - Interface de validation des remplacements
-
----
-
-## 📅 PHASE 7 - INTERFACE DE PLANNING (Semaine 8-10)
-
-### 7.1 Calendrier principal
-
-- [ ] **T116** - Composant calendrier mensuel élégant
-- [ ] **T117** - Vue par employé avec détails
-- [ ] **T118** - Vue par poste/département
-- [ ] **T119** - Codes couleur intuitifs par type de shift
-- [ ] **T120** - Animations fluides pour les interactions
-- [ ] **T121** - Navigation entre mois/semaines
-
-### 7.2 Fonctionnalités d'édition
-
-- [ ] **T122** - Drag & Drop pour modifier les affectations
-- [ ] **T123** - Modification manuelle des shifts
-- [ ] **T124** - Validation en temps réel des contraintes
-- [ ] **T125** - Undo/Redo pour les modifications
-- [ ] **T126** - Sauvegarde automatique des changements
-
-### 7.3 Responsive et mobile
-
-- [ ] **T127** - Interface adaptée mobile avec gestures tactiles
-- [ ] **T128** - Mode sombre/clair
-- [ ] **T129** - Optimisation performances sur mobile
-- [ ] **T130** - Interface tactile pour édition rapide
-
-### 7.4 Visualisations avancées
-
-- [ ] **T131** - Graphiques de charge de travail
-- [ ] **T132** - Indicateurs de conformité légale
-- [ ] **T133** - Alertes visuelles pour conflits
-- [ ] **T134** - Statistiques temps réel du planning
-
----
-
-## 🏖️ PHASE 8 - GESTION DES CONGÉS (Semaine 10-11)
-
-### 8.1 Types de congés
-
-- [ ] **T135** - Configuration des types de congés (CP, RTT, etc.)
-- [ ] **T136** - Règles spécifiques par type de congé
-- [ ] **T137** - Calcul automatique des soldes de congés
-- [ ] **T138** - Gestion des congés exceptionnels
-
-### 8.2 Demandes de congés
-
-- [ ] **T139** - Interface de demande de congés employé
-- [ ] **T140** - Workflow de validation hiérarchique
-- [ ] **T141** - Notifications automatiques des demandes
-- [ ] **T142** - Historique des demandes et décisions
-
-### 8.3 Gestion des remplacements
-
-- [ ] **T143** - Analyse automatique des compétences requises
-- [ ] **T144** - Proposition de remplaçants optimaux par IA
-- [ ] **T145** - Validation et notification en un clic
-- [ ] **T146** - Gestion des remplacements d'urgence
+CREATE POLICY "Users can only access their company users" ON users
+  FOR ALL USING (company_id IN (
+    SELECT company_id FROM users WHERE id = auth.uid()
+  ));
+```
 
 ---
 
-## 🔔 PHASE 9 - SYSTÈME DE NOTIFICATIONS (Semaine 11-12)
+## 🔐 PHASE 3 - AUTHENTIFICATION
 
-### 9.1 Infrastructure notifications
+### 3.1 Middleware et protection des routes
 
-- [ ] **T147** - Setup système de notifications en temps réel
-- [ ] **T148** - Intégration email avec templates personnalisables
-- [ ] **T149** - Notifications push dans l'application
-- [ ] **T150** - Préférences de notification par utilisateur
+**T046 - Middleware Next.js**
 
-### 9.2 Notifications automatiques
+Créer `src/middleware.ts` :
 
-- [ ] **T151** - Reminder 15j avant génération planning
-- [ ] **T152** - Alertes conflits/surcharge automatiques
-- [ ] **T153** - Notifications remplacements urgents
-- [ ] **T154** - Résumés hebdomadaires pour managers
-- [ ] **T155** - Notifications validation congés
+```typescript
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-### 9.3 Templates et personnalisation
+export async function middleware(request: NextRequest) {
+  // Logique de protection des routes
+  // Redirection selon authentification
+}
+```
 
-- [ ] **T156** - Templates email personnalisables par entreprise
-- [ ] **T157** - Système de variables dynamiques dans templates
-- [ ] **T158** - Prévisualisation des notifications
-- [ ] **T159** - Historique des notifications envoyées
+**T047 - Pages authentification**
 
----
+Structure à créer :
 
-## 📊 PHASE 10 - RAPPORTS ET ANALYTICS (Semaine 12-13)
-
-### 10.1 Rapports de base
-
-- [ ] **T160** - Rapport heures travaillées par employé
-- [ ] **T161** - Rapport conformité légale
-- [ ] **T162** - Statistiques d'utilisation des congés
-- [ ] **T163** - Rapport coûts de personnel
-
-### 10.2 Analytics avancées
-
-- [ ] **T164** - Dashboard analytics pour managers
-- [ ] **T165** - Indicateurs de performance équipe
-- [ ] **T166** - Prédictions de charge de travail
-- [ ] **T167** - Analyse des tendances d'absences
-
-### 10.3 Exports et intégrations
-
-- [ ] **T168** - Export PDF automatique des plannings
-- [ ] **T169** - Export Excel pour intégration paie
-- [ ] **T170** - API pour intégrations tierces
-- [ ] **T171** - Envoi automatique par email
+- `src/app/(auth)/login/page.tsx`
+- `src/app/(auth)/register/page.tsx`
+- `src/app/(auth)/forgot-password/page.tsx`
 
 ---
 
-## 🎨 PHASE 11 - UI/UX PREMIUM (Semaine 13-14)
+## 📊 PHASE 4 - INTERFACES CRUD
 
-### 11.1 Design system avancé
+### 4.1 Interface employés
 
-- [ ] **T172** - Finalisation du design system premium
-- [ ] **T173** - Animations et micro-interactions
-- [ ] **T174** - Thème sombre/clair complet
-- [ ] **T175** - Composants accessibles (ARIA)
+**T061-T067 - CRUD Employés complet**
 
-### 11.2 Expérience utilisateur
+Composants à créer :
 
-- [ ] **T176** - Onboarding interactif pour nouveaux utilisateurs
-- [ ] **T177** - Tooltips et aide contextuelle
-- [ ] **T178** - Raccourcis clavier pour power users
-- [ ] **T179** - Interface de recherche globale
+- `src/app/employees/page.tsx` (listing)
+- `src/app/employees/new/page.tsx` (création)
+- `src/app/employees/[id]/page.tsx` (détail)
+- `src/app/employees/[id]/edit/page.tsx` (modification)
 
-### 11.3 Performance et optimisation
+Hooks personnalisés :
 
-- [ ] **T180** - Optimisation des performances (Lighthouse)
-- [ ] **T181** - Lazy loading des composants
-- [ ] **T182** - Optimisation des images
-- [ ] **T183** - Cache strategy optimisée
+- `src/hooks/useEmployees.ts`
+- `src/hooks/useEmployee.ts`
 
 ---
 
-## 🧪 PHASE 12 - TESTS ET QUALITÉ (Semaine 14-15)
+## 🤖 PHASE 5 - INTÉGRATION IA
 
-### 12.1 Tests unitaires et intégration
+### 5.1 Setup OpenAI
 
-- [ ] **T184** - Setup Jest et React Testing Library
-- [ ] **T185** - Tests unitaires composants UI
-- [ ] **T186** - Tests intégration API
-- [ ] **T187** - Tests logique métier (contraintes, calculs)
+**T095-T099 - Configuration OpenAI**
 
-### 12.2 Tests E2E
+```bash
+npm install openai
+```
 
-- [ ] **T188** - Setup Playwright pour tests E2E
-- [ ] **T189** - Tests parcours utilisateur complets
-- [ ] **T190** - Tests multi-tenant et sécurité
-- [ ] **T191** - Tests performance et charge
+Créer `src/lib/ai/openai.ts` :
 
-### 12.3 Qualité et monitoring
+```typescript
+import OpenAI from 'openai';
 
-- [ ] **T192** - Setup Sentry pour monitoring erreurs
-- [ ] **T193** - Analytics d'usage avec Vercel Analytics
-- [ ] **T194** - Monitoring performance en production
-- [ ] **T195** - Alertes automatiques incidents
+export const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+```
 
----
+**T100-T105 - Moteur de génération planning**
 
-## 🚀 PHASE 13 - DÉPLOIEMENT ET PRODUCTION (Semaine 15-16)
+Créer API route :
 
-### 13.1 Configuration production
-
-- [ ] **T196** - Configuration Vercel pour production
-- [ ] **T197** - Setup domaine personnalisé et SSL
-- [ ] **T198** - Configuration variables d'environnement prod
-- [ ] **T199** - Setup backup automatique base de données
-
-### 13.2 CI/CD et DevOps
-
-- [ ] **T200** - Pipeline CI/CD avec GitHub Actions
-- [ ] **T201** - Tests automatiques avant déploiement
-- [ ] **T202** - Déploiements automatiques par branche
-- [ ] **T203** - Rollback automatique en cas d'erreur
-
-### 13.3 Sécurité production
-
-- [ ] **T204** - Audit sécurité complet
-- [ ] **T205** - Configuration headers sécurité
-- [ ] **T206** - Rate limiting et protection DDoS
-- [ ] **T207** - Monitoring sécurité continu
+- `src/app/api/ai/generate-schedule/route.ts`
 
 ---
 
-## 📈 PHASE 14 - OPTIMISATION ET ÉVOLUTION (Semaine 16+)
+## 📅 PHASE 6 - INTERFACE PLANNING
 
-### 14.1 Optimisations post-lancement
+### 6.1 Calendrier principal
 
-- [ ] **T208** - Analyse des métriques d'usage
-- [ ] **T209** - Optimisation basée sur feedback utilisateurs
-- [ ] **T210** - Amélioration continue de l'IA
-- [ ] **T211** - Optimisation coûts infrastructure
+**T116-T121 - Composant calendrier**
 
-### 14.2 Fonctionnalités avancées futures
+Installer dépendance calendrier :
 
-- [ ] **T212** - Intégration calendriers externes (Google, Outlook)
-- [ ] **T213** - API publique pour intégrations
-- [ ] **T214** - Application mobile native
-- [ ] **T215** - Fonctionnalités IA avancées (prédictions, recommandations)
+```bash
+npm install @tanstack/react-table date-fns
+```
 
----
+Composants à créer :
 
-## 📋 RÉCAPITULATIF PAR PRIORITÉ
-
-### 🔥 **CRITIQUE (MVP)**
-
-- Phases 1-7 : Infrastructure, Auth, CRUD, Planning de base
-- **Durée estimée :** 10 semaines
-- **Tâches :** T001 à T134
-
-### ⚡ **IMPORTANT (Version 1.0)**
-
-- Phases 8-11 : Congés, Notifications, Rapports, UI Premium
-- **Durée estimée :** 4 semaines
-- **Tâches :** T135 à T183
-
-### 🎯 **OPTIMISATION (Version 1.1+)**
-
-- Phases 12-14 : Tests, Production, Évolution
-- **Durée estimée :** 2+ semaines
-- **Tâches :** T184 à T215
+- `src/components/charts/schedule-calendar.tsx`
+- `src/app/schedules/page.tsx`
 
 ---
 
-## 🎯 MÉTRIQUES DE SUCCÈS
+## 🚦 ORDRE D'EXÉCUTION RECOMMANDÉ
 
-- **Performance :** < 2s temps de chargement
-- **Sécurité :** 0 faille critique
-- **Utilisabilité :** Score Lighthouse > 90
-- **Scalabilité :** Support 500 employés/entreprise
-- **Disponibilité :** 99.9% uptime
+### Phase Immédiate (Sprint 1-2)
+
+1. **T005** - Variables environnement
+2. **T004** - Finaliser ShadCN/UI
+3. **T009-T011** - Setup Supabase
+4. **T021-T034** - Schéma base de données
+5. **T040-T043** - RLS et sécurité
+
+### Phase Authentification (Sprint 3)
+
+6. **T044-T050** - Système auth complet
+7. **T051-T056** - Multi-tenant
+8. **T046** - Middleware protection
+
+### Phase CRUD (Sprint 4-5)
+
+9. **T061-T067** - Interface employés
+10. **T075-T078** - Types de contrats
+11. **T079-T084** - Configuration postes
+
+### Phase IA (Sprint 6-7)
+
+12. **T095-T105** - Intégration OpenAI
+13. **T100-T115** - Moteur génération
+
+### Phase Interface (Sprint 8-9)
+
+14. **T116-T134** - Calendrier et planning
 
 ---
 
-**Total estimé :** 215 tâches détaillées sur 16+ semaines de développement intensif.
+## 📋 CHECKLIST AVANT CHAQUE PHASE
+
+Avant de commencer une phase :
+
+- [ ] Vérifier que `npm run build` passe
+- [ ] Vérifier que `npm run type-check` passe
+- [ ] Vérifier que `npm run lint` passe
+- [ ] Tester les fonctionnalités existantes
+- [ ] Backup base de données si applicable
+
+---
+
+## 🎯 DÉFINITION OF DONE
+
+Pour qu'une tâche soit considérée comme terminée :
+
+1. ✅ **Code implémenté** selon les spécifications
+2. ✅ **Types TypeScript** définis et corrects
+3. ✅ **Tests unitaires** si applicable
+4. ✅ **Documentation** mise à jour
+5. ✅ **Build** passe sans erreur
+6. ✅ **Linting** sans warning
+7. ✅ **Fonctionnalité testée** manuellement
+8. ✅ **Commit** avec message clair
+
+---
+
+**Prochaine action recommandée :** Commencer par T005 (variables environnement) puis T004 (finaliser ShadCN/UI)
