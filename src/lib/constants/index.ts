@@ -41,7 +41,7 @@ export const USER_ROLES: Record<
  * Permissions by role
  */
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  super_admin: [
+  SUPER_ADMIN: [
     'read',
     'write',
     'delete',
@@ -52,7 +52,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'view_reports',
     'manage_settings',
   ],
-  company_admin: [
+  ADMIN: [
     'read',
     'write',
     'delete',
@@ -62,15 +62,15 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'view_reports',
     'manage_settings',
   ],
-  manager: [
+  MANAGER: [
     'read',
     'write',
     'manage_schedules',
     'manage_employees',
     'view_reports',
   ],
-  employee: ['read'],
-  viewer: ['read'],
+  EMPLOYEE: ['read'],
+  VIEWER: ['read'],
 } as const;
 
 /**

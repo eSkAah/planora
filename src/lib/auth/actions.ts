@@ -8,7 +8,8 @@
 
 import { redirect } from 'next/navigation';
 
-import { prisma, supabase } from '@/lib/database';
+import { prisma } from '@/lib/database';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { accountCreationSchema, userLoginSchema } from '@/lib/validations';
 
 type ActionResult<T = unknown> = {
@@ -23,6 +24,8 @@ type ActionResult<T = unknown> = {
  */
 export async function createAccount(formData: FormData): Promise<ActionResult> {
   try {
+    const supabase = await createServerSupabaseClient();
+
     // Extract and validate form data
     const rawData = {
       company: {
@@ -155,6 +158,8 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
  */
 export async function signIn(formData: FormData): Promise<ActionResult> {
   try {
+    const supabase = await createServerSupabaseClient();
+
     const rawData = {
       email: formData.get('email') as string,
       password: formData.get('password') as string,
@@ -208,6 +213,7 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
  * Sign out user
  */
 export async function signOut(): Promise<void> {
+  const supabase = await createServerSupabaseClient();
   const { error } = await supabase.auth.signOut();
   if (error && process.env.NODE_ENV === 'development') {
     // eslint-disable-next-line no-console

@@ -5,11 +5,31 @@
  * These are the building blocks of the application.
  */
 
-// Note: ShadCN/UI components will be added here as they are created
-// export { Button } from './button';
-// export { Card, CardHeader, CardContent, CardFooter } from './card';
-// export { Input } from './input';
-// export { Label } from './label';
-// etc...
-
-export {}; // Temporary export to avoid empty file error
+// Shadcn/UI Components
+export { Button } from './button';
+export {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+} from './card';
+export { Input } from './input';
+export { Label } from './label';
+export {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './select';
+export {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from './form';
