@@ -10,10 +10,11 @@ import {
   Sparkles,
   Eye,
   EyeOff,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,22 +27,72 @@ export default function HomePage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  const validateEmail = (email: string) => {
+    if (!email) {
+      setEmailError('Email requis');
+      return false;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError('Format email invalide');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+
+  const validatePassword = (password: string) => {
+    if (!password) {
+      setPasswordError('Mot de passe requis');
+      return false;
+    }
+    if (password.length < 6) {
+      setPasswordError('Minimum 6 caractères');
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
 
   const handleLogin = async (formData: FormData) => {
+    const emailValue = formData.get('email') as string;
+    const passwordValue = formData.get('password') as string;
+
+    const emailValid = validateEmail(emailValue);
+    const passwordValid = validatePassword(passwordValue);
+
+    if (!emailValid || !passwordValid) {
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
       const result = await signIn(formData);
       if (result.success) {
-        router.push('/dashboard');
+        // Délai pour montrer l'animation de succès
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 500);
       } else {
         setError(result.error || 'Erreur de connexion');
       }
     } catch {
       setError('Une erreur inattendue est survenue');
     } finally {
-      setIsLoading(false);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 800);
     }
   };
 
@@ -77,9 +128,20 @@ export default function HomePage() {
   ];
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800'>
+    <div className='min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800'>
+      {/* Animated background elements */}
+      <div className='pointer-events-none fixed inset-0 overflow-hidden'>
+        <div className='absolute -top-40 -right-40 h-80 w-80 animate-pulse rounded-full bg-blue-400/20 blur-3xl'></div>
+        <div className='absolute -bottom-40 -left-40 h-80 w-80 animate-pulse rounded-full bg-purple-400/20 blur-3xl delay-1000'></div>
+        <div className='animate-spin-slow absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-gradient-to-r from-blue-400/10 to-purple-400/10 blur-3xl'></div>
+      </div>
+
       {/* Navigation */}
-      <nav className='absolute top-0 z-50 w-full px-6 py-4'>
+      <nav
+        className={`absolute top-0 z-50 w-full px-6 py-4 transition-all duration-1000 ${
+          isVisible ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0'
+        }`}
+      >
         <div className='mx-auto flex max-w-7xl items-center justify-between'>
           <div className='flex items-center space-x-2'>
             <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-purple-600'>
@@ -103,10 +165,24 @@ export default function HomePage() {
         <div className='relative hidden overflow-hidden lg:flex lg:w-1/2'>
           {/* Background decoration */}
           <div className='absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20' />
-          <div className='absolute top-20 right-20 h-72 w-72 rounded-full bg-blue-200/30 blur-3xl' />
-          <div className='absolute bottom-20 left-20 h-64 w-64 rounded-full bg-purple-200/30 blur-3xl' />
+          <div
+            className={`absolute top-20 right-20 h-72 w-72 rounded-full bg-blue-200/30 blur-3xl transition-all duration-2000 ${
+              isVisible ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
+            }`}
+          />
+          <div
+            className={`absolute bottom-20 left-20 h-64 w-64 rounded-full bg-purple-200/30 blur-3xl transition-all delay-300 duration-2000 ${
+              isVisible ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
+            }`}
+          />
 
-          <div className='relative z-10 flex flex-col justify-center px-12 py-20 xl:px-16'>
+          <div
+            className={`relative z-10 flex flex-col justify-center px-12 py-20 transition-all delay-500 duration-1000 xl:px-16 ${
+              isVisible
+                ? 'translate-x-0 opacity-100'
+                : '-translate-x-8 opacity-0'
+            }`}
+          >
             <div className='space-y-8'>
               {/* Hero Content */}
               <div className='space-y-6'>
@@ -183,7 +259,13 @@ export default function HomePage() {
 
         {/* Right Side - Login Form */}
         <div className='flex flex-1 items-center justify-center px-6 py-20 lg:w-1/2'>
-          <div className='w-full max-w-md'>
+          <div
+            className={`w-full max-w-md transition-all delay-700 duration-1000 ${
+              isVisible
+                ? 'translate-x-0 opacity-100'
+                : 'translate-x-8 opacity-0'
+            }`}
+          >
             <Card className='border-white/20 bg-white/80 shadow-2xl backdrop-blur-xl dark:bg-slate-900/80'>
               <CardContent className='p-8'>
                 <div className='space-y-6'>
@@ -203,35 +285,87 @@ export default function HomePage() {
                   {!showForgotPassword ? (
                     <form action={handleLogin} className='space-y-4'>
                       <div className='space-y-4'>
-                        <div>
-                          <Input
-                            type='email'
-                            name='email'
-                            placeholder='Votre email'
-                            className='h-12 border-slate-200/50 bg-white/50 transition-colors focus:bg-white dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800'
-                            required
-                          />
+                        <div className='space-y-2'>
+                          <div className='relative'>
+                            <Input
+                              type='email'
+                              name='email'
+                              placeholder='Votre email'
+                              value={email}
+                              onChange={e => {
+                                setEmail(e.target.value);
+                                if (emailError && e.target.value) {
+                                  validateEmail(e.target.value);
+                                }
+                              }}
+                              onBlur={() => validateEmail(email)}
+                              className={`h-12 border-slate-200/50 bg-white/50 pr-10 transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
+                                emailError
+                                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                                  : ''
+                              } ${
+                                email && !emailError ? 'border-green-500' : ''
+                              }`}
+                            />
+                            {email && !emailError && (
+                              <div className='absolute top-1/2 right-3 -translate-y-1/2'>
+                                <Check className='h-4 w-4 text-green-500' />
+                              </div>
+                            )}
+                          </div>
+                          {emailError && (
+                            <p className='animate-in slide-in-from-top-2 text-xs text-red-500 duration-300'>
+                              {emailError}
+                            </p>
+                          )}
                         </div>
 
-                        <div className='relative'>
-                          <Input
-                            type={showPassword ? 'text' : 'password'}
-                            name='password'
-                            placeholder='Votre mot de passe'
-                            className='h-12 border-slate-200/50 bg-white/50 pr-10 transition-colors focus:bg-white dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800'
-                            required
-                          />
-                          <button
-                            type='button'
-                            onClick={() => setShowPassword(!showPassword)}
-                            className='absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-                          >
-                            {showPassword ? (
-                              <EyeOff className='h-4 w-4' />
-                            ) : (
-                              <Eye className='h-4 w-4' />
-                            )}
-                          </button>
+                        <div className='space-y-2'>
+                          <div className='relative'>
+                            <Input
+                              type={showPassword ? 'text' : 'password'}
+                              name='password'
+                              placeholder='Votre mot de passe'
+                              value={password}
+                              onChange={e => {
+                                setPassword(e.target.value);
+                                if (passwordError && e.target.value) {
+                                  validatePassword(e.target.value);
+                                }
+                              }}
+                              onBlur={() => validatePassword(password)}
+                              className={`h-12 border-slate-200/50 bg-white/50 pr-16 transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
+                                passwordError
+                                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                                  : ''
+                              } ${
+                                password && !passwordError
+                                  ? 'border-green-500'
+                                  : ''
+                              }`}
+                            />
+                            <div className='absolute top-1/2 right-3 flex -translate-y-1/2 items-center space-x-2'>
+                              {password && !passwordError && (
+                                <Check className='h-4 w-4 text-green-500' />
+                              )}
+                              <button
+                                type='button'
+                                onClick={() => setShowPassword(!showPassword)}
+                                className='text-slate-400 transition-colors duration-200 hover:text-slate-600 dark:hover:text-slate-300'
+                              >
+                                {showPassword ? (
+                                  <EyeOff className='h-4 w-4' />
+                                ) : (
+                                  <Eye className='h-4 w-4' />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                          {passwordError && (
+                            <p className='animate-in slide-in-from-top-2 text-xs text-red-500 duration-300'>
+                              {passwordError}
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -245,16 +379,25 @@ export default function HomePage() {
 
                       <Button
                         type='submit'
-                        disabled={isLoading}
-                        className='h-12 w-full rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 font-semibold text-white shadow-lg transition-all duration-300 hover:from-blue-700 hover:to-purple-700 hover:shadow-xl'
+                        disabled={
+                          isLoading ||
+                          !!emailError ||
+                          !!passwordError ||
+                          !email ||
+                          !password
+                        }
+                        className='h-12 w-full rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:from-blue-700 hover:to-purple-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100'
                       >
                         {isLoading ? (
                           <>
-                            <div className='mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white' />
+                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                             Connexion...
                           </>
                         ) : (
-                          'Se connecter'
+                          <div className='flex items-center justify-center'>
+                            Se connecter
+                            <ChevronRight className='ml-1 h-4 w-4 transition-transform group-hover:translate-x-1' />
+                          </div>
                         )}
                       </Button>
                     </form>
