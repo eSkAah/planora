@@ -95,3 +95,16 @@ temp/
 
 /src/generated/prisma
 .next/
+# Build outputs - NEVER COMMIT
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+.turbo/
+
+# Additional safety for builds
+/.next/
+/out/
+/build/
+/dist/
