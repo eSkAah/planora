@@ -1,26 +1,173 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --radius: 0.875rem;
+
+  /* Planora Premium Theme - Inspiré Apple */
+  --background: oklch(0.985 0.001 106.35);
+  --foreground: oklch(0.09 0.005 258.34);
+  --card: oklch(0.98 0.002 106.35);
+  --card-foreground: oklch(0.11 0.005 258.34);
+  --popover: oklch(0.985 0.001 106.35);
+  --popover-foreground: oklch(0.09 0.005 258.34);
+
+  /* Primary: Bleu premium Apple-style */
+  --primary: oklch(0.54 0.233 252.72);
+  --primary-foreground: oklch(0.985 0.001 106.35);
+
+  /* Secondary: Gris premium sophistiqué */
+  --secondary: oklch(0.96 0.004 258.34);
+  --secondary-foreground: oklch(0.13 0.005 258.34);
+
+  /* Muted: Tons neutres élégants */
+  --muted: oklch(0.97 0.002 258.34);
+  --muted-foreground: oklch(0.46 0.006 258.34);
+
+  /* Accent: Violet premium moderne */
+  --accent: oklch(0.96 0.008 285.85);
+  --accent-foreground: oklch(0.13 0.005 258.34);
+
+  /* Success: Vert émeraude premium */
+  --success: oklch(0.55 0.16 162.84);
+  --success-foreground: oklch(0.985 0.001 106.35);
+
+  /* Warning: Orange sophistiqué */
+  --warning: oklch(0.72 0.18 65.89);
+  --warning-foreground: oklch(0.985 0.001 106.35);
+
+  /* Destructive: Rouge premium */
+  --destructive: oklch(0.58 0.24 19.27);
+  --destructive-foreground: oklch(0.985 0.001 106.35);
+
+  --border: oklch(0.92 0.003 258.34);
+  --input: oklch(0.98 0.002 258.34);
+  --ring: oklch(0.54 0.233 252.72);
+
+  /* Chart colors palette premium */
+  --chart-1: oklch(0.54 0.233 252.72);
+  --chart-2: oklch(0.55 0.16 162.84);
+  --chart-3: oklch(0.62 0.19 285.85);
+  --chart-4: oklch(0.72 0.18 65.89);
+  --chart-5: oklch(0.58 0.22 340.34);
+
+  /* Sidebar design Apple-like */
+  --sidebar: oklch(0.975 0.002 258.34);
+  --sidebar-foreground: oklch(0.13 0.005 258.34);
+  --sidebar-primary: oklch(0.54 0.233 252.72);
+  --sidebar-primary-foreground: oklch(0.985 0.001 106.35);
+  --sidebar-accent: oklch(0.96 0.004 258.34);
+  --sidebar-accent-foreground: oklch(0.13 0.005 258.34);
+  --sidebar-border: oklch(0.92 0.003 258.34);
+  --sidebar-ring: oklch(0.54 0.233 252.72);
+}
+
+.dark {
+  /* Planora Dark Premium Theme - Style Apple */
+  --background: oklch(0.06 0.004 258.34);
+  --foreground: oklch(0.94 0.004 258.34);
+  --card: oklch(0.09 0.005 258.34);
+  --card-foreground: oklch(0.92 0.004 258.34);
+  --popover: oklch(0.09 0.005 258.34);
+  --popover-foreground: oklch(0.92 0.004 258.34);
+
+  /* Primary: Bleu Apple premium pour dark mode */
+  --primary: oklch(0.64 0.22 252.72);
+  --primary-foreground: oklch(0.06 0.004 258.34);
+
+  /* Secondary: Gris foncé premium */
+  --secondary: oklch(0.15 0.006 258.34);
+  --secondary-foreground: oklch(0.9 0.004 258.34);
+
+  /* Muted: Tons foncés élégants */
+  --muted: oklch(0.12 0.005 258.34);
+  --muted-foreground: oklch(0.62 0.006 258.34);
+
+  /* Accent: Violet foncé moderne */
+  --accent: oklch(0.18 0.01 285.85);
+  --accent-foreground: oklch(0.9 0.004 258.34);
+
+  /* Success: Vert émeraude pour dark */
+  --success: oklch(0.58 0.15 162.84);
+  --success-foreground: oklch(0.06 0.004 258.34);
+
+  /* Warning: Orange pour dark mode */
+  --warning: oklch(0.75 0.17 65.89);
+  --warning-foreground: oklch(0.06 0.004 258.34);
+
+  /* Destructive: Rouge pour dark mode */
+  --destructive: oklch(0.65 0.22 19.27);
+  --destructive-foreground: oklch(0.94 0.004 258.34);
+
+  --border: oklch(0.2 0.006 258.34);
+  --input: oklch(0.15 0.005 258.34);
+  --ring: oklch(0.64 0.22 252.72);
+
+  /* Chart colors palette premium dark */
+  --chart-1: oklch(0.64 0.22 252.72);
+  --chart-2: oklch(0.58 0.15 162.84);
+  --chart-3: oklch(0.68 0.18 285.85);
+  --chart-4: oklch(0.75 0.17 65.89);
+  --chart-5: oklch(0.65 0.2 340.34);
+
+  /* Sidebar dark Apple-like */
+  --sidebar: oklch(0.08 0.005 258.34);
+  --sidebar-foreground: oklch(0.9 0.004 258.34);
+  --sidebar-primary: oklch(0.64 0.22 252.72);
+  --sidebar-primary-foreground: oklch(0.06 0.004 258.34);
+  --sidebar-accent: oklch(0.15 0.006 258.34);
+  --sidebar-accent-foreground: oklch(0.9 0.004 258.34);
+  --sidebar-border: oklch(0.2 0.006 258.34);
+  --sidebar-ring: oklch(0.64 0.22 252.72);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+  }
 }
