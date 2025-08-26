@@ -5,7 +5,7 @@
  * These types will be generated/updated when we set up Supabase.
  */
 
-import type { BaseEntity, UserRole, ThemeMode } from './global';
+import type { BaseEntity, LegacyUserRole, ThemeMode } from './global';
 
 /**
  * Company (Multi-tenant)
@@ -62,7 +62,7 @@ export interface User extends BaseEntity {
   first_name: string;
   last_name: string;
   avatar_url?: string;
-  role: UserRole;
+  role: LegacyUserRole;
   company_id: string;
   is_active: boolean;
   last_login_at?: string;

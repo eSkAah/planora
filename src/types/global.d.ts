@@ -153,9 +153,10 @@ export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 /**
- * User role type
+ * Legacy user role type (replaced by Prisma UserRole enum)
+ * @deprecated Use UserRole from @/lib/database instead
  */
-export type UserRole =
+export type LegacyUserRole =
   | 'super_admin'
   | 'company_admin'
   | 'manager'

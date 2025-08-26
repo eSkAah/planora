@@ -12,7 +12,7 @@ import type {
   Schedule,
   ScheduleAssignment,
 } from './database';
-import type { UserRole, ThemeMode } from './global';
+import type { LegacyUserRole, ThemeMode } from './global';
 
 /**
  * HTTP Methods
@@ -103,14 +103,14 @@ export interface CreateUserRequest {
   email: string;
   first_name: string;
   last_name: string;
-  role: UserRole;
+  role: LegacyUserRole;
   send_invitation?: boolean;
 }
 
 export interface UpdateUserRequest {
   first_name?: string;
   last_name?: string;
-  role?: UserRole;
+  role?: LegacyUserRole;
   is_active?: boolean;
 }
 

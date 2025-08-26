@@ -5,7 +5,8 @@
  * Enums, default values, configuration objects, static data.
  */
 
-import type { UserRole, Permission, ThemeMode } from '@/types';
+import type { UserRole } from '@/lib/database';
+import type { Permission, ThemeMode } from '@/types';
 
 /**
  * User Roles with descriptions
@@ -14,23 +15,23 @@ export const USER_ROLES: Record<
   UserRole,
   { label: string; description: string }
 > = {
-  super_admin: {
+  SUPER_ADMIN: {
     label: 'Super Admin',
     description: 'Full system access across all companies',
   },
-  company_admin: {
-    label: 'Company Admin',
+  ADMIN: {
+    label: 'Admin',
     description: 'Full access within their company',
   },
-  manager: {
+  MANAGER: {
     label: 'Manager',
     description: 'Manage schedules and employees',
   },
-  employee: {
+  EMPLOYEE: {
     label: 'Employee',
     description: 'View own schedule and request leave',
   },
-  viewer: {
+  VIEWER: {
     label: 'Viewer',
     description: 'Read-only access to schedules',
   },
@@ -40,7 +41,7 @@ export const USER_ROLES: Record<
  * Permissions by role
  */
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  super_admin: [
+  SUPER_ADMIN: [
     'read',
     'write',
     'delete',
@@ -51,7 +52,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'view_reports',
     'manage_settings',
   ],
-  company_admin: [
+  ADMIN: [
     'read',
     'write',
     'delete',
@@ -61,15 +62,15 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'view_reports',
     'manage_settings',
   ],
-  manager: [
+  MANAGER: [
     'read',
     'write',
     'manage_schedules',
     'manage_employees',
     'view_reports',
   ],
-  employee: ['read'],
-  viewer: ['read'],
+  EMPLOYEE: ['read'],
+  VIEWER: ['read'],
 } as const;
 
 /**

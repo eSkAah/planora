@@ -8,21 +8,15 @@
 // Global types and utilities
 export type * from './global';
 
-// Database entities
+// Legacy database entities (replaced by Prisma types)
+// Note: Main database types are now exported from @/lib/database
 export type {
-  Company,
   CompanySettings,
   LegalConstraints,
-  User,
   UserPreferences,
-  Employee,
-  ContractType,
   EmployeeAvailability,
   TimeSlot,
   EmployeePreferences,
-  ShiftTemplate,
-  Schedule,
-  ScheduleAssignment,
   LeaveRequest,
   LeaveType,
   Notification,

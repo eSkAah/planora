@@ -17,6 +17,8 @@ const eslintConfig = [
       'build/**',
       'dist/**',
       'node_modules/**',
+      'src/generated/**',
+      'prisma/generated/**',
     ],
   },
   ...compat.extends('next/core-web-vitals', 'next/typescript'),

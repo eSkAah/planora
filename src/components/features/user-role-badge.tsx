@@ -5,8 +5,8 @@
  */
 
 import { USER_ROLES } from '@/lib/constants';
+import type { UserRole } from '@/lib/database';
 import { cn } from '@/lib/utils';
-import type { UserRole } from '@/types';
 
 interface UserRoleBadgeProps {
   role: UserRole;
@@ -29,11 +29,11 @@ const variantClasses = {
 } as const;
 
 const roleColors: Record<UserRole, string> = {
-  super_admin: 'bg-red-100 text-red-800 border-red-200',
-  company_admin: 'bg-purple-100 text-purple-800 border-purple-200',
-  manager: 'bg-blue-100 text-blue-800 border-blue-200',
-  employee: 'bg-green-100 text-green-800 border-green-200',
-  viewer: 'bg-gray-100 text-gray-800 border-gray-200',
+  SUPER_ADMIN: 'bg-red-100 text-red-800 border-red-200',
+  ADMIN: 'bg-purple-100 text-purple-800 border-purple-200',
+  MANAGER: 'bg-blue-100 text-blue-800 border-blue-200',
+  EMPLOYEE: 'bg-green-100 text-green-800 border-green-200',
+  VIEWER: 'bg-gray-100 text-gray-800 border-gray-200',
 } as const;
 
 /**
@@ -83,11 +83,11 @@ export function UserRoleBadge({
  */
 export function hasRole(userRole: UserRole, requiredRole: UserRole): boolean {
   const roleHierarchy: Record<UserRole, number> = {
-    viewer: 0,
-    employee: 1,
-    manager: 2,
-    company_admin: 3,
-    super_admin: 4,
+    VIEWER: 0,
+    EMPLOYEE: 1,
+    MANAGER: 2,
+    ADMIN: 3,
+    SUPER_ADMIN: 4,
   };
 
   return roleHierarchy[userRole] >= roleHierarchy[requiredRole];
@@ -105,27 +105,27 @@ export function isValidRole(role: string): role is UserRole {
  */
 export function getAccessibleRoles(currentRole: UserRole): UserRole[] {
   const allRoles: UserRole[] = [
-    'viewer',
-    'employee',
-    'manager',
-    'company_admin',
-    'super_admin',
+    'VIEWER',
+    'EMPLOYEE',
+    'MANAGER',
+    'ADMIN',
+    'SUPER_ADMIN',
   ];
 
   return allRoles.filter(role => {
     // Super admin can assign any role
-    if (currentRole === 'super_admin') {
+    if (currentRole === 'SUPER_ADMIN') {
       return true;
     }
 
-    // Company admin can assign roles below them
-    if (currentRole === 'company_admin') {
-      return role !== 'super_admin';
+    // Admin can assign roles below them
+    if (currentRole === 'ADMIN') {
+      return role !== 'SUPER_ADMIN';
     }
 
     // Managers can only assign employee/viewer roles
-    if (currentRole === 'manager') {
-      return role === 'employee' || role === 'viewer';
+    if (currentRole === 'MANAGER') {
+      return role === 'EMPLOYEE' || role === 'VIEWER';
     }
 
     // Others can't assign roles

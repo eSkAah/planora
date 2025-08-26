@@ -1,0 +1,396 @@
+// ==============================================
+// PLANORA - PRISMA SCHEMA
+// Phase 2: Database Models (T021-T027)
+// ==============================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==============================================
+// ENUMS
+// ==============================================
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  EMPLOYEE
+  VIEWER
+}
+
+enum ContractType {
+  FULL_TIME
+  PART_TIME
+  TEMPORARY
+  INTERN
+  FREELANCE
+}
+
+enum ShiftType {
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
+  CUSTOM
+}
+
+enum ScheduleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AssignmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  MISSED
+  CANCELLED
+}
+
+enum GenerationMethod {
+  MANUAL
+  AI
+  TEMPLATE
+}
+
+// ==============================================
+// T021 - COMPANIES TABLE (Multi-tenant)
+// ==============================================
+
+model Company {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                  String   @unique @db.VarChar(100)
+  country               String   @db.VarChar(50)
+  sector                String   @db.VarChar(50)
+  sizeCategory          String   @default("small") @map("size_category") @db.VarChar(20)
+  legalWorkHoursPerWeek Int      @default(35) @map("legal_work_hours_per_week")
+  timezone              String   @default("Europe/Paris") @db.VarChar(50)
+  settings              Json     @default("{}")
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  users               User[]
+  employees           Employee[]
+  contracts           Contract[]
+  shiftTemplates      ShiftTemplate[]
+  schedules           Schedule[]
+  scheduleAssignments ScheduleAssignment[]
+
+  @@map("companies")
+}
+
+// ==============================================
+// T022 - USERS TABLE (with roles)
+// ==============================================
+
+model User {
+  id           String    @id @db.Uuid
+  email        String    @unique @db.VarChar(255)
+  firstName    String    @map("first_name") @db.VarChar(50)
+  lastName     String    @map("last_name") @db.VarChar(50)
+  role         UserRole  @default(EMPLOYEE)
+  companyId    String    @map("company_id") @db.Uuid
+  avatarUrl    String?   @map("avatar_url")
+  phone        String?   @db.VarChar(20)
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz(6)
+  preferences  Json      @default("{}")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  company                  Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee                 Employee?
+  generatedSchedules       Schedule[]           @relation("ScheduleGeneratedBy")
+  publishedSchedules       Schedule[]           @relation("SchedulePublishedBy")
+  confirmedAssignments     ScheduleAssignment[] @relation("AssignmentConfirmedBy")
+
+  @@map("users")
+}
+
+// ==============================================
+// T023 - EMPLOYEES TABLE (comprehensive info)
+// ==============================================
+
+model Employee {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                String?   @unique @map("user_id") @db.Uuid
+  companyId             String    @map("company_id") @db.Uuid
+  employeeNumber        String?   @unique @map("employee_number") @db.VarChar(20)
+
+  // Personal Information
+  dateOfBirth           DateTime? @map("date_of_birth") @db.Date
+  address               String?
+  city                  String?   @db.VarChar(100)
+  postalCode            String?   @map("postal_code") @db.VarChar(20)
+  emergencyContactName  String?   @map("emergency_contact_name") @db.VarChar(100)
+  emergencyContactPhone String?   @map("emergency_contact_phone") @db.VarChar(20)
+
+  // Professional Information
+  hireDate              DateTime  @map("hire_date") @db.Date
+  department            String?   @db.VarChar(100)
+  position              String?   @db.VarChar(100)
+  managerId             String?   @map("manager_id") @db.Uuid
+
+  // Work Configuration
+  maxHoursPerWeek       Int       @default(35) @map("max_hours_per_week")
+  maxConsecutiveDays    Int       @default(6) @map("max_consecutive_days")
+  minRestHours          Int       @default(11) @map("min_rest_hours")
+
+  // Skills & Qualifications
+  skills                String[]
+  qualifications        Json      @default("[]")
+  certifications        Json      @default("[]")
+
+  // Availability & Preferences
+  availability          Json      @default("{}")
+  shiftPreferences      Json      @default("{}") @map("shift_preferences")
+  unavailableDates      Json      @default("[]") @map("unavailable_dates")
+
+  // Performance & Notes
+  performanceRating     Decimal?  @map("performance_rating") @db.Decimal(3, 2)
+  notes                 String?
+
+  // Status
+  isActive              Boolean   @default(true) @map("is_active")
+  terminationDate       DateTime? @map("termination_date") @db.Date
+  terminationReason     String?   @map("termination_reason")
+
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user                  User?                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company               Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  manager               Employee?            @relation("EmployeeManager", fields: [managerId], references: [id])
+  subordinates          Employee[]           @relation("EmployeeManager")
+  contracts             Contract[]
+  scheduleAssignments   ScheduleAssignment[]
+  originalAssignments   ScheduleAssignment[] @relation("OriginalEmployee")
+
+  @@map("employees")
+}
+
+// ==============================================
+// T024 - CONTRACTS TABLE (flexible types)
+// ==============================================
+
+model Contract {
+  id                        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId                String       @map("employee_id") @db.Uuid
+  companyId                 String       @map("company_id") @db.Uuid
+
+  // Contract Details
+  contractType              ContractType @map("contract_type")
+  title                     String       @db.VarChar(100)
+  description               String?
+
+  // Duration
+  startDate                 DateTime     @map("start_date") @db.Date
+  endDate                   DateTime?    @map("end_date") @db.Date
+
+  // Working Time
+  hoursPerWeek              Decimal      @map("hours_per_week") @db.Decimal(5, 2)
+  hoursPerDay               Decimal?     @map("hours_per_day") @db.Decimal(4, 2)
+  daysPerWeek               Int          @default(5) @map("days_per_week")
+
+  // Annual Limits
+  maxAnnualHours            Int?         @map("max_annual_hours")
+  currentAnnualHours        Int          @default(0) @map("current_annual_hours")
+
+  // Overtime Configuration
+  overtimeAllowed           Boolean      @default(true) @map("overtime_allowed")
+  maxOvertimeHoursPerWeek   Int          @default(0) @map("max_overtime_hours_per_week")
+  overtimeRate              Decimal      @default(1.25) @map("overtime_rate") @db.Decimal(4, 2)
+
+  // Contract Status
+  isActive                  Boolean      @default(true) @map("is_active")
+  signedAt                  DateTime?    @map("signed_at") @db.Timestamptz(6)
+  effectiveFrom             DateTime     @map("effective_from") @db.Date
+
+  createdAt                 DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  employee                  Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  company                   Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("contracts")
+}
+
+// ==============================================
+// T025 - SHIFT TEMPLATES TABLE (shift models)
+// ==============================================
+
+model ShiftTemplate {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId             String    @map("company_id") @db.Uuid
+
+  // Template Info
+  name                  String    @db.VarChar(100)
+  description           String?
+  shiftType             ShiftType @map("shift_type")
+  colorCode             String    @default("#3B82F6") @map("color_code") @db.VarChar(7)
+
+  // Timing
+  startTime             DateTime  @map("start_time") @db.Time(6)
+  endTime               DateTime  @map("end_time") @db.Time(6)
+
+  // Break Configuration
+  breakDurationMinutes  Int       @default(0) @map("break_duration_minutes")
+  isPaidBreak           Boolean   @default(true) @map("is_paid_break")
+
+  // Staffing Requirements
+  minStaffRequired      Int       @default(1) @map("min_staff_required")
+  maxStaffAllowed       Int?      @map("max_staff_allowed")
+
+  // Skills Required
+  requiredSkills        String[]  @map("required_skills")
+  requiredQualifications Json     @default("[]") @map("required_qualifications")
+
+  // Rules & Constraints
+  isWeekendShift        Boolean   @default(false) @map("is_weekend_shift")
+  isHolidayShift        Boolean   @default(false) @map("is_holiday_shift")
+  overtimeEligible      Boolean   @default(true) @map("overtime_eligible")
+
+  // Status
+  isActive              Boolean   @default(true) @map("is_active")
+  isTemplate            Boolean   @default(true) @map("is_template")
+
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  company               Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  scheduleAssignments   ScheduleAssignment[]
+
+  @@unique([companyId, name])
+  @@map("shift_templates")
+}
+
+// ==============================================
+// T026 - SCHEDULES TABLE (generated schedules)
+// ==============================================
+
+model Schedule {
+  id                    String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId             String           @map("company_id") @db.Uuid
+
+  // Schedule Period
+  title                 String           @db.VarChar(100)
+  description           String?
+  startDate             DateTime         @map("start_date") @db.Date
+  endDate               DateTime         @map("end_date") @db.Date
+
+  // Generation Info
+  generatedBy           String?          @map("generated_by") @db.Uuid
+  generatedAt           DateTime         @default(now()) @map("generated_at") @db.Timestamptz(6)
+  generationMethod      GenerationMethod @default(AI) @map("generation_method")
+
+  // AI Generation Parameters
+  aiPrompt              String?          @map("ai_prompt")
+  aiConstraints         Json             @default("{}") @map("ai_constraints")
+  aiOptimizationGoals   Json             @default("[]") @map("ai_optimization_goals")
+
+  // Status & Approval
+  status                ScheduleStatus   @default(DRAFT)
+  publishedAt           DateTime?        @map("published_at") @db.Timestamptz(6)
+  publishedBy           String?          @map("published_by") @db.Uuid
+
+  // Metrics & Quality
+  totalHours            Decimal          @default(0) @map("total_hours") @db.Decimal(8, 2)
+  totalCost             Decimal          @default(0) @map("total_cost") @db.Decimal(10, 2)
+  coverageScore         Decimal?         @map("coverage_score") @db.Decimal(5, 2)
+  satisfactionScore     Decimal?         @map("satisfaction_score") @db.Decimal(5, 2)
+
+  // Version Control
+  version               Int              @default(1)
+  previousVersionId     String?          @map("previous_version_id") @db.Uuid
+
+  // Notifications
+  notificationsSent     Boolean          @default(false) @map("notifications_sent")
+  notificationSentAt    DateTime?        @map("notification_sent_at") @db.Timestamptz(6)
+
+  createdAt             DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  company               Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  generatedByUser       User?                @relation("ScheduleGeneratedBy", fields: [generatedBy], references: [id])
+  publishedByUser       User?                @relation("SchedulePublishedBy", fields: [publishedBy], references: [id])
+  previousVersion       Schedule?            @relation("ScheduleVersion", fields: [previousVersionId], references: [id])
+  nextVersions          Schedule[]           @relation("ScheduleVersion")
+  assignments           ScheduleAssignment[]
+
+  @@map("schedules")
+}
+
+// ==============================================
+// T027 - SCHEDULE ASSIGNMENTS TABLE (assignments)
+// ==============================================
+
+model ScheduleAssignment {
+  id                          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  scheduleId                  String           @map("schedule_id") @db.Uuid
+  employeeId                  String           @map("employee_id") @db.Uuid
+  shiftTemplateId             String?          @map("shift_template_id") @db.Uuid
+  companyId                   String           @map("company_id") @db.Uuid
+
+  // Assignment Details
+  date                        DateTime         @db.Date
+  startTime                   DateTime         @map("start_time") @db.Time(6)
+  endTime                     DateTime         @map("end_time") @db.Time(6)
+
+  // Override Information
+  actualStartTime             DateTime?        @map("actual_start_time") @db.Time(6)
+  actualEndTime               DateTime?        @map("actual_end_time") @db.Time(6)
+
+  // Break Information
+  breakDurationMinutes        Int              @default(0) @map("break_duration_minutes")
+  breakStartTime              DateTime?        @map("break_start_time") @db.Time(6)
+  breakEndTime                DateTime?        @map("break_end_time") @db.Time(6)
+
+  // Status & Tracking
+  status                      AssignmentStatus @default(SCHEDULED)
+  confirmedAt                 DateTime?        @map("confirmed_at") @db.Timestamptz(6)
+  confirmedBy                 String?          @map("confirmed_by") @db.Uuid
+
+  // Hours & Pay Calculation
+  actualHours                 Decimal?         @map("actual_hours") @db.Decimal(4, 2)
+  isOvertime                  Boolean          @default(false) @map("is_overtime")
+  overtimeHours               Decimal          @default(0) @map("overtime_hours") @db.Decimal(4, 2)
+
+  // Notes & Comments
+  notes                       String?
+  employeeNotes               String?          @map("employee_notes")
+  managerNotes                String?          @map("manager_notes")
+
+  // Replacement Tracking
+  originalEmployeeId          String?          @map("original_employee_id") @db.Uuid
+  replacementReason           String?          @map("replacement_reason")
+  replacementRequestedAt      DateTime?        @map("replacement_requested_at") @db.Timestamptz(6)
+
+  createdAt                   DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                   DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  schedule                    Schedule         @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  employee                    Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  shiftTemplate               ShiftTemplate?   @relation(fields: [shiftTemplateId], references: [id])
+  company                     Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  confirmedByUser             User?            @relation("AssignmentConfirmedBy", fields: [confirmedBy], references: [id])
+  originalEmployee            Employee?        @relation("OriginalEmployee", fields: [originalEmployeeId], references: [id])
+
+  @@unique([employeeId, date, startTime])
+  @@map("schedule_assignments")
+}
