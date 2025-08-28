@@ -11,6 +11,12 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  Mail,
+  Lock,
+  Building2,
+  Globe,
+  Briefcase,
+  User,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -314,7 +320,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className='min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800'>
+    <div className='h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800'>
       {/* Animated background elements */}
       <div className='pointer-events-none fixed inset-0 overflow-hidden'>
         <div className='absolute -top-40 -right-40 h-80 w-80 animate-pulse rounded-full bg-blue-400/20 blur-3xl'></div>
@@ -329,28 +335,23 @@ export default function HomePage() {
         }`}
       >
         <div className='mx-auto flex max-w-7xl items-center justify-between'>
-          <div className='flex items-center space-x-2'>
-            <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-purple-600'>
+          <div className='flex items-center space-x-3'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 shadow-lg shadow-blue-500/25'>
               <Calendar className='h-5 w-5 text-white' />
             </div>
-            <span className='bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-xl font-bold text-transparent dark:from-white dark:to-slate-300'>
-              Planora
-            </span>
+            <div>
+              <span className='block bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-xl font-bold text-transparent dark:from-white dark:to-slate-300'>
+                Planora
+              </span>
+              <span className='block text-xs text-slate-500 dark:text-slate-400'>
+                Planning IA Premium
+              </span>
+            </div>
           </div>
-          <button
-            onClick={() => {
-              setIsRegisterMode(!isRegisterMode);
-              setError(null);
-              setSuccess(null);
-            }}
-            className='text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-          >
-            {isRegisterMode ? 'Se connecter' : 'Créer un compte'}
-          </button>
         </div>
       </nav>
 
-      <div className='flex min-h-screen'>
+      <div className='flex h-screen'>
         {/* Left Side - Product Benefits */}
         <div className='relative hidden overflow-hidden lg:flex lg:w-1/2'>
           {/* Background decoration */}
@@ -367,23 +368,23 @@ export default function HomePage() {
           />
 
           <div
-            className={`relative z-10 flex flex-col justify-center px-12 py-20 transition-all delay-500 duration-1000 xl:px-16 ${
+            className={`relative z-10 flex flex-col justify-center px-8 py-12 transition-all delay-500 duration-1000 xl:px-10 ${
               isVisible
                 ? 'translate-x-0 opacity-100'
                 : '-translate-x-8 opacity-0'
             }`}
           >
-            <div className='space-y-8'>
+            <div className='space-y-6'>
               {/* Hero Content */}
-              <div className='space-y-6'>
-                <div className='inline-flex items-center space-x-2 rounded-full border border-white/20 bg-white/60 px-3 py-1.5 backdrop-blur-sm dark:bg-slate-800/60'>
+              <div className='space-y-4'>
+                <div className='inline-flex items-center space-x-2 rounded-full border border-white/20 bg-white/60 px-4 py-2 backdrop-blur-sm dark:bg-slate-800/60'>
                   <Sparkles className='h-4 w-4 text-blue-600' />
                   <span className='text-sm font-medium text-slate-700 dark:text-slate-300'>
                     Propulsé par l&apos;IA
                   </span>
                 </div>
 
-                <h1 className='text-5xl leading-tight font-bold xl:text-6xl'>
+                <h1 className='text-4xl leading-tight font-bold xl:text-5xl'>
                   <span className='bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 bg-clip-text text-transparent dark:from-white dark:via-slate-100 dark:to-slate-300'>
                     Planifiez
                   </span>
@@ -393,7 +394,7 @@ export default function HomePage() {
                   </span>
                 </h1>
 
-                <p className='text-xl leading-relaxed text-slate-600 dark:text-slate-400'>
+                <p className='text-lg leading-relaxed text-slate-600 dark:text-slate-400'>
                   La première solution SaaS qui révolutionne la gestion des
                   plannings avec l&apos;intelligence artificielle. Optimisez vos
                   équipes, respectez la législation, maximisez la productivité.
@@ -401,18 +402,18 @@ export default function HomePage() {
               </div>
 
               {/* Features Grid */}
-              <div className='grid grid-cols-2 gap-4'>
+              <div className='grid grid-cols-2 gap-3'>
                 {features.map((feature, index) => (
                   <Card
                     key={index}
                     className='border-white/20 bg-white/60 backdrop-blur-sm transition-all duration-300 hover:bg-white/80 dark:bg-slate-800/60 dark:hover:bg-slate-800/80'
                   >
-                    <CardContent className='p-4'>
-                      <feature.icon className='mb-2 h-6 w-6 text-blue-600' />
-                      <h3 className='mb-1 text-sm font-semibold text-slate-900 dark:text-white'>
+                    <CardContent className='p-3'>
+                      <feature.icon className='mb-1 h-5 w-5 text-blue-600' />
+                      <h3 className='mb-1 text-xs font-semibold text-slate-900 dark:text-white'>
                         {feature.title}
                       </h3>
-                      <p className='text-xs leading-relaxed text-slate-600 dark:text-slate-400'>
+                      <p className='text-xs leading-snug text-slate-600 dark:text-slate-400'>
                         {feature.description}
                       </p>
                     </CardContent>
@@ -421,7 +422,7 @@ export default function HomePage() {
               </div>
 
               {/* Benefits List */}
-              <div className='space-y-3'>
+              <div className='space-y-2'>
                 {benefits.map((benefit, index) => (
                   <div key={index} className='flex items-center space-x-3'>
                     <div className='flex h-5 w-5 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30'>
@@ -442,7 +443,7 @@ export default function HomePage() {
                     setError(null);
                     setSuccess(null);
                   }}
-                  className='group rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:from-blue-700 hover:to-purple-700 hover:shadow-xl'
+                  className='group rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6 text-base font-semibold text-white shadow-xl shadow-blue-500/25 transition-all duration-300 hover:scale-[1.02] hover:from-blue-700 hover:to-purple-700 hover:shadow-2xl hover:shadow-blue-500/30'
                 >
                   Essayer gratuitement
                   <ChevronRight className='ml-2 h-5 w-5 transition-transform group-hover:translate-x-1' />
@@ -452,87 +453,126 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Right Side - Login Form */}
-        <div className='flex flex-1 items-center justify-center px-6 py-20 lg:w-1/2'>
+        {/* Right Side - Premium Authentication Card */}
+        <div className='flex h-full flex-1 items-center justify-center px-6 py-4 lg:w-1/2'>
           <div
-            className={`w-full max-w-md transition-all delay-700 duration-1000 ${
+            className={`w-full max-w-lg transition-all delay-700 duration-1000 ${
               isVisible
                 ? 'translate-x-0 opacity-100'
                 : 'translate-x-8 opacity-0'
             }`}
           >
-            <Card className='max-h-[90vh] overflow-y-auto border-white/20 bg-white/80 shadow-2xl backdrop-blur-xl dark:bg-slate-900/80'>
-              <CardContent className='p-8'>
-                <div className='space-y-6'>
-                  {/* Header */}
+            {/* PREMIUM CARD DESIGN */}
+            <Card className='relative flex max-h-[80vh] min-h-[70vh] flex-col overflow-hidden border-0 bg-white/98 shadow-2xl backdrop-blur-3xl dark:bg-slate-900/98'>
+              {/* Premium gradient border */}
+              <div className='absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 p-[1px]'>
+                <div className='h-full w-full rounded-3xl bg-white/98 dark:bg-slate-900/98' />
+              </div>
+
+              {/* Premium glow effect */}
+              <div className='absolute -inset-1 rounded-3xl bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-blue-600/10 opacity-75 blur-xl' />
+
+              <CardContent className='relative z-10 flex-1 overflow-y-auto p-4'>
+                <div className='flex min-h-full flex-col justify-center space-y-3'>
+                  {/* Premium Header */}
                   <div className='space-y-2 text-center'>
+                    {/* Logo premium avec glow */}
+                    <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 shadow-lg shadow-blue-500/30'>
+                      <Calendar className='h-6 w-6 text-white' />
+                      <div className='absolute inset-0 rounded-3xl bg-gradient-to-br from-white/20 to-transparent' />
+                    </div>
+
+                    {/* Toggle Premium avec animation fluide */}
                     {!showForgotPassword && (
-                      <div className='flex items-center justify-center space-x-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800'>
-                        <button
-                          type='button'
-                          onClick={() => {
-                            setIsRegisterMode(false);
-                            setError(null);
-                            setSuccess(null);
-                          }}
-                          className={`rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                            !isRegisterMode
-                              ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
-                              : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                          }`}
-                        >
-                          Connexion
-                        </button>
-                        <button
-                          type='button'
-                          onClick={() => {
-                            setIsRegisterMode(true);
-                            setError(null);
-                            setSuccess(null);
-                          }}
-                          className={`rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                            isRegisterMode
-                              ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
-                              : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                          }`}
-                        >
-                          S&apos;inscrire
-                        </button>
+                      <div className='relative mx-auto w-fit'>
+                        <div className='flex rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100 p-1.5 shadow-inner dark:from-slate-800 dark:to-slate-700'>
+                          <button
+                            type='button'
+                            onClick={() => {
+                              setIsRegisterMode(false);
+                              setError(null);
+                              setSuccess(null);
+                            }}
+                            className={`relative rounded-xl px-8 py-4 text-sm font-semibold transition-all duration-500 ${
+                              !isRegisterMode
+                                ? 'scale-105 bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-xl shadow-blue-500/30'
+                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                            }`}
+                          >
+                            <span className='relative z-10'>Connexion</span>
+                            {!isRegisterMode && (
+                              <div className='absolute inset-0 animate-pulse rounded-xl bg-white/20' />
+                            )}
+                          </button>
+                          <button
+                            type='button'
+                            onClick={() => {
+                              setIsRegisterMode(true);
+                              setError(null);
+                              setSuccess(null);
+                            }}
+                            className={`relative rounded-xl px-8 py-4 text-sm font-semibold transition-all duration-500 ${
+                              isRegisterMode
+                                ? 'scale-105 bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-xl shadow-purple-500/30'
+                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                            }`}
+                          >
+                            <span className='relative z-10'>
+                              S&apos;inscrire
+                            </span>
+                            {isRegisterMode && (
+                              <div className='absolute inset-0 animate-pulse rounded-xl bg-white/20' />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     )}
-                    <h2 className='text-2xl font-bold text-slate-900 dark:text-white'>
-                      {showForgotPassword
-                        ? 'Mot de passe oublié'
-                        : isRegisterMode
-                          ? 'Créer votre compte'
-                          : 'Connexion'}
-                    </h2>
-                    <p className='text-slate-600 dark:text-slate-400'>
-                      {showForgotPassword
-                        ? 'Entrez votre email pour réinitialiser votre mot de passe'
-                        : isRegisterMode
-                          ? 'Créez votre compte et votre entreprise'
-                          : 'Accédez à votre espace Planora'}
-                    </p>
+
+                    {/* Titre premium */}
+                    <div className='space-y-1'>
+                      <h2 className='bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 bg-clip-text text-xl font-bold text-transparent dark:from-white dark:via-slate-100 dark:to-slate-300'>
+                        {showForgotPassword
+                          ? 'Récupération'
+                          : isRegisterMode
+                            ? 'Créer votre compte'
+                            : 'Bienvenue'}
+                      </h2>
+                      <p className='text-slate-500 dark:text-slate-400'>
+                        {showForgotPassword
+                          ? "Récupérez l'accès à votre compte"
+                          : isRegisterMode
+                            ? 'Rejoignez les leaders qui optimisent leurs équipes'
+                            : 'Connectez-vous à votre espace premium'}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Login/Register Form */}
+                  {/* FORMULAIRE PREMIUM */}
                   {!showForgotPassword ? (
                     <form
                       action={isRegisterMode ? handleRegister : handleLogin}
-                      className='space-y-4'
+                      className='space-y-3'
                     >
-                      {/* Register fields */}
+                      {/* Champs d'inscription */}
                       {isRegisterMode && (
-                        <div className='space-y-4'>
-                          {/* Company Information */}
-                          <div className='space-y-3'>
-                            <h3 className='text-sm font-semibold text-slate-700 dark:text-slate-300'>
-                              Informations entreprise
-                            </h3>
+                        <div className='space-y-3'>
+                          {/* Section Entreprise */}
+                          <div className='space-y-2'>
+                            <div className='flex items-center space-x-2 pb-1'>
+                              <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20'>
+                                <Building2 className='h-4 w-4 text-blue-600 dark:text-blue-400' />
+                              </div>
+                              <h3 className='text-base font-semibold text-slate-800 dark:text-slate-200'>
+                                Votre entreprise
+                              </h3>
+                            </div>
 
-                            <div className='space-y-2'>
-                              <div className='relative'>
+                            {/* Nom entreprise */}
+                            <div className='space-y-1'>
+                              <div className='group relative'>
+                                <div className='absolute inset-y-0 left-4 flex items-center'>
+                                  <Building2 className='h-5 w-5 text-slate-400 transition-colors group-focus-within:text-blue-500' />
+                                </div>
                                 <Input
                                   type='text'
                                   placeholder='Nom de votre entreprise'
@@ -546,67 +586,84 @@ export default function HomePage() {
                                   onBlur={() =>
                                     validateCompanyName(companyName)
                                   }
-                                  className={`h-12 border-slate-200/50 bg-white/50 pr-10 transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
+                                  className={`h-12 rounded-2xl border-0 bg-slate-50/80 pr-12 pl-12 text-base font-medium backdrop-blur-sm transition-all duration-300 focus:bg-white focus:shadow-lg focus:ring-2 focus:ring-offset-0 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
                                     companyNameError
-                                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                                      : ''
-                                  } ${
-                                    companyName && !companyNameError
-                                      ? 'border-green-500'
-                                      : ''
+                                      ? 'ring-2 ring-red-400/50 focus:ring-red-500/50'
+                                      : companyName && !companyNameError
+                                        ? 'bg-green-50/50 ring-2 ring-green-400/50'
+                                        : 'focus:ring-blue-500/50'
                                   }`}
                                 />
                                 {companyName && !companyNameError && (
-                                  <div className='absolute top-1/2 right-3 -translate-y-1/2'>
-                                    <Check className='h-4 w-4 text-green-500' />
+                                  <div className='absolute inset-y-0 right-4 flex items-center'>
+                                    <div className='flex h-6 w-6 items-center justify-center rounded-full bg-green-500'>
+                                      <Check className='h-3 w-3 text-white' />
+                                    </div>
                                   </div>
                                 )}
                               </div>
                               {companyNameError && (
-                                <p className='animate-in slide-in-from-top-2 text-xs text-red-500 duration-300'>
+                                <p className='animate-in slide-in-from-top-2 px-1 text-sm font-medium text-red-500 duration-300'>
                                   {companyNameError}
                                 </p>
                               )}
                             </div>
 
-                            <div className='grid grid-cols-2 gap-3'>
+                            {/* Pays et Secteur */}
+                            <div className='grid grid-cols-2 gap-4'>
+                              {/* Pays */}
                               <div className='space-y-2'>
-                                <Select
-                                  value={country}
-                                  onValueChange={value => {
-                                    setCountry(value);
-                                    validateCountry(value);
-                                  }}
-                                >
-                                  <SelectTrigger
-                                    className={`h-12 border-slate-200/50 bg-white/50 transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
-                                      countryError ? 'border-red-500' : ''
-                                    } ${
-                                      country && !countryError
-                                        ? 'border-green-500'
-                                        : ''
-                                    }`}
+                                <div className='group relative'>
+                                  <div className='absolute inset-y-0 left-4 z-10 flex items-center'>
+                                    <Globe className='h-5 w-5 text-slate-400 transition-colors group-focus-within:text-blue-500' />
+                                  </div>
+                                  <Select
+                                    value={country}
+                                    onValueChange={value => {
+                                      setCountry(value);
+                                      validateCountry(value);
+                                    }}
                                   >
-                                    <SelectValue placeholder='Pays' />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value='France'>
-                                      France
-                                    </SelectItem>
-                                    <SelectItem value='Luxembourg'>
-                                      Luxembourg
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
+                                    <SelectTrigger
+                                      className={`h-12 rounded-2xl border-0 bg-slate-50/80 pr-4 pl-12 text-base font-medium backdrop-blur-sm transition-all duration-300 focus:bg-white focus:shadow-lg focus:ring-2 focus:ring-offset-0 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
+                                        countryError
+                                          ? 'ring-2 ring-red-400/50'
+                                          : country && !countryError
+                                            ? 'bg-green-50/50 ring-2 ring-green-400/50'
+                                            : 'focus:ring-blue-500/50'
+                                      }`}
+                                    >
+                                      <SelectValue placeholder='Pays' />
+                                    </SelectTrigger>
+                                    <SelectContent className='rounded-xl border-0 bg-white/95 shadow-2xl backdrop-blur-xl'>
+                                      <SelectItem
+                                        value='France'
+                                        className='rounded-lg'
+                                      >
+                                        France
+                                      </SelectItem>
+                                      <SelectItem
+                                        value='Luxembourg'
+                                        className='rounded-lg'
+                                      >
+                                        Luxembourg
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
                                 {countryError && (
-                                  <p className='animate-in slide-in-from-top-2 text-xs text-red-500 duration-300'>
+                                  <p className='animate-in slide-in-from-top-2 px-1 text-sm font-medium text-red-500 duration-300'>
                                     {countryError}
                                   </p>
                                 )}
                               </div>
 
+                              {/* Secteur */}
                               <div className='space-y-2'>
-                                <div className='relative'>
+                                <div className='group relative'>
+                                  <div className='absolute inset-y-0 left-4 flex items-center'>
+                                    <Briefcase className='h-5 w-5 text-slate-400 transition-colors group-focus-within:text-blue-500' />
+                                  </div>
                                   <Input
                                     type='text'
                                     placeholder='Secteur'
@@ -618,24 +675,24 @@ export default function HomePage() {
                                       }
                                     }}
                                     onBlur={() => validateSector(sector)}
-                                    className={`h-12 border-slate-200/50 bg-white/50 pr-10 transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
+                                    className={`h-12 rounded-2xl border-0 bg-slate-50/80 pr-12 pl-12 text-base font-medium backdrop-blur-sm transition-all duration-300 focus:bg-white focus:shadow-lg focus:ring-2 focus:ring-offset-0 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
                                       sectorError
-                                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                                        : ''
-                                    } ${
-                                      sector && !sectorError
-                                        ? 'border-green-500'
-                                        : ''
+                                        ? 'ring-2 ring-red-400/50 focus:ring-red-500/50'
+                                        : sector && !sectorError
+                                          ? 'bg-green-50/50 ring-2 ring-green-400/50'
+                                          : 'focus:ring-blue-500/50'
                                     }`}
                                   />
                                   {sector && !sectorError && (
-                                    <div className='absolute top-1/2 right-3 -translate-y-1/2'>
-                                      <Check className='h-4 w-4 text-green-500' />
+                                    <div className='absolute inset-y-0 right-4 flex items-center'>
+                                      <div className='flex h-6 w-6 items-center justify-center rounded-full bg-green-500'>
+                                        <Check className='h-3 w-3 text-white' />
+                                      </div>
                                     </div>
                                   )}
                                 </div>
                                 {sectorError && (
-                                  <p className='animate-in slide-in-from-top-2 text-xs text-red-500 duration-300'>
+                                  <p className='animate-in slide-in-from-top-2 px-1 text-sm font-medium text-red-500 duration-300'>
                                     {sectorError}
                                   </p>
                                 )}
@@ -643,15 +700,24 @@ export default function HomePage() {
                             </div>
                           </div>
 
-                          {/* Personal Information */}
-                          <div className='space-y-3'>
-                            <h3 className='text-sm font-semibold text-slate-700 dark:text-slate-300'>
-                              Informations personnelles
-                            </h3>
+                          {/* Section Personnelle */}
+                          <div className='space-y-1'>
+                            <div className='flex items-center space-x-2 pb-1'>
+                              <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20'>
+                                <User className='h-5 w-5 text-purple-600 dark:text-purple-400' />
+                              </div>
+                              <h3 className='text-lg font-semibold text-slate-800 dark:text-slate-200'>
+                                Vos informations
+                              </h3>
+                            </div>
 
-                            <div className='grid grid-cols-2 gap-3'>
+                            {/* Prénom et Nom */}
+                            <div className='grid grid-cols-2 gap-4'>
                               <div className='space-y-2'>
-                                <div className='relative'>
+                                <div className='group relative'>
+                                  <div className='absolute inset-y-0 left-4 flex items-center'>
+                                    <User className='h-5 w-5 text-slate-400 transition-colors group-focus-within:text-purple-500' />
+                                  </div>
                                   <Input
                                     type='text'
                                     placeholder='Prénom'
@@ -663,31 +729,34 @@ export default function HomePage() {
                                       }
                                     }}
                                     onBlur={() => validateFirstName(firstName)}
-                                    className={`h-12 border-slate-200/50 bg-white/50 pr-10 transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
+                                    className={`h-12 rounded-2xl border-0 bg-slate-50/80 pr-12 pl-12 text-base font-medium backdrop-blur-sm transition-all duration-300 focus:bg-white focus:shadow-lg focus:ring-2 focus:ring-offset-0 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
                                       firstNameError
-                                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                                        : ''
-                                    } ${
-                                      firstName && !firstNameError
-                                        ? 'border-green-500'
-                                        : ''
+                                        ? 'ring-2 ring-red-400/50 focus:ring-red-500/50'
+                                        : firstName && !firstNameError
+                                          ? 'bg-green-50/50 ring-2 ring-green-400/50'
+                                          : 'focus:ring-purple-500/50'
                                     }`}
                                   />
                                   {firstName && !firstNameError && (
-                                    <div className='absolute top-1/2 right-3 -translate-y-1/2'>
-                                      <Check className='h-4 w-4 text-green-500' />
+                                    <div className='absolute inset-y-0 right-4 flex items-center'>
+                                      <div className='flex h-6 w-6 items-center justify-center rounded-full bg-green-500'>
+                                        <Check className='h-3 w-3 text-white' />
+                                      </div>
                                     </div>
                                   )}
                                 </div>
                                 {firstNameError && (
-                                  <p className='animate-in slide-in-from-top-2 text-xs text-red-500 duration-300'>
+                                  <p className='animate-in slide-in-from-top-2 px-1 text-sm font-medium text-red-500 duration-300'>
                                     {firstNameError}
                                   </p>
                                 )}
                               </div>
 
                               <div className='space-y-2'>
-                                <div className='relative'>
+                                <div className='group relative'>
+                                  <div className='absolute inset-y-0 left-4 flex items-center'>
+                                    <User className='h-5 w-5 text-slate-400 transition-colors group-focus-within:text-purple-500' />
+                                  </div>
                                   <Input
                                     type='text'
                                     placeholder='Nom'
@@ -699,24 +768,24 @@ export default function HomePage() {
                                       }
                                     }}
                                     onBlur={() => validateLastName(lastName)}
-                                    className={`h-12 border-slate-200/50 bg-white/50 pr-10 transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
+                                    className={`h-12 rounded-2xl border-0 bg-slate-50/80 pr-12 pl-12 text-base font-medium backdrop-blur-sm transition-all duration-300 focus:bg-white focus:shadow-lg focus:ring-2 focus:ring-offset-0 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
                                       lastNameError
-                                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                                        : ''
-                                    } ${
-                                      lastName && !lastNameError
-                                        ? 'border-green-500'
-                                        : ''
+                                        ? 'ring-2 ring-red-400/50 focus:ring-red-500/50'
+                                        : lastName && !lastNameError
+                                          ? 'bg-green-50/50 ring-2 ring-green-400/50'
+                                          : 'focus:ring-purple-500/50'
                                     }`}
                                   />
                                   {lastName && !lastNameError && (
-                                    <div className='absolute top-1/2 right-3 -translate-y-1/2'>
-                                      <Check className='h-4 w-4 text-green-500' />
+                                    <div className='absolute inset-y-0 right-4 flex items-center'>
+                                      <div className='flex h-6 w-6 items-center justify-center rounded-full bg-green-500'>
+                                        <Check className='h-3 w-3 text-white' />
+                                      </div>
                                     </div>
                                   )}
                                 </div>
                                 {lastNameError && (
-                                  <p className='animate-in slide-in-from-top-2 text-xs text-red-500 duration-300'>
+                                  <p className='animate-in slide-in-from-top-2 px-1 text-sm font-medium text-red-500 duration-300'>
                                     {lastNameError}
                                   </p>
                                 )}
@@ -726,14 +795,20 @@ export default function HomePage() {
                         </div>
                       )}
 
-                      {/* Common fields */}
-                      <div className='space-y-4'>
-                        <div className='space-y-2'>
-                          <div className='relative'>
+                      {/* Champs communs - Email et Mot de passe */}
+                      <div className='space-y-2'>
+                        {/* Email */}
+                        <div className='space-y-1'>
+                          <div className='group relative'>
+                            <div className='absolute inset-y-0 left-4 flex items-center'>
+                              <Mail
+                                className={`h-5 w-5 text-slate-400 group-focus-within:${isRegisterMode ? 'text-purple-500' : 'text-blue-500'} transition-colors`}
+                              />
+                            </div>
                             <Input
                               type='email'
                               name='email'
-                              placeholder='Votre email'
+                              placeholder='votre.email@entreprise.com'
                               value={email}
                               onChange={e => {
                                 setEmail(e.target.value);
@@ -742,35 +817,45 @@ export default function HomePage() {
                                 }
                               }}
                               onBlur={() => validateEmail(email)}
-                              className={`h-12 border-slate-200/50 bg-white/50 pr-10 transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
+                              className={`h-12 rounded-2xl border-0 bg-slate-50/80 pr-12 pl-12 text-base font-medium backdrop-blur-sm transition-all duration-300 focus:bg-white focus:shadow-lg focus:ring-2 focus:ring-offset-0 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
                                 emailError
-                                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                                  : ''
-                              } ${
-                                email && !emailError ? 'border-green-500' : ''
+                                  ? 'ring-2 ring-red-400/50 focus:ring-red-500/50'
+                                  : email && !emailError
+                                    ? 'bg-green-50/50 ring-2 ring-green-400/50'
+                                    : isRegisterMode
+                                      ? 'focus:ring-purple-500/50'
+                                      : 'focus:ring-blue-500/50'
                               }`}
                             />
                             {email && !emailError && (
-                              <div className='absolute top-1/2 right-3 -translate-y-1/2'>
-                                <Check className='h-4 w-4 text-green-500' />
+                              <div className='absolute inset-y-0 right-4 flex items-center'>
+                                <div className='flex h-6 w-6 items-center justify-center rounded-full bg-green-500'>
+                                  <Check className='h-3 w-3 text-white' />
+                                </div>
                               </div>
                             )}
                           </div>
                           {emailError && (
-                            <p className='animate-in slide-in-from-top-2 text-xs text-red-500 duration-300'>
+                            <p className='animate-in slide-in-from-top-2 px-1 text-sm font-medium text-red-500 duration-300'>
                               {emailError}
                             </p>
                           )}
                         </div>
 
-                        <div className='space-y-2'>
-                          <div className='relative'>
+                        {/* Mot de passe */}
+                        <div className='space-y-1'>
+                          <div className='group relative'>
+                            <div className='absolute inset-y-0 left-4 flex items-center'>
+                              <Lock
+                                className={`h-5 w-5 text-slate-400 group-focus-within:${isRegisterMode ? 'text-purple-500' : 'text-blue-500'} transition-colors`}
+                              />
+                            </div>
                             <Input
                               type={showPassword ? 'text' : 'password'}
                               name='password'
                               placeholder={
                                 isRegisterMode
-                                  ? 'Mot de passe (8+ caractères, maj, min, chiffre)'
+                                  ? 'Mot de passe sécurisé (8+ caractères)'
                                   : 'Votre mot de passe'
                               }
                               value={password}
@@ -779,30 +864,31 @@ export default function HomePage() {
                                 if (passwordError && e.target.value) {
                                   validatePassword(e.target.value);
                                 }
-                                // Also validate confirm password in register mode
                                 if (isRegisterMode && confirmPassword) {
                                   validateConfirmPassword(confirmPassword);
                                 }
                               }}
                               onBlur={() => validatePassword(password)}
-                              className={`h-12 border-slate-200/50 bg-white/50 pr-16 transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
+                              className={`h-12 rounded-2xl border-0 bg-slate-50/80 pr-20 pl-12 text-base font-medium backdrop-blur-sm transition-all duration-300 focus:bg-white focus:shadow-lg focus:ring-2 focus:ring-offset-0 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
                                 passwordError
-                                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                                  : ''
-                              } ${
-                                password && !passwordError
-                                  ? 'border-green-500'
-                                  : ''
+                                  ? 'ring-2 ring-red-400/50 focus:ring-red-500/50'
+                                  : password && !passwordError
+                                    ? 'bg-green-50/50 ring-2 ring-green-400/50'
+                                    : isRegisterMode
+                                      ? 'focus:ring-purple-500/50'
+                                      : 'focus:ring-blue-500/50'
                               }`}
                             />
-                            <div className='absolute top-1/2 right-3 flex -translate-y-1/2 items-center space-x-2'>
+                            <div className='absolute inset-y-0 right-4 flex items-center space-x-2'>
                               {password && !passwordError && (
-                                <Check className='h-4 w-4 text-green-500' />
+                                <div className='flex h-6 w-6 items-center justify-center rounded-full bg-green-500'>
+                                  <Check className='h-3 w-3 text-white' />
+                                </div>
                               )}
                               <button
                                 type='button'
                                 onClick={() => setShowPassword(!showPassword)}
-                                className='text-slate-400 transition-colors duration-200 hover:text-slate-600 dark:hover:text-slate-300'
+                                className='rounded-lg p-1.5 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300'
                               >
                                 {showPassword ? (
                                   <EyeOff className='h-4 w-4' />
@@ -813,16 +899,19 @@ export default function HomePage() {
                             </div>
                           </div>
                           {passwordError && (
-                            <p className='animate-in slide-in-from-top-2 text-xs text-red-500 duration-300'>
+                            <p className='animate-in slide-in-from-top-2 px-1 text-sm font-medium text-red-500 duration-300'>
                               {passwordError}
                             </p>
                           )}
                         </div>
 
-                        {/* Confirm Password for Register */}
+                        {/* Confirmation mot de passe pour inscription */}
                         {isRegisterMode && (
-                          <div className='space-y-2'>
-                            <div className='relative'>
+                          <div className='space-y-1'>
+                            <div className='group relative'>
+                              <div className='absolute inset-y-0 left-4 flex items-center'>
+                                <Lock className='h-5 w-5 text-slate-400 transition-colors group-focus-within:text-purple-500' />
+                              </div>
                               <Input
                                 type={showPassword ? 'text' : 'password'}
                                 placeholder='Confirmer le mot de passe'
@@ -836,24 +925,24 @@ export default function HomePage() {
                                 onBlur={() =>
                                   validateConfirmPassword(confirmPassword)
                                 }
-                                className={`h-12 border-slate-200/50 bg-white/50 pr-10 transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
+                                className={`h-12 rounded-2xl border-0 bg-slate-50/80 pr-12 pl-12 text-base font-medium backdrop-blur-sm transition-all duration-300 focus:bg-white focus:shadow-lg focus:ring-2 focus:ring-offset-0 dark:bg-slate-800/50 dark:focus:bg-slate-800 ${
                                   confirmPasswordError
-                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                                    : ''
-                                } ${
-                                  confirmPassword && !confirmPasswordError
-                                    ? 'border-green-500'
-                                    : ''
+                                    ? 'ring-2 ring-red-400/50 focus:ring-red-500/50'
+                                    : confirmPassword && !confirmPasswordError
+                                      ? 'bg-green-50/50 ring-2 ring-green-400/50'
+                                      : 'focus:ring-purple-500/50'
                                 }`}
                               />
                               {confirmPassword && !confirmPasswordError && (
-                                <div className='absolute top-1/2 right-3 -translate-y-1/2'>
-                                  <Check className='h-4 w-4 text-green-500' />
+                                <div className='absolute inset-y-0 right-4 flex items-center'>
+                                  <div className='flex h-6 w-6 items-center justify-center rounded-full bg-green-500'>
+                                    <Check className='h-3 w-3 text-white' />
+                                  </div>
                                 </div>
                               )}
                             </div>
                             {confirmPasswordError && (
-                              <p className='animate-in slide-in-from-top-2 text-xs text-red-500 duration-300'>
+                              <p className='animate-in slide-in-from-top-2 px-1 text-sm font-medium text-red-500 duration-300'>
                                 {confirmPasswordError}
                               </p>
                             )}
@@ -861,22 +950,30 @@ export default function HomePage() {
                         )}
                       </div>
 
+                      {/* Messages d'erreur et succès premium */}
                       {error && (
-                        <div className='rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20'>
-                          <p className='text-sm text-red-600 dark:text-red-400'>
-                            {error}
-                          </p>
+                        <div className='animate-in slide-in-from-top-2 rounded-xl border-0 bg-gradient-to-r from-red-50 via-rose-50 to-red-50 p-3 ring-1 ring-red-200/50 duration-300 dark:from-red-900/20 dark:via-rose-900/20 dark:to-red-900/20 dark:ring-red-800/30'>
+                          <div className='flex items-center space-x-3'>
+                            <div className='h-3 w-3 animate-pulse rounded-full bg-red-500' />
+                            <p className='text-sm font-semibold text-red-700 dark:text-red-300'>
+                              {error}
+                            </p>
+                          </div>
                         </div>
                       )}
 
                       {success && (
-                        <div className='rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-900/20'>
-                          <p className='text-sm text-green-600 dark:text-green-400'>
-                            {success}
-                          </p>
+                        <div className='animate-in slide-in-from-top-2 rounded-xl border-0 bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 p-3 ring-1 ring-green-200/50 duration-300 dark:from-green-900/20 dark:via-emerald-900/20 dark:to-green-900/20 dark:ring-green-800/30'>
+                          <div className='flex items-center space-x-3'>
+                            <div className='h-3 w-3 animate-pulse rounded-full bg-green-500' />
+                            <p className='text-sm font-semibold text-green-700 dark:text-green-300'>
+                              {success}
+                            </p>
+                          </div>
                         </div>
                       )}
 
+                      {/* Bouton Premium */}
                       <Button
                         type='submit'
                         disabled={
@@ -899,64 +996,107 @@ export default function HomePage() {
                               !country ||
                               !sector))
                         }
-                        className='h-12 w-full rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:from-blue-700 hover:to-purple-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100'
+                        className={`group hover:shadow-3xl relative h-12 w-full rounded-2xl font-bold text-white shadow-2xl transition-all duration-500 hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 ${
+                          isRegisterMode
+                            ? 'bg-gradient-to-r from-purple-600 via-purple-500 to-purple-600 shadow-purple-500/30 hover:from-purple-700 hover:via-purple-600 hover:to-purple-700 hover:shadow-purple-500/40'
+                            : 'bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 shadow-blue-500/30 hover:from-blue-700 hover:via-blue-600 hover:to-blue-700 hover:shadow-blue-500/40'
+                        }`}
                       >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                            {isRegisterMode ? 'Création...' : 'Connexion...'}
-                          </>
-                        ) : (
-                          <div className='flex items-center justify-center'>
-                            {isRegisterMode
-                              ? 'Créer mon compte'
-                              : 'Se connecter'}
-                            <ChevronRight className='ml-1 h-4 w-4 transition-transform group-hover:translate-x-1' />
-                          </div>
-                        )}
+                        <div className='absolute inset-0 rounded-2xl bg-gradient-to-r from-white/20 via-white/10 to-white/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100' />
+                        <div className='relative z-10 flex items-center justify-center space-x-3'>
+                          {isLoading ? (
+                            <>
+                              <Loader2 className='h-6 w-6 animate-spin' />
+                              <span className='text-lg'>
+                                {isRegisterMode
+                                  ? 'Création en cours...'
+                                  : 'Connexion...'}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              {isRegisterMode ? (
+                                <>
+                                  <Sparkles className='h-6 w-6 transition-transform group-hover:scale-110' />
+                                  <span className='text-lg'>
+                                    Créer mon compte
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className='text-lg'>Se connecter</span>
+                                  <ChevronRight className='h-6 w-6 transition-transform group-hover:translate-x-1 group-hover:scale-110' />
+                                </>
+                              )}
+                            </>
+                          )}
+                        </div>
                       </Button>
                     </form>
                   ) : (
-                    /* Forgot Password Form */
-                    <form className='space-y-4'>
-                      <Input
-                        type='email'
-                        placeholder='Votre email'
-                        className='h-12 border-slate-200/50 bg-white/50 transition-colors focus:bg-white dark:border-slate-700/50 dark:bg-slate-800/50 dark:focus:bg-slate-800'
-                        required
-                      />
+                    /* Formulaire mot de passe oublié */
+                    <form className='space-y-6'>
+                      <div className='space-y-2'>
+                        <div className='group relative'>
+                          <div className='absolute inset-y-0 left-4 flex items-center'>
+                            <Mail className='h-5 w-5 text-slate-400 transition-colors group-focus-within:text-blue-500' />
+                          </div>
+                          <Input
+                            type='email'
+                            placeholder='Votre email'
+                            className='h-12 rounded-2xl border-0 bg-slate-50/80 pr-4 pl-12 text-base font-medium backdrop-blur-sm transition-all duration-300 focus:bg-white focus:shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-0 dark:bg-slate-800/50 dark:focus:bg-slate-800'
+                            required
+                          />
+                        </div>
+                      </div>
 
                       <Button
                         type='submit'
-                        className='h-12 w-full rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 font-semibold text-white shadow-lg transition-all duration-300 hover:from-blue-700 hover:to-purple-700 hover:shadow-xl'
+                        className='group hover:shadow-3xl relative h-12 w-full rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 font-bold text-white shadow-2xl shadow-blue-500/30 transition-all duration-500 hover:scale-[1.02] hover:from-blue-700 hover:to-blue-600 hover:shadow-blue-500/40'
                       >
-                        Envoyer le lien de réinitialisation
+                        <div className='absolute inset-0 rounded-2xl bg-gradient-to-r from-white/20 to-white/10 opacity-0 transition-opacity duration-500 group-hover:opacity-100' />
+                        <span className='relative z-10 text-lg'>
+                          Envoyer le lien
+                        </span>
                       </Button>
                     </form>
                   )}
 
-                  {/* Footer Links */}
-                  <div className='space-y-4 text-center'>
+                  {/* Footer Premium */}
+                  <div className='space-y-2 text-center'>
                     {!isRegisterMode && (
                       <button
                         onClick={() =>
                           setShowForgotPassword(!showForgotPassword)
                         }
-                        className='text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+                        className='group inline-flex items-center space-x-2 text-sm font-medium text-slate-500 transition-all duration-300 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
                       >
-                        {showForgotPassword
-                          ? 'Retour à la connexion'
-                          : 'Mot de passe oublié ?'}
+                        <span>
+                          {showForgotPassword
+                            ? 'Retour à la connexion'
+                            : 'Mot de passe oublié ?'}
+                        </span>
+                        <ChevronRight className='h-4 w-4 transition-transform group-hover:translate-x-1' />
                       </button>
                     )}
+
+                    {/* Séparateur et branding premium */}
+                    <div className='space-y-1'>
+                      <div className='h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent dark:via-slate-700' />
+                      <div className='flex items-center justify-center space-x-2 text-xs text-slate-400 dark:text-slate-500'>
+                        <Sparkles className='h-3 w-3' />
+                        <span>Planora Premium - Optimisé par l&apos;IA</span>
+                        <Sparkles className='h-3 w-3' />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Mobile Features - Only visible on small screens */}
-            {!isRegisterMode && (
-              <div className='mt-8 space-y-4 lg:hidden'>
+            {/* Features mobile masquées en mode inscription pour garder le focus */}
+            {false && !isRegisterMode && (
+              <div className='mt-4 space-y-3 lg:hidden'>
                 <h3 className='text-center text-lg font-semibold text-slate-900 dark:text-white'>
                   Pourquoi choisir Planora ?
                 </h3>
@@ -964,12 +1104,12 @@ export default function HomePage() {
                   {benefits.map((benefit, index) => (
                     <div
                       key={index}
-                      className='flex items-center space-x-3 rounded-lg border border-white/20 bg-white/60 p-3 backdrop-blur-sm dark:bg-slate-800/60'
+                      className='flex items-center space-x-3 rounded-xl border border-white/20 bg-white/60 p-4 backdrop-blur-sm dark:bg-slate-800/60'
                     >
-                      <div className='flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30'>
+                      <div className='flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30'>
                         <Check className='h-3 w-3 text-green-600' />
                       </div>
-                      <span className='text-sm text-slate-700 dark:text-slate-300'>
+                      <span className='text-sm font-medium text-slate-700 dark:text-slate-300'>
                         {benefit}
                       </span>
                     </div>
