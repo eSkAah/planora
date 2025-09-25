@@ -1,18 +1,16 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle, Eye, EyeOff } from 'lucide-react';
-import { useEffect, useMemo, useState, useTransition } from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
+import { type FieldPath, type SubmitHandler, useForm } from 'react-hook-form';
 
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  Button,
-  Label,
   Form,
   FormControl,
   FormField,
@@ -25,228 +23,327 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  useToast,
 } from '@/components/ui';
-import { signIn, createAccount } from '@/lib/auth/actions';
+import { createAccount } from '@/lib/auth/actions';
 import {
   accountCreationSchema,
   type AccountCreationInput,
 } from '@/lib/validations';
 
-type Mode = 'login' | 'register';
+type AuthDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onRegistered?: (email: string) => void;
+};
+
+const defaultValues: AccountCreationInput = {
+  company: { name: '', country: '', sector: '' },
+  user: {
+    email: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    role: 'ADMIN',
+  },
+};
+
+type AccountFieldPath = FieldPath<AccountCreationInput>;
 
 export default function AuthDialog({
   open,
   onOpenChange,
-  initialMode = 'login',
-}: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  initialMode?: Mode;
-}) {
-  const [mode, setMode] = useState<Mode>(initialMode);
-  const [direction, setDirection] = useState<1 | -1 | 0>(0);
-  const [isPendingLogin, startLogin] = useTransition();
-  const [loginError, setLoginError] = useState<string>('');
-  const [result, setResult] = useState<{
-    success: boolean;
-    error?: string;
-    fieldErrors?: Record<string, string[]>;
-  } | null>(null);
-  const [prefillEmail, setPrefillEmail] = useState<string>('');
-
-  useEffect(() => {
-    if (open) {
-      setMode(initialMode);
-      setDirection(0);
-    }
-  }, [initialMode, open]);
-
-  const formTransitions = useMemo(
-    () => ({ duration: 0.35, ease: [0.22, 1, 0.36, 1] as const }),
-    []
-  );
+  onRegistered,
+}: AuthDialogProps) {
+  const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<AccountCreationInput>({
     resolver: zodResolver(accountCreationSchema),
+    defaultValues,
     mode: 'onChange',
-    defaultValues: {
-      company: { name: '', country: '', sector: '' },
-      user: {
-        email: '',
-        password: '',
-        confirmPassword: '',
-        firstName: '',
-        lastName: '',
-        role: 'ADMIN',
-      },
-    },
   });
 
-  const onRegisterSubmit: SubmitHandler<AccountCreationInput> = async data => {
-    setResult(null);
+  const buildFormData = (data: AccountCreationInput) => {
+    const formData = new FormData();
+    formData.set('company.name', data.company.name);
+    formData.set('company.country', data.company.country);
+    formData.set('company.sector', data.company.sector);
+    formData.set('user.email', data.user.email);
+    formData.set('user.password', data.user.password);
+    formData.set('user.confirmPassword', data.user.confirmPassword);
+    formData.set('user.firstName', data.user.firstName);
+    formData.set('user.lastName', data.user.lastName);
+    formData.set('user.role', data.user.role);
+    return formData;
+  };
 
-    const fd = new FormData();
-    fd.set('company.name', data.company.name);
-    fd.set('company.country', data.company.country);
-    fd.set('company.sector', data.company.sector);
-    fd.set('user.email', data.user.email);
-    fd.set('user.password', data.user.password);
-    fd.set('user.confirmPassword', data.user.confirmPassword);
-    fd.set('user.firstName', data.user.firstName);
-    fd.set('user.lastName', data.user.lastName);
-    fd.set('user.role', data.user.role);
+  const onSubmit: SubmitHandler<AccountCreationInput> = async data => {
+    const formData = buildFormData(data);
 
     try {
-      const response = await createAccount(fd);
-      setResult(response);
+      const response = await createAccount(formData);
 
       if (!response.success) {
+        if (response.fieldErrors) {
+          Object.entries(response.fieldErrors).forEach(([field, messages]) => {
+            if (messages && messages[0]) {
+              form.setError(field as AccountFieldPath, {
+                message: messages[0],
+              });
+            }
+          });
+        }
+
+        toast({
+          variant: 'destructive',
+          title: 'Création impossible',
+          description:
+            response.error ?? 'Vérifiez les informations saisies et réessayez.',
+        });
         return;
       }
 
-      setPrefillEmail(data.user.email);
-      form.reset();
+      toast({
+        variant: 'success',
+        title: 'Compte créé',
+        description: 'Vous pouvez maintenant vous connecter.',
+      });
+
+      onRegistered?.(data.user.email);
+      form.reset(defaultValues);
       setShowPassword(false);
       setShowConfirmPassword(false);
-      setDirection(-1);
-      setMode('login');
+      onOpenChange(false);
     } catch {
-      setResult({
-        success: false,
-        error: 'Une erreur inattendue est survenue',
+      toast({
+        variant: 'destructive',
+        title: 'Erreur inattendue',
+        description: 'Réessayez dans quelques instants.',
       });
     }
   };
 
-  async function handleLogin(formData: FormData) {
-    setLoginError('');
-    startLogin(async () => {
-      const res = await signIn(formData);
-      if (!res.success) {
-        setLoginError(res.error || 'Erreur de connexion');
-      } else {
-        window.location.href = '/dashboard';
-      }
-    });
-  }
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const handleOpenChange = (value: boolean) => {
+    onOpenChange(value);
+    if (!value) {
+      form.reset(defaultValues);
+      form.clearErrors();
+      setShowPassword(false);
+      setShowConfirmPassword(false);
+    }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='w-full max-w-md'>
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'login' ? 'Connexion' : 'Créer un compte'}
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className='w-full max-w-xl rounded-[28px] border border-white/10 bg-[#0F1F33] p-8 text-white shadow-[0_30px_90px_-40px_rgba(3,13,28,0.85)] backdrop-blur-xl'>
+        <DialogHeader className='space-y-1 text-left'>
+          <DialogTitle className='text-3xl font-semibold text-white'>
+            Créer un compte
           </DialogTitle>
         </DialogHeader>
 
-        {/* Mode Toggle */}
-        <div className='mb-6 flex'>
-          <div className='bg-muted relative w-full rounded-2xl p-1'>
-            {/* Animated background slider */}
-            <div
-              className={`bg-secondary absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-xl shadow-sm transition-transform duration-300 ease-out ${
-                mode === 'register' ? 'translate-x-full' : 'translate-x-0'
-              }`}
-            />
-            <button
-              type='button'
-              onClick={() => {
-                if (mode !== 'login') {
-                  setDirection(-1);
-                  setMode('login');
-                }
-              }}
-              className={`relative z-10 w-1/2 rounded-xl py-3 text-sm font-medium transition-colors duration-300 ${
-                mode === 'login'
-                  ? 'text-secondary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Connexion
-            </button>
-            <button
-              type='button'
-              onClick={() => {
-                if (mode !== 'register') {
-                  setDirection(1);
-                  setMode('register');
-                }
-              }}
-              className={`relative z-10 w-1/2 rounded-xl py-3 text-sm font-medium transition-colors duration-300 ${
-                mode === 'register'
-                  ? 'text-secondary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Inscription
-            </button>
-          </div>
-        </div>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='mt-6 grid gap-6'
+          >
+            <section className='space-y-4'>
+              <p className='text-xs font-semibold tracking-[0.32em] text-white/40 uppercase'>
+                Entreprise
+              </p>
 
-        {/* Forms Container with smooth transition */}
-        <div className='relative min-h-[440px]'>
-          <AnimatePresence mode='wait' initial={false} custom={direction}>
-            {mode === 'login' ? (
-              <motion.div
-                key='login'
-                custom={direction}
-                initial={{
-                  opacity: 0,
-                  x: direction === 0 ? 0 : 24 * direction,
-                  scale: 0.98,
-                }}
-                animate={{
-                  opacity: 1,
-                  x: 0,
-                  scale: 1,
-                  transition: formTransitions,
-                }}
-                exit={{
-                  opacity: 0,
-                  x: direction === 0 ? 0 : -24 * direction,
-                  scale: 0.98,
-                  transition: formTransitions,
-                }}
-                className='space-y-4'
-              >
-                <form action={handleLogin} className='space-y-4'>
-                  {loginError && (
-                    <div className='border-destructive/20 bg-destructive/5 text-destructive rounded-lg border p-3 text-sm'>
-                      {loginError}
-                    </div>
-                  )}
-
-                  <div className='space-y-4'>
-                    <div>
-                      <Label htmlFor='email'>Email</Label>
+              <FormField
+                control={form.control}
+                name='company.name'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className='text-white/75'>
+                      Nom de l&apos;entreprise
+                    </FormLabel>
+                    <FormControl>
                       <Input
-                        id='email'
-                        type='email'
-                        name='email'
-                        placeholder='votre@email.com'
-                        required
-                        defaultValue={prefillEmail}
+                        placeholder='Ex. Planora SAS'
+                        className='h-11 rounded-2xl border-white/15 bg-white/10 text-white placeholder:text-white/35 focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'
+                        {...field}
                       />
-                    </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                    <div>
-                      <Label htmlFor='password'>Mot de passe</Label>
-                      <div className='relative'>
+              <div className='grid gap-4 md:grid-cols-2'>
+                <FormField
+                  control={form.control}
+                  name='company.country'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className='text-white/75'>Pays</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className='h-11 rounded-2xl border-white/15 bg-white/10 text-white focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'>
+                            <SelectValue placeholder='Sélectionner' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value='France'>France</SelectItem>
+                          <SelectItem value='Luxembourg'>Luxembourg</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='company.sector'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className='text-white/75'>Secteur</FormLabel>
+                      <FormControl>
                         <Input
-                          id='password'
-                          type={showPassword ? 'text' : 'password'}
-                          name='password'
-                          placeholder='Votre mot de passe'
-                          required
-                          className='pr-10'
+                          placeholder='Ex. Conseil'
+                          className='h-11 rounded-2xl border-white/15 bg-white/10 text-white placeholder:text-white/35 focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'
+                          {...field}
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </section>
+
+            <section className='space-y-4'>
+              <p className='text-xs font-semibold tracking-[0.32em] text-white/40 uppercase'>
+                Administrateur
+              </p>
+
+              <div className='grid gap-4 md:grid-cols-2'>
+                <FormField
+                  control={form.control}
+                  name='user.firstName'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className='text-white/75'>Prénom</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder='Julie'
+                          className='h-11 rounded-2xl border-white/15 bg-white/10 text-white placeholder:text-white/35 focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='user.lastName'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className='text-white/75'>Nom</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder='Martin'
+                          className='h-11 rounded-2xl border-white/15 bg-white/10 text-white placeholder:text-white/35 focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name='user.email'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className='text-white/75'>
+                      Email professionnel
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type='email'
+                        placeholder='vous@planora.com'
+                        autoComplete='email'
+                        className='h-11 rounded-2xl border-white/15 bg-white/10 text-white placeholder:text-white/35 focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='user.role'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className='text-white/75'>Rôle</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className='h-11 rounded-2xl border-white/15 bg-white/10 text-white focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'>
+                          <SelectValue placeholder='Sélectionner un rôle' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value='ADMIN'>Administrateur</SelectItem>
+                        <SelectItem value='MANAGER'>Manager</SelectItem>
+                        <SelectItem value='EMPLOYEE'>Employé</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </section>
+
+            <section className='space-y-4'>
+              <p className='text-xs font-semibold tracking-[0.32em] text-white/40 uppercase'>
+                Sécurité
+              </p>
+
+              <div className='grid gap-4 md:grid-cols-2'>
+                <FormField
+                  control={form.control}
+                  name='user.password'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className='text-white/75'>
+                        Mot de passe
+                      </FormLabel>
+                      <div className='relative'>
+                        <FormControl>
+                          <Input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder='••••••••'
+                            autoComplete='new-password'
+                            className='h-11 rounded-2xl border-white/15 bg-white/10 pr-12 text-white placeholder:text-white/35 focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'
+                            {...field}
+                          />
+                        </FormControl>
                         <button
                           type='button'
-                          onClick={() => setShowPassword(!showPassword)}
-                          className='absolute top-1/2 right-3 -translate-y-1/2'
+                          onClick={() => setShowPassword(previous => !previous)}
+                          className='absolute top-1/2 right-3 -translate-y-1/2 text-white/60 transition hover:text-white'
+                          aria-label={
+                            showPassword
+                              ? 'Masquer le mot de passe'
+                              : 'Afficher le mot de passe'
+                          }
                         >
                           {showPassword ? (
                             <EyeOff className='h-4 w-4' />
@@ -255,282 +352,65 @@ export default function AuthDialog({
                           )}
                         </button>
                       </div>
-                    </div>
-                  </div>
-
-                  <Button
-                    type='submit'
-                    disabled={isPendingLogin}
-                    className='w-full'
-                  >
-                    {isPendingLogin ? 'Connexion...' : 'Se connecter'}
-                  </Button>
-                </form>
-              </motion.div>
-            ) : (
-              <motion.div
-                key='register'
-                custom={direction}
-                initial={{
-                  opacity: 0,
-                  x: direction === 0 ? 0 : 24 * direction,
-                  scale: 0.98,
-                }}
-                animate={{
-                  opacity: 1,
-                  x: 0,
-                  scale: 1,
-                  transition: formTransitions,
-                }}
-                exit={{
-                  opacity: 0,
-                  x: direction === 0 ? 0 : -24 * direction,
-                  scale: 0.98,
-                  transition: formTransitions,
-                }}
-              >
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onRegisterSubmit)}
-                    className='space-y-4'
-                  >
-                    <FormField
-                      control={form.control}
-                      name='company.name'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nom de l&apos;entreprise</FormLabel>
-                          <FormControl>
-                            <Input placeholder='Ex. Acme SAS' {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className='grid grid-cols-2 gap-4'>
-                      <FormField
-                        control={form.control}
-                        name='company.country'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Pays</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder='Sélectionner' />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value='France'>
-                                  🇫🇷 France
-                                </SelectItem>
-                                <SelectItem value='Luxembourg'>
-                                  🇱🇺 Luxembourg
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name='company.sector'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Secteur</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder='Ex. Restauration'
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className='grid grid-cols-2 gap-4'>
-                      <FormField
-                        control={form.control}
-                        name='user.firstName'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Prénom</FormLabel>
-                            <FormControl>
-                              <Input placeholder='Jean' {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name='user.lastName'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nom</FormLabel>
-                            <FormControl>
-                              <Input placeholder='Dupont' {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name='user.email'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input
-                              type='email'
-                              placeholder='email@exemple.com'
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className='grid grid-cols-2 gap-4'>
-                      <FormField
-                        control={form.control}
-                        name='user.password'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Mot de passe</FormLabel>
-                            <div className='relative'>
-                              <FormControl>
-                                <Input
-                                  type={showPassword ? 'text' : 'password'}
-                                  placeholder='••••••••'
-                                  {...field}
-                                  className='pr-10'
-                                />
-                              </FormControl>
-                              <button
-                                type='button'
-                                onClick={() => setShowPassword(!showPassword)}
-                                className='absolute top-1/2 right-3 -translate-y-1/2'
-                              >
-                                {showPassword ? (
-                                  <EyeOff className='h-4 w-4' />
-                                ) : (
-                                  <Eye className='h-4 w-4' />
-                                )}
-                              </button>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name='user.confirmPassword'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Confirmer</FormLabel>
-                            <div className='relative'>
-                              <FormControl>
-                                <Input
-                                  type={
-                                    showConfirmPassword ? 'text' : 'password'
-                                  }
-                                  placeholder='••••••••'
-                                  {...field}
-                                  className='pr-10'
-                                />
-                              </FormControl>
-                              <button
-                                type='button'
-                                onClick={() =>
-                                  setShowConfirmPassword(!showConfirmPassword)
-                                }
-                                className='absolute top-1/2 right-3 -translate-y-1/2'
-                              >
-                                {showConfirmPassword ? (
-                                  <EyeOff className='h-4 w-4' />
-                                ) : (
-                                  <Eye className='h-4 w-4' />
-                                )}
-                              </button>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name='user.role'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Votre rôle</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value='ADMIN'>👑 Admin</SelectItem>
-                              <SelectItem value='MANAGER'>
-                                📊 Manager
-                              </SelectItem>
-                              <SelectItem value='EMPLOYEE'>
-                                👤 Employé
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {result?.error && (
-                      <div className='border-destructive/20 bg-destructive/5 text-destructive rounded-lg border p-3 text-sm'>
-                        {result.error}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='user.confirmPassword'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className='text-white/75'>
+                        Confirmation
+                      </FormLabel>
+                      <div className='relative'>
+                        <FormControl>
+                          <Input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            placeholder='••••••••'
+                            autoComplete='new-password'
+                            className='h-11 rounded-2xl border-white/15 bg-white/10 pr-12 text-white placeholder:text-white/35 focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'
+                            {...field}
+                          />
+                        </FormControl>
+                        <button
+                          type='button'
+                          onClick={() =>
+                            setShowConfirmPassword(previous => !previous)
+                          }
+                          className='absolute top-1/2 right-3 -translate-y-1/2 text-white/60 transition hover:text-white'
+                          aria-label={
+                            showConfirmPassword
+                              ? 'Masquer la confirmation'
+                              : 'Afficher la confirmation'
+                          }
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className='h-4 w-4' />
+                          ) : (
+                            <Eye className='h-4 w-4' />
+                          )}
+                        </button>
                       </div>
-                    )}
-                    {result?.success && (
-                      <div className='border-accent/50 bg-accent/10 text-accent-foreground rounded-lg border p-3 text-sm'>
-                        <div className='flex items-center gap-2'>
-                          <CheckCircle className='h-4 w-4' />
-                          Compte créé avec succès ! Connectez-vous pour
-                          commencer.
-                        </div>
-                      </div>
-                    )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </section>
 
-                    <Button
-                      type='submit'
-                      className='w-full'
-                      disabled={form.formState.isSubmitting}
-                    >
-                      {form.formState.isSubmitting
-                        ? 'Création...'
-                        : 'Créer un compte'}
-                    </Button>
-                  </form>
-                </Form>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+            <Button
+              type='submit'
+              className='h-12 cursor-pointer rounded-2xl bg-[#F2E94E] text-[#0A1A2F] transition hover:bg-[#f6f07a] focus-visible:ring-[#F2E94E]/40'
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting
+                ? 'Création en cours…'
+                : 'Créer mon compte'}
+            </Button>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

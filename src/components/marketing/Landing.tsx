@@ -1,171 +1,324 @@
 'use client';
 
-import { ChevronRight, Calendar, Sparkles } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowRight, Eye, EyeOff, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { type FormEvent, useMemo, useState, useTransition } from 'react';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-
-import AuthDialog from './AuthDialog';
+import AuthDialog from '@/components/marketing/AuthDialog';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  useToast,
+} from '@/components/ui';
+import { signIn } from '@/lib/auth/actions';
 
 export default function Landing() {
-  const [authOpen, setAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
-  const features = [
-    {
-      title: 'Planning intelligent',
-      description:
-        'Générez des plannings optimisés par IA en quelques secondes.',
-    },
-    {
-      title: 'Conformité intégrée',
-      description:
-        'Règles légales France & Luxembourg appliquées automatiquement.',
-    },
-    {
-      title: 'Pilotage clair',
-      description: 'Suivi des coûts et productivité avec des insights utiles.',
-    },
-  ];
+  const [showLoginCard, setShowLoginCard] = useState(false);
+  const [registerOpen, setRegisterOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isPending, startTransition] = useTransition();
+  const [showPassword, setShowPassword] = useState(false);
+  const { toast } = useToast();
+
+  const advantages = useMemo(
+    () => [
+      {
+        title: 'Pilotage harmonisé',
+        description:
+          'Une cartographie unique pour piloter plusieurs sites, aligner les équipes et respecter chaque convention locale sans tableurs parallèles ni pertes de temps.',
+        icon: '/icons/planning.svg',
+      },
+      {
+        title: 'IA adaptative',
+        description:
+          "Un moteur d'IA qui anticipe l'absentéisme, propose des remplacements en un clic et ajuste vos coûts salariaux en continu pour garder le contrôle.",
+        icon: '/icons/ai-adapt.svg',
+      },
+    ],
+    []
+  );
+
+  const handleLoginSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+
+    startTransition(async () => {
+      const response = await signIn(formData);
+      if (!response.success) {
+        toast({
+          variant: 'destructive',
+          title: 'Connexion impossible',
+          description: response.error ?? 'Vérifiez vos identifiants.',
+        });
+        return;
+      }
+
+      toast({
+        variant: 'success',
+        title: 'Connexion réussie',
+        description: 'Ouverture de votre espace.',
+      });
+
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 350);
+    });
+  };
+
+  const handleRegistrationSuccess = (registeredEmail: string) => {
+    setRegisterOpen(false);
+    setShowLoginCard(true);
+    setEmail(registeredEmail);
+    setPassword('');
+  };
 
   return (
-    <div className='bg-background relative min-h-screen overflow-hidden'>
-      {/* Subtle radial glow */}
-      <div className='pointer-events-none absolute inset-0 -z-10'>
-        <div className='absolute top-[-200px] left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/15 to-purple-500/15 blur-3xl' />
+    <div className='relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#071427] text-white'>
+      <div className='pointer-events-none absolute inset-0 opacity-70 select-none'>
+        <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,95,255,0.22),rgba(7,14,30,0.95))]' />
+        <div className='absolute inset-x-0 bottom-0 h-1/3 bg-[radial-gradient(circle_at_bottom,rgba(52,94,204,0.18),transparent)]' />
       </div>
 
-      {/* Navigation */}
-      <nav className='bg-background/60 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full backdrop-blur-md'>
-        <div className='mx-auto flex max-w-7xl items-center justify-between px-6 py-4'>
-          <Link href='/' className='flex items-center space-x-2'>
-            <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-purple-600'>
-              <Calendar className='h-5 w-5 text-white' />
-            </div>
-            <span className='text-foreground text-xl font-semibold'>
-              Planora
-            </span>
+      <main className='relative z-10 flex w-full flex-col items-center px-6 py-20 text-center'>
+        <div className='space-y-5'>
+          <Link
+            href='/'
+            onClick={() => setShowLoginCard(false)}
+            className='inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#F2E94E]/40 bg-[#2753a0]/30 px-4 py-1.5 text-xs font-semibold tracking-[0.3em] text-[#F2E94E]/90 backdrop-blur transition hover:bg-[#2753a0]/45'
+          >
+            <Sparkles className='h-3.5 w-3.5 text-[#F2E94E]' />
+            PLANORA
           </Link>
-          <div className='flex items-center gap-3'>
-            <button
-              onClick={() => {
-                setAuthMode('login');
-                setAuthOpen(true);
-              }}
-              className='text-muted-foreground hover:text-foreground text-sm font-medium transition-colors'
-            >
-              Se connecter
-            </button>
-            <Button
-              onClick={() => {
-                setAuthMode('register');
-                setAuthOpen(true);
-              }}
-              variant='secondary'
-            >
-              Essayer gratuitement
-            </Button>
-          </div>
-        </div>
-        <div className='bg-border h-px w-full' />
-      </nav>
-
-      {/* Hero */}
-      <section className='mx-auto max-w-7xl px-6 pt-20 pb-16 md:pt-28'>
-        <div className='mx-auto max-w-3xl text-center'>
-          <div className='border-border/60 bg-card/70 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 backdrop-blur'>
-            <Sparkles className='h-4 w-4 text-blue-600' />
-            <span className='text-muted-foreground text-xs font-medium'>
-              Propulsé par l&apos;IA
-            </span>
-          </div>
-
-          <h1 className='text-foreground mt-6 text-4xl font-bold tracking-tight text-pretty md:text-5xl lg:text-6xl'>
-            Planifiez mieux, sans compromis.
-          </h1>
-          <p className='text-muted-foreground mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-balance'>
-            La plateforme premium de planification assistée par IA. Optimisez
-            vos équipes, respectez la législation et gagnez en sérénité.
+          <Link
+            href='/'
+            onClick={() => setShowLoginCard(false)}
+            className='block cursor-pointer text-5xl font-semibold tracking-tight text-balance transition hover:text-[#F2E94E]/90 md:text-6xl lg:text-7xl'
+          >
+            Planora
+          </Link>
+          <p className='mx-auto max-w-xl text-base leading-relaxed text-balance text-white/70 md:text-lg'>
+            La plateforme premium qui orchestre vos plannings, sécurise vos
+            opérations et magnifie le quotidien de vos équipes.
           </p>
-
-          <div className='mt-8 flex items-center justify-center gap-3'>
-            <Button
-              onClick={() => {
-                setAuthMode('register');
-                setAuthOpen(true);
-              }}
-              size='lg'
-              className='bg-primary text-primary-foreground'
-            >
-              Commencer gratuitement
-              <ChevronRight className='ml-1 h-5 w-5' />
-            </Button>
-            <Button
-              variant='outline'
-              size='lg'
-              onClick={() => {
-                setAuthMode('login');
-                setAuthOpen(true);
-              }}
-            >
-              Se connecter
-            </Button>
-          </div>
         </div>
 
-        {/* Product preview */}
-        <div className='mx-auto mt-16 max-w-6xl'>
-          <Card className='bg-card border-border/50 shadow-2xl shadow-black/5'>
-            <CardContent className='p-3 md:p-6'>
-              <div className='bg-muted/30 border-border/30 relative rounded-2xl border p-2'>
-                <div className='from-primary/5 to-accent/5 absolute inset-0 rounded-2xl bg-gradient-to-tr' />
-                <div className='bg-background border-border/50 relative overflow-hidden rounded-xl border'>
-                  <Image
-                    src='/preview.svg'
-                    alt="Aperçu de l'application Planora"
-                    width={2400}
-                    height={1500}
-                    className='w-full rounded-xl'
-                    priority
-                  />
-                </div>
+        <AnimatePresence mode='wait'>
+          {showLoginCard ? (
+            <motion.div
+              key='login-card'
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                transition: { duration: 0.48, ease: [0.18, 0.9, 0.24, 1] },
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.95,
+                y: 16,
+                transition: { duration: 0.28, ease: [0.4, 0, 0.2, 1] },
+              }}
+              className='mt-12 w-full max-w-md'
+            >
+              <Card className='rounded-[32px] border border-white/15 bg-white/12 p-0 text-[#0A1A2F] shadow-[0_35px_120px_-40px_rgba(3,13,28,0.75)] backdrop-blur-2xl'>
+                <CardHeader className='space-y-2 px-8 pt-8 text-left text-white'>
+                  <CardTitle className='text-2xl font-semibold'>
+                    Connexion Planora
+                  </CardTitle>
+                  <p className='text-sm text-white/65'>
+                    Connectez-vous avec votre identifiant professionnel.
+                  </p>
+                </CardHeader>
+                <CardContent className='space-y-6 px-8 pb-8'>
+                  <motion.form
+                    onSubmit={handleLoginSubmit}
+                    className='space-y-5'
+                    initial='hidden'
+                    animate='visible'
+                    variants={{
+                      hidden: { opacity: 0, y: 16 },
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        transition: {
+                          staggerChildren: 0.08,
+                          delayChildren: 0.12,
+                          ease: [0.18, 0.9, 0.24, 1],
+                        },
+                      },
+                    }}
+                  >
+                    <motion.div
+                      variants={{
+                        hidden: { opacity: 0, y: 12 },
+                        visible: { opacity: 1, y: 0 },
+                      }}
+                      className='space-y-2 text-left'
+                    >
+                      <Label htmlFor='email' className='text-white/70'>
+                        Adresse e-mail
+                      </Label>
+                      <Input
+                        id='email'
+                        name='email'
+                        type='email'
+                        value={email}
+                        onChange={event => setEmail(event.target.value)}
+                        placeholder='vous@entreprise.com'
+                        autoComplete='email'
+                        required
+                        className='h-12 rounded-2xl border-white/20 bg-white/20 text-white placeholder:text-white/35 focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'
+                      />
+                    </motion.div>
+
+                    <motion.div
+                      variants={{
+                        hidden: { opacity: 0, y: 12 },
+                        visible: { opacity: 1, y: 0 },
+                      }}
+                      className='space-y-2 text-left'
+                    >
+                      <Label htmlFor='password' className='text-white/70'>
+                        Mot de passe
+                      </Label>
+                      <div className='relative'>
+                        <Input
+                          id='password'
+                          name='password'
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={event => setPassword(event.target.value)}
+                          placeholder='Votre mot de passe'
+                          autoComplete='current-password'
+                          required
+                          className='h-12 rounded-2xl border-white/20 bg-white/20 pr-12 text-white placeholder:text-white/35 focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'
+                        />
+                        <button
+                          type='button'
+                          onClick={() => setShowPassword(prev => !prev)}
+                          className='absolute top-1/2 right-4 -translate-y-1/2 text-white/60 transition hover:text-white'
+                          aria-label={
+                            showPassword
+                              ? 'Masquer le mot de passe'
+                              : 'Afficher le mot de passe'
+                          }
+                        >
+                          {showPassword ? (
+                            <EyeOff className='h-4 w-4' />
+                          ) : (
+                            <Eye className='h-4 w-4' />
+                          )}
+                        </button>
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      variants={{
+                        hidden: { opacity: 0, y: 12 },
+                        visible: { opacity: 1, y: 0 },
+                      }}
+                    >
+                      <Button
+                        type='submit'
+                        disabled={isPending}
+                        className='h-12 w-full cursor-pointer rounded-2xl bg-[#F2E94E] text-[#0A1A2F] transition hover:bg-[#f6f07a] focus-visible:ring-[#F2E94E]/40'
+                      >
+                        {isPending ? 'Connexion…' : 'Se connecter'}
+                      </Button>
+                    </motion.div>
+                  </motion.form>
+
+                  <motion.div
+                    variants={{
+                      hidden: { opacity: 0, y: 12 },
+                      visible: { opacity: 1, y: 0 },
+                    }}
+                    className='border-t border-white/15 pt-4 text-sm text-white/65'
+                  >
+                    Pas encore de compte ?{' '}
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setRegisterOpen(true);
+                      }}
+                      className='cursor-pointer font-medium text-white transition hover:text-white/80'
+                    >
+                      Créer un compte
+                    </button>
+                  </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ) : (
+            <motion.div
+              key='login-cta'
+              initial={{ opacity: 0, y: 12 }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
+              }}
+              exit={{
+                opacity: 0,
+                y: -12,
+                scale: 0.98,
+                transition: { duration: 0.2 },
+              }}
+            >
+              <Button
+                size='lg'
+                className='mt-12 flex cursor-pointer items-center gap-2 rounded-full bg-[#F2E94E] px-10 py-6 text-lg font-semibold text-[#0A1A2F] shadow-[0_20px_70px_-30px_rgba(242,233,78,0.65)] transition hover:bg-[#f6f07a]'
+                onClick={() => setShowLoginCard(true)}
+              >
+                Se connecter
+                <ArrowRight className='h-5 w-5' />
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className='mt-20 grid w-full max-w-4xl gap-6 md:grid-cols-2'>
+          {advantages.map(({ title, description, icon }) => (
+            <div
+              key={title}
+              className='flex h-full min-h-[240px] flex-col justify-between rounded-[28px] border border-white/14 bg-white/10 p-6 text-left text-white shadow-[0_20px_80px_-40px_rgba(3,13,28,0.55)] backdrop-blur-lg'
+            >
+              <div className='mb-6 flex items-center justify-center'>
+                <Image
+                  src={icon}
+                  alt={`Illustration ${title}`}
+                  width={96}
+                  height={96}
+                  className='drop-shadow-[0_10px_25px_rgba(0,0,0,0.25)]'
+                />
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Feature row */}
-      <section className='mx-auto max-w-6xl px-6 pb-24'>
-        <div className='grid gap-8 md:grid-cols-3'>
-          {features.map((f, i) => (
-            <Card
-              key={i}
-              className='bg-card border-border/50 p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg'
-            >
-              <h3 className='text-foreground text-lg font-semibold'>
-                {f.title}
-              </h3>
-              <p className='text-muted-foreground mt-3 text-base leading-relaxed'>
-                {f.description}
+              <h3 className='text-xl font-semibold text-white'>{title}</h3>
+              <p className='mt-3 text-sm leading-relaxed text-white/70'>
+                {description}
               </p>
-            </Card>
+              <div className='mt-6 h-px w-full bg-white/15' />
+              <p className='mt-4 text-xs font-medium tracking-[0.28em] text-white/45 uppercase'>
+                Planora Essentials
+              </p>
+            </div>
           ))}
         </div>
-      </section>
+      </main>
 
-      {/* Trust bar */}
-      <footer className='mx-auto max-w-6xl px-6 pb-16'>
-        <div className='bg-card/60 text-muted-foreground rounded-xl border p-4 text-center text-sm backdrop-blur'>
-          Déjà des équipes qui gagnent des heures chaque semaine avec Planora.
-        </div>
-      </footer>
       <AuthDialog
-        open={authOpen}
-        onOpenChange={setAuthOpen}
-        initialMode={authMode}
+        open={registerOpen}
+        onOpenChange={setRegisterOpen}
+        onRegistered={handleRegistrationSuccess}
       />
     </div>
   );
