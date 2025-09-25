@@ -50,13 +50,10 @@ export async function middleware(req: NextRequest) {
     req.nextUrl.pathname.startsWith(route)
   );
 
-  const authRoutes = ['/auth/login', '/auth/register'];
-  const isAuthRoute = authRoutes.some(route =>
-    req.nextUrl.pathname.startsWith(route)
-  );
+  const isAuthRoute = req.nextUrl.pathname === '/';
 
   if (isProtectedRoute && !session) {
-    return NextResponse.redirect(new URL('/auth/login', req.url));
+    return NextResponse.redirect(new URL('/', req.url));
   }
 
   if (isAuthRoute && session) {

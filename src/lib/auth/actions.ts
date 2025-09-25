@@ -224,5 +224,5 @@ export async function signOutAction(): Promise<void> {
     console.error('Sign out error:', error);
   }
 
-  redirect('/auth/login');
+  redirect('/');
 }
