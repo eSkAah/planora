@@ -1,0 +1,11 @@
+project_id = "planora-local"
+
+[api]
+# Location where generated types will be written
+schema = "public"
+port = 54321
+ssl = false
+
+[db]
+shadow_port = 54322
+major_version = 15

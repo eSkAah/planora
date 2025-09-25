@@ -1,537 +1,472 @@
-# 📝 TASKLIST PLANORA - Tâches de Développement
+# Planora Tasklist – Vue Codex Structurée
 
-## 🔄 WORKFLOW GIT À SUIVRE
+## 1. Mode d'emploi
 
-**Pour chaque tâche :**
-
-1. `git checkout develop && git pull origin develop`
-2. `git checkout -b feature/T00X-description-tache`
-3. Développer la tâche complètement
-4. Commit avec message clair
-5. `gh pr create --title "feat: T00X - Description" --body "Détails de la tâche"`
-6. Attendre validation pour merge
+- **Cible** : Project manager + développeur senior.
+- **Statuts** : `DONE`, `WIP`, `TODO`, `HOLD`.
+- **Cycle de travail** : ouvrir branche `feature/<id>-slug`, livrer code + tests + docs, valider `npm run lint && npm run type-check && npm run build` avant PR.
+- **Traçabilité** : toute décision ou écart doit être consigné dans `docs/`.
 
 ---
 
-## 🚦 STATUT DES TÂCHES
+## 2. Vue d'ensemble des phases
 
-- ✅ **TERMINÉ** - Tâche complétée et mergée
-- 🟡 **EN COURS** - Actuellement en développement
-- ❌ **À FAIRE** - Prêt à être développé
-- 🔄 **BLOQUÉ** - Attend une autre tâche
-
----
-
-## 📋 PHASE 1 - INFRASTRUCTURE (IMMÉDIAT)
-
-### **T005 - Variables d'environnement** ✅
-
-**Branch:** `feature/T005-environment-variables`  
-**Description:** Configurer tous les fichiers d'environnement nécessaires  
-**Tâches:**
-
-- ✅ Créer `.env.local` et `.env.example`
-- ✅ Ajouter variables Supabase, OpenAI, App URL
-- ✅ Documenter les variables dans `docs/ENVIRONMENT.md`
-- ✅ Créer utilitaire de validation d'environnement
-- ✅ Tester la configuration
-
-### **T004 - Finaliser ShadCN/UI** ❌
-
-**Branch:** `feature/T004-complete-shadcn-setup`  
-**Description:** Installer et configurer tous les composants ShadCN de base  
-**Tâches:**
-
-- `npx shadcn@latest init`
-- Installer 10+ composants de base (button, card, input, etc.)
-- Créer thème personnalisé Planora
-- Tester tous les composants
-- Mettre à jour `src/components/ui/index.ts`
+| Phase                        | Objectif principal                          | Statut global       | Impact clé                      |
+| ---------------------------- | ------------------------------------------- | ------------------- | ------------------------------- |
+| A. Fondations & Tooling      | Base Next.js, tooling, design system        | Partiellement livré | Qualité du code et cohérence UI |
+| B. Données & Supabase        | Schéma multi-tenant, sécurité RLS           | TODO                | Stockage et conformité          |
+| C. Auth & Multi-tenant       | Auth Supabase, rôles, onboarding entreprise | TODO                | Accès sécurisé                  |
+| D. Gestion Employés          | CRUD, imports, contrats, disponibilités     | TODO                | Cœur métier RH                  |
+| E. Planning & Temps          | Calendrier interactif, workflow shifts      | TODO                | Expérience planning             |
+| F. IA & Conformité           | Génération IA, règles légales FR/LU         | TODO                | Différenciation produit         |
+| G. Congés & Remplacements    | Congés + remplaçants IA                     | TODO                | Complétude RH                   |
+| H. Notifications             | Emails, in-app, temps réel, consentement    | TODO                | Engagement utilisateurs         |
+| I. Analytics & Insights      | Dashboards, rapports, prédictions           | TODO                | Pilotage décisionnel            |
+| J. Intégrations & Billing    | API, webhooks, calendriers, Stripe          | TODO                | Monétisation & écosystème       |
+| K. UX & Internationalisation | Layout, responsive, i18n, onboarding        | TODO                | Adoption & conversion           |
+| L. Qualité & Tests           | Tests unitaires → E2E, perf, sécurité       | TODO                | Fiabilité                       |
+| M. Ops & Conformité          | CI/CD, monitoring, RGPD, SLA                | TODO                | Exploitation                    |
+| N. Documentation & Lancement | Docs, support, go-to-market                 | TODO                | Mise sur le marché              |
 
 ---
 
-## 📊 PHASE 2 - SUPABASE & BASE DE DONNÉES
+## 3. Détails par phase
 
-### **T009 - Créer projet Supabase** ❌
+### Phase A – Fondations & Tooling (Partiellement livré)
 
-**Branch:** `feature/T009-supabase-project-setup`  
-**Description:** Créer et configurer le projet Supabase  
-**Tâches:**
+- **Objectif** : disposer d’un socle Next.js/TypeScript, d’un design system cohérent et de scripts qualité.
+- **Décisions clés** : respecter `docs/DESIGN.md`, `docs/ARCHITECTURE.md`, `docs/TYPESCRIPT.md`.
 
-- Créer projet "planora-prod" sur supabase.com
-- Configurer région Europe (RGPD)
-- Noter les clés API dans .env.local
-- Tester la connexion
+#### FND-01 – Base Next.js 15 + repo propre (DONE)
 
-### **T010 - Connection Next.js ↔ Supabase** ❌
+- **Livrables** : projet Next.js 15.2+, initialisation Git, architecture conforme.
+- **Acceptation** : build initial OK, structure `src/` validée.
 
-**Branch:** `feature/T010-nextjs-supabase-integration`  
-**Description:** Intégrer Supabase avec Next.js  
-**Dépendances:** T009  
-**Tâches:**
+#### FND-02 – TypeScript strict (DONE)
 
-- `npm install @supabase/supabase-js @supabase/ssr`
-- Créer `src/lib/database/supabase.ts`
-- Créer client côté serveur et client
-- Types TypeScript pour Supabase
-- Tester la connexion
+- **Livrables** : `tsconfig.json` strict, ESLint anti-`any`, script `npm run type-check`.
+- **Acceptation** : exécution sans erreur.
 
-### **T011 - Setup authentification Supabase** ❌
+#### FND-03 – Tooling lint/format (DONE)
 
-**Branch:** `feature/T011-supabase-auth-setup`  
-**Description:** Configurer l'authentification Supabase  
-**Dépendances:** T010  
-**Tâches:**
+- **Livrables** : ESLint + Prettier + Husky + lint-staged.
+- **Acceptation** : `npm run lint` & `npm run format:check` passent, hooks actifs.
 
-- `npm install @supabase/auth-ui-react @supabase/auth-ui-shared`
-- Configurer les providers d'auth
-- Créer hooks d'authentification
-- Middleware de protection des routes
+#### FND-04 – Tailwind & tokens de base (DONE)
 
-### **T021-T034 - Schéma base de données** ❌
+- **Livrables** : Tailwind v4 + Turbopack, palette alignée design.
+- **Acceptation** : build OK, tokens conformes.
 
-**Branch:** `feature/T021-034-database-schema`  
-**Description:** Créer toutes les tables principales  
-**Dépendances:** T010  
-**Tâches:**
+#### FND-05 – Design system ShadCN (DONE)
 
-- Exécuter SQL complet (companies, users, employees, etc.)
-- Configurer Row Level Security (RLS)
-- Créer les politiques de sécurité
-- Tester l'isolation multi-tenant
-- Créer les index de performance
+- **Livrables** : init `shadcn@latest`, composants base (button, card, input, select, textarea, table, dialog, toast, form) stylés Planora.
+- **Acceptation** : exports centralisés, couleurs & radius 12-30px, hover 300ms ease-in-out, documentation d’usage.
 
----
+#### FND-06 – Gestion des variables d’environnement (DONE)
 
-## 🔐 PHASE 3 - AUTHENTIFICATION
+- **Livrables** : `.env.local`, `.env.example`, validation runtime (Zod) couvrant Supabase/OpenAI/NextAuth/SMTP/analytics.
+- **Acceptation** : démarrage bloque si variable manquante, doc alignée avec `docs/ENVIRONMENT.md`.
 
-### **T046 - Middleware protection routes** ❌
+#### FND-07 – Module config & constantes (DONE)
 
-**Branch:** `feature/T046-auth-middleware`  
-**Description:** Créer middleware Next.js pour protéger les routes  
-**Dépendances:** T011  
-**Tâches:**
+- **Livrables** : `src/lib/constants/`, `src/lib/config.ts` centralisant la configuration.
+- **Acceptation** : import unique des constantes, tests unitaires simples.
 
-- Créer `src/middleware.ts`
-- Logique de redirection auth
-- Protection routes sensibles
-- Gestion des rôles utilisateur
+#### FND-08 – Gestion d’erreurs & journalisation (TODO)
 
-### **T047 - Pages authentification** ❌
+- **Livrables** : logger serveur/client (pino ou wrapper), error boundaries, pages d’erreur premium.
+- **Acceptation** : logs structurés, design conforme, instrumentation Sentry prête.
 
-**Branch:** `feature/T047-auth-pages`  
-**Description:** Créer toutes les pages d'authentification  
-**Dépendances:** T046  
-**Tâches:**
+#### FND-09 – Scripts CI locaux (DONE)
 
-- `src/app/(auth)/login/page.tsx`
-- `src/app/(auth)/register/page.tsx`
-- `src/app/(auth)/forgot-password/page.tsx`
-- Design premium avec ShadCN
-- Validation côté client
+- **Livrables** : script `npm run verify` regroupant lint/type-check/build/test.
+- **Acceptation** : un seul script pour validation locale avant PR.
 
-### **T051-T056 - Gestion entreprises multi-tenant** ❌
+#### FND-10 – Sécurité baseline (TODO)
 
-**Branch:** `feature/T051-056-company-management`  
-**Description:** Interface complète de gestion des entreprises  
-**Dépendances:** T047  
-**Tâches:**
-
-- Page inscription entreprise
-- Sélection pays et règles légales
-- Configuration initiale entreprise
-- Interface invitation utilisateurs
-- Gestion permissions par entreprise
+- **Livrables** : headers sécurisés, protections CSRF/CSP.
+- **Acceptation** : audit OWASP basique sans criticité.
 
 ---
 
-## 👥 PHASE 4 - GESTION EMPLOYÉS
+### Phase B – Plateforme Données & Supabase (Partiellement livré)
 
-### **T061 - Interface listing employés** ❌
+- **Objectif** : implémenter la couche données multi-tenant sécurisée.
 
-**Branch:** `feature/T061-employees-listing`  
-**Description:** Page de listing des employés avec pagination  
-**Dépendances:** T051-T056  
-**Tâches:**
+- **DAT-01 – Projets Supabase (prod + sandbox)** (DONE)
+  - Livrables : projet EU, clés dans `.env`, configuration Vercel.
+  - Acceptation : connexion réussie depuis Next.
 
-- `src/app/employees/page.tsx`
-- Table avec tri et filtres
-- Pagination performante
-- Actions bulk (export, etc.)
-- Responsive mobile
+- **DAT-02 – Clients Supabase SSR + client** (DONE)
+  - Livrables : `supabase-server.ts`, `supabase-browser.ts` typés `Database`.
+  - Acceptation : utilisables dans server actions et hooks.
 
-### **T062 - Formulaire création employé** ❌
+- **DAT-03 – Schéma relationnel complet** (DONE)
+  - Livrables : migrations SQL (companies, users, employees, schedules, entries, versions, availability, time_off_requests, notifications, analytics_snapshots, audit_logs).
+  - Acceptation : migrations Supabase appliquées, contraintes FK & index validés.
 
-**Branch:** `feature/T062-employee-create-form`  
-**Description:** Formulaire complet de création d'employé  
-**Dépendances:** T061  
-**Tâches:**
+- **DAT-04 – Politiques RLS multi-rôle** (DONE)
+  - Livrables : politiques owner/admin/manager/employee/viewer par table.
+  - Acceptation : tests automatisés garantissant isolation par company.
 
-- `src/app/employees/new/page.tsx`
-- Form avec validation Zod
-- Upload avatar
-- Gestion des contrats
-- Preview avant sauvegarde
+- **DAT-05 – Seeds & fixtures multi-tenant** (DONE)
+  - Livrables : script Supabase CLI (2 entreprises, 30 employés).
+  - Acceptation : données prêtes pour démos et tests.
 
-### **T063 - Page détail employé** ❌
+- **DAT-06 – Gestion migrations & génération types** (DONE)
+  - Livrables : intégration Supabase CLI, script `supabase gen types`.
+  - Acceptation : `src/types/supabase.ts` toujours synchronisé.
 
-**Branch:** `feature/T063-employee-detail`  
-**Description:** Page de détail avec toutes les informations  
-**Dépendances:** T062  
-**Tâches:**
+- **DAT-07 – Triggers & audit**
+  - Livrables : triggers `updated_at`, audit_logs, agrégats heures.
+  - Acceptation : audit trail automatique, analytics rapides.
 
-- `src/app/employees/[id]/page.tsx`
-- Vue complète des données
-- Historique des modifications
-- Actions rapides
-- Interface élégante
-
-### **T064 - Formulaire modification employé** ❌
-
-**Branch:** `feature/T064-employee-edit-form`  
-**Description:** Interface de modification d'un employé  
-**Dépendances:** T063  
-**Tâches:**
-
-- `src/app/employees/[id]/edit/page.tsx`
-- Form pré-rempli
-- Validation temps réel
-- Gestion des changements
-- Confirmation avant sauvegarde
-
-### **T066-T067 - Import/Export employés** ❌
-
-**Branch:** `feature/T066-067-employee-import-export`  
-**Description:** Import CSV massif et export des données  
-**Dépendances:** T064  
-**Tâches:**
-
-- Interface upload CSV/Excel
-- Validation des données importées
-- Mapping des colonnes
-- Export dans différents formats
-- Gestion des erreurs
-
-### **T075-T078 - Types de contrats** ❌
-
-**Branch:** `feature/T075-078-contract-types`  
-**Description:** Configuration des types de contrats  
-**Dépendances:** T066-T067  
-**Tâches:**
-
-- Interface CRUD contrats
-- Validation contraintes légales
-- Gestion temps partiel
-- Templates par pays
+- **DAT-08 – Optimisations performance**
+  - Livrables : index ciblés, vues materialisées, quotas.
+  - Acceptation : requêtes critiques <100ms.
 
 ---
 
-## 🏢 PHASE 5 - CONFIGURATION POSTES
+### Phase C – Authentification & Multi-tenant (Partiellement livré)
 
-### **T079-T084 - Modèles de postes** ❌
+- **Objectif** : sécuriser l’accès, gérer les rôles et l’onboarding entreprise.
 
-**Branch:** `feature/T079-084-shift-templates`  
-**Description:** Création et gestion des postes/shifts  
-**Dépendances:** T075-T078  
-**Tâches:**
+- **AUTH-01 – Intégration Supabase Auth** (DONE)
+  - Livrables : sessions SSR/CSR, helpers auth, cookies sécurisés.
+  - Acceptation : login persistant, state partagé.
 
-- Interface création postes
-- Configuration horaires flexibles
-- Templates réutilisables
-- Gestion des compétences requises
-- Duplication et modification
+- **AUTH-02 – Pages auth premium** (DONE)
+  - Livrables : pages login/register/forgot/reset dans `(auth)` respectant design.
+  - Acceptation : responsive, CTA jaune, FR/EN.
 
-### **T085-T089 - Contraintes métier** ❌
+- **AUTH-03 – Middleware & guards** (DONE)
+  - Livrables : `src/middleware.ts`, hooks d’autorisation.
+  - Acceptation : redirections rôle → dashboard approprié.
 
-**Branch:** `feature/T085-089-business-constraints`  
-**Description:** Configuration des règles métier  
-**Dépendances:** T079-T084  
-**Tâches:**
+- **AUTH-04 – Onboarding Owner & création entreprise**
+  - Livrables : wizard post-inscription (infos société, pays, règles).
+  - Acceptation : tenant complet après onboarding.
 
-- Jours consécutifs max
-- Temps repos minimum
-- Rotations obligatoires/optionnelles
-- Équipes minimales par créneau
+- **AUTH-05 – Invitations & gestion des rôles**
+  - Livrables : flux invitation email, acceptation, changement rôle.
+  - Acceptation : historique invitations, aucune élévation illégitime.
 
-### **T090-T094 - Contraintes légales par pays** ❌
+- **AUTH-06 – Paramètres entreprise & personnalisation**
+  - Livrables : page `/settings` (fuseau, horaires, couleurs limitées, logos).
+  - Acceptation : paramètres isolés par tenant, respect design.
 
-**Branch:** `feature/T090-094-legal-constraints`  
-**Description:** Implémentation des règles légales  
-**Dépendances:** T085-T089  
-**Tâches:**
+- **AUTH-07 – MFA & sécurité avancée (HOLD)**
+  - Livrables : décision sur TOTP/passkeys, implémentation si validée.
+  - Acceptation : décision documentée.
 
-- Règles France (35h, repos dominical)
-- Règles Luxembourg (40h)
-- Système extensible autres pays
-- Validation automatique
-- Alertes non-conformité
+- **AUTH-08 – Interface audit trail**
+  - Livrables : vue admin audit_logs (filtres entité/action/utilisateur).
+  - Acceptation : recherche <1s, historique complet.
 
----
-
-## 🤖 PHASE 6 - INTÉGRATION IA
-
-### **T095-T099 - Configuration OpenAI** ❌
-
-**Branch:** `feature/T095-099-openai-setup`  
-**Description:** Setup complet OpenAI API  
-**Dépendances:** T090-T094  
-**Tâches:**
-
-- `npm install openai`
-- `src/lib/ai/openai.ts`
-- Gestion sécurisée des clés
-- Rate limiting et coûts
-- Monitoring des appels
-
-### **T100-T105 - Moteur génération IA** ❌
-
-**Branch:** `feature/T100-105-ai-generation-engine`  
-**Description:** Moteur IA de génération de plannings  
-**Dépendances:** T095-T099  
-**Tâches:**
-
-- Prompt de base optimisé
-- Intégration contraintes légales
-- Optimisation multi-critères
-- Score qualité planning
-- Apprentissage préférences
-
-### **T106-T110 - Interface génération IA** ❌
-
-**Branch:** `feature/T106-110-ai-generation-ui`  
-**Description:** Interface utilisateur pour la génération IA  
-**Dépendances:** T100-T105  
-**Tâches:**
-
-- Interface paramètres génération
-- Prompts personnalisables par secteur
-- Prévisualisation avec score
-- Système régénération partielle
-- Historique et comparaisons
-
-### **T111-T115 - Remplacement automatique** ❌
-
-**Branch:** `feature/T111-115-automatic-replacement`  
-**Description:** Algorithme de remplacement intelligent  
-**Dépendances:** T106-T110  
-**Tâches:**
-
-- Calcul remplaçants disponibles
-- Vérification heures annuelles
-- Respect contraintes légales
-- Notifications automatiques
-- Interface validation
+- **AUTH-09 – Tests isolation multi-tenant**
+  - Livrables : tests unitaires & E2E sur RLS et API.
+  - Acceptation : fuite inter-entreprise détectée immédiatement.
 
 ---
 
-## 📅 PHASE 7 - INTERFACE PLANNING
+### Phase D – Gestion Employés (TODO)
 
-### **T116-T121 - Calendrier principal** ❌
+- **Objectif** : fournir l’ensemble des fonctionnalités RH décrites dans le BRD.
 
-**Branch:** `feature/T116-121-main-calendar`  
-**Description:** Composant calendrier interactif  
-**Dépendances:** T111-T115  
-**Tâches:**
+- **EMP-01 – API/actions CRUD employés**
+  - Livrables : server actions/API sécurisées, validations Zod.
+  - Acceptation : tests unitaires, RLS respecté.
 
-- Calendrier mensuel élégant
-- Vue par employé/poste
-- Codes couleur par shift
-- Navigation fluide
-- Animations micro-interactions
+- **EMP-02 – Interfaces manager employés**
+  - Livrables : pages listing, détail, création, édition, historique.
+  - Acceptation : UI premium, responsive, accessibilité clavier.
 
-### **T122-T126 - Fonctionnalités édition** ❌
+- **EMP-03 – Import/Export employés**
+  - Livrables : upload CSV/Excel avec mapping, export Excel & PDF.
+  - Acceptation : import 1000 employés <2 min, retours d’erreur précis.
 
-**Branch:** `feature/T122-126-calendar-editing`  
-**Description:** Édition avancée du planning  
-**Dépendances:** T116-T121  
-**Tâches:**
+- **EMP-04 – Gestion types de contrats**
+  - Livrables : module `contract_types`, liaison employés.
+  - Acceptation : règles 35h/40h appliquées.
 
-- Drag & Drop modifications
-- Validation temps réel contraintes
-- Undo/Redo
-- Sauvegarde automatique
-- Conflits et alertes
+- **EMP-05 – Compétences & certifications**
+  - Livrables : tags compétences, rappels expiration.
+  - Acceptation : filtrage planning par compétences.
 
-### **T127-T130 - Responsive et mobile** ❌
+- **EMP-06 – Disponibilités & préférences**
+  - Livrables : UI drag & drop hebdomadaire + exceptions.
+  - Acceptation : stockage structuré, conflits signalés.
 
-**Branch:** `feature/T127-130-mobile-responsive`  
-**Description:** Optimisation mobile complète  
-**Dépendances:** T122-T126  
-**Tâches:**
-
-- Interface tactile optimisée
-- Gestures mobiles
-- Mode sombre/clair
-- Performance mobile
-- Édition rapide tactile
+- **EMP-07 – Recherche & filtres avancés**
+  - Livrables : recherche globale, filtres multi-critères, export filtré.
+  - Acceptation : réponse <500ms sur dataset seed.
 
 ---
 
-## 🏖️ PHASE 8 - GESTION CONGÉS
+### Phase E – Planning & Temps de travail (TODO)
 
-### **T135-T138 - Types de congés** ❌
+- **Objectif** : offrir une interface planning performante et conforme légalement.
 
-**Branch:** `feature/T135-138-leave-types`  
-**Description:** Configuration des types de congés  
-**Dépendances:** T127-T130  
-**Tâches:**
+- **SCHED-01 – Modèles de shifts**
+  - Livrables : CRUD `shift_templates`, preview visuelle.
+  - Acceptation : validations Zod, tests unitaires.
 
-- Types congés (CP, RTT, maladie, etc.)
-- Règles par type
-- Calcul soldes automatique
-- Congés exceptionnels
+- **SCHED-02 – Calendrier interactif**
+  - Livrables : calendrier (hebdo/mensuel/employé) managers & employés.
+  - Acceptation : chargement <2s pour 100 employés, mobile friendly.
 
-### **T139-T142 - Demandes de congés** ❌
+- **SCHED-03 – Drag & drop + conflits temps réel**
+  - Livrables : interactions shifts, calcul repos & conformité instantané.
+  - Acceptation : alertes visuelles, blocage des sauvegardes si violation.
 
-**Branch:** `feature/T139-142-leave-requests`  
-**Description:** Workflow complet demandes congés  
-**Dépendances:** T135-T138  
-**Tâches:**
+- **SCHED-04 – Versioning & publication**
+  - Livrables : statuts brouillon→publié, diff entre versions, rollback.
+  - Acceptation : historique complet, logs audit.
 
-- Interface demande employé
-- Workflow validation hiérarchique
-- Notifications automatiques
-- Historique décisions
+- **SCHED-05 – Workflow échange de shifts**
+  - Livrables : demande employé, validation manager, notifications.
+  - Acceptation : compatibilité compétences respectée.
 
-### **T143-T146 - Gestion remplacements** ❌
-
-**Branch:** `feature/T143-146-replacement-management`  
-**Description:** Système intelligent de remplacements  
-**Dépendances:** T139-T142  
-**Tâches:**
-
-- Analyse compétences requises
-- Proposition remplaçants IA
-- Validation un clic
-- Remplacements urgence
+- **SCHED-06 – Suivi heures sup & limites**
+  - Livrables : calcul heures/semaine/mois, alertes dépassements.
+  - Acceptation : conformité 35h/40h, rapports précis.
 
 ---
 
-## 🔔 PHASE 9 - NOTIFICATIONS
+### Phase F – IA & Conformité (TODO)
 
-### **T147-T150 - Infrastructure notifications** ❌
+- **Objectif** : générer des plannings optimisés tout en garantissant la conformité légale.
 
-**Branch:** `feature/T147-150-notification-infrastructure`  
-**Description:** Système de notifications temps réel  
-**Dépendances:** T143-T146  
-**Tâches:**
+- **AI-01 – Configuration OpenAI**
+  - Livrables : SDK, client partagé, paramètre `OPENAI_MODEL`.
+  - Acceptation : secret géré, client réutilisable.
 
-- Notifications push app
-- Templates email personnalisables
-- Préférences utilisateur
-- Système temps réel
+- **AI-02 – Prompt engineering sectoriel**
+  - Livrables : prompts par secteur (Retail, Hôtellerie, Santé, Industrie).
+  - Acceptation : personnalisation UI, versionnement.
 
-### **T151-T155 - Notifications automatiques** ❌
+- **AI-03 – Service génération planning**
+  - Livrables : route `POST /api/ai/generate-schedule`, queue si nécessaire.
+  - Acceptation : génération <30s pour 100 employés, logs détaillés.
 
-**Branch:** `feature/T151-155-auto-notifications`  
-**Description:** Notifications métier automatiques  
-**Dépendances:** T147-T150  
-**Tâches:**
+- **AI-04 – Score qualité & feedback**
+  - Livrables : score >85%, collecte feedback manager.
+  - Acceptation : feedback stocké et exploité pour amélioration.
 
-- Rappel génération planning (15j)
-- Alertes conflits automatiques
-- Remplacements urgents
-- Résumés managers
+- **AI-05 – Monitoring coûts IA**
+  - Livrables : dashboard usage, alertes budget.
+  - Acceptation : alertes avant dépassement, suivi journalier.
 
----
+- **COM-01 – Moteur règles légales FR/LU**
+  - Livrables : catalogue règles par pays, versionnées.
+  - Acceptation : validation 100% contraintes, tests unitaires.
 
-## 📊 PHASE 10 - RAPPORTS
+- **COM-02 – Validation temps réel**
+  - Livrables : service côté serveur utilisé par employees/planning.
+  - Acceptation : messages précis, blocage si non-conformité.
 
-### **T160-T163 - Rapports de base** ❌
+- **COM-03 – Rapports conformité mensuels**
+  - Livrables : PDF/Excel, historique violations.
+  - Acceptation : génération <5s, distribution managers.
 
-**Branch:** `feature/T160-163-basic-reports`  
-**Description:** Rapports essentiels pour managers  
-**Dépendances:** T151-T155  
-**Tâches:**
-
-- Heures travaillées par employé
-- Conformité légale
-- Statistiques congés
-- Coûts personnel
-
-### **T164-T167 - Analytics avancées** ❌
-
-**Branch:** `feature/T164-167-advanced-analytics`  
-**Description:** Dashboard analytics pour décideurs  
-**Dépendances:** T160-T163  
-**Tâches:**
-
-- Dashboard managers
-- KPIs performance équipe
-- Prédictions charge travail
-- Analyse tendances absences
-
-### **T168-T171 - Exports et intégrations** ❌
-
-**Branch:** `feature/T168-171-exports-integrations`  
-**Description:** Exports automatiques et API  
-**Dépendances:** T164-T167  
-**Tâches:**
-
-- Export PDF automatique
-- Export Excel paie
-- API intégrations tierces
-- Envoi automatique email
+- **COM-04 – Framework extension pays**
+  - Livrables : doc + architecture pour nouveaux pays.
+  - Acceptation : ajout d’un pays en <1 sprint documenté.
 
 ---
 
-## 🎨 PHASE 11 - UI/UX PREMIUM
+### Phase G – Congés & Remplacements (TODO)
 
-### **T172-T175 - Design system avancé** ❌
+- **Objectif** : gérer congés et remplacements avec assistance IA.
 
-**Branch:** `feature/T172-175-premium-design-system`  
-**Description:** Finalisation design system premium  
-**Dépendances:** T168-T171  
-**Tâches:**
+- **LEAVE-01 – Demande de congés employé**
+  - Livrables : formulaire mobile-friendly, pièces jointes.
+  - Acceptation : demande en <3 clics, validations claires.
 
-- Design system complet
-- Animations et micro-interactions
-- Thème sombre/clair final
-- Accessibilité ARIA complète
+- **LEAVE-02 – Workflow d’approbation**
+  - Livrables : chaîne manager→RH, SLA 24h, notifications.
+  - Acceptation : historique décisions, respect SLA.
 
-### **T176-T179 - Expérience utilisateur** ❌
+- **LEAVE-03 – Calcul soldes & accrual**
+  - Livrables : accrual FR (2.5j/mois), LU (25j/an), RTT.
+  - Acceptation : soldes exacts après import historique.
 
-**Branch:** `feature/T176-179-user-experience`  
-**Description:** UX optimisée pour tous les utilisateurs  
-**Dépendances:** T172-T175  
-**Tâches:**
-
-- Onboarding interactif
-- Aide contextuelle
-- Raccourcis clavier power users
-- Recherche globale intelligente
+- **LEAVE-04 – Suggestions remplaçants IA**
+  - Livrables : score compatibilité (disponibilités + compétences).
+  - Acceptation : top 3 proposés en <5s.
 
 ---
 
-## ⚙️ TÂCHES TRANSVERSALES
+### Phase H – Notifications & Communication (TODO)
 
-### **Hooks personnalisés** 🔄
+- **Objectif** : informer utilisateurs via email, in-app, temps réel.
 
-- `useEmployees()`, `useEmployee(id)`
-- `useSchedules()`, `useScheduleGeneration()`
-- `useAuth()`, `useCompany()`
-- `useNotifications()`, `useReports()`
+- **NOT-01 – Infrastructure email**
+  - Livrables : provider SMTP/Resend, templates premium.
+  - Acceptation : SPF/DKIM validés, emails brandés.
 
-### **Types TypeScript** 🔄
+- **NOT-02 – Centre notifications in-app**
+  - Livrables : toasts, panneau historique, catégories.
+  - Acceptation : état lu/non-lu persistant.
 
-- Mise à jour continue des types
-- Génération automatique depuis Supabase
-- Validation avec Zod
+- **NOT-03 – Temps réel & synchro**
+  - Livrables : Supabase Realtime ou Pusher, canaux multi-tenant.
+  - Acceptation : updates instantanées planning/congés/shifts.
 
-### **Tests** 🔄
+- **NOT-04 – Préférences & consentement**
+  - Livrables : page paramètres par canal, stockage RGPD.
+  - Acceptation : opt-in/out respecté, audit consentement.
 
-- Tests unitaires composants
-- Tests intégration API
-- Tests E2E parcours critiques
+- **NOT-05 – Templates métier**
+  - Livrables : notifications planning publié, conflit, congé, swap, rappels.
+  - Acceptation : couverture 100% scénarios BRD.
 
 ---
 
-## 🎯 PROCHAINES TÂCHES RECOMMANDÉES
+### Phase I – Analytics & Insights (TODO)
 
-1. **T005** - Variables environnement (15 min)
-2. **T004** - Finaliser ShadCN/UI (1h)
-3. **T009** - Projet Supabase (30 min)
-4. **T010** - Connection Next.js (1h)
-5. **T011** - Auth Supabase (2h)
+- **Objectif** : fournir KPIs managers, rapports et prédictions.
 
-**Choisis une tâche et je la développe complètement !**
+- **AN-01 – Dashboard manager**
+  - Livrables : KPIs heures planifiées/réalisées, conformité, satisfaction.
+  - Acceptation : chargement <2s, données temps réel.
+
+- **AN-02 – Rapports opérationnels**
+  - Livrables : heures par employé, dépassements, congés, coûts.
+  - Acceptation : export PDF/Excel <5s, filtres période.
+
+- **AN-03 – Prédictions charge & tendances**
+  - Livrables : modèle saisonnalité + historique.
+  - Acceptation : projection 4 semaines, visualisation claire.
+
+- **AN-04 – Instrumentation produit & KPIs business**
+  - Livrables : tracking adoption, churn, temps generation IA, NPS.
+  - Acceptation : dashboard interne partagé, seuils alertes.
+
+---
+
+### Phase J – Intégrations & Billing (TODO)
+
+- **Objectif** : ouvrir la plateforme et activer la monétisation.
+
+- **INT-01 – API publique REST**
+  - Livrables : endpoints sécurisés, tokens service, spec OpenAPI 3.0.
+  - Acceptation : documentation exploitable, tests intégration.
+
+- **INT-02 – Webhooks événementiels**
+  - Livrables : webhooks planning/congé/swap, UI configuration, signatures HMAC.
+  - Acceptation : retries gérés, journal des livraisons.
+
+- **INT-03 – Synchronisation calendriers externes**
+  - Livrables : OAuth Google & Outlook, export ICS.
+  - Acceptation : synchronisation quotidienne fiable.
+
+- **INT-04 – Exports paie & RH**
+  - Livrables : templates CSV/Excel (PayFit, ADP), automatisation.
+  - Acceptation : validation comptable, conformité légale.
+
+- **INT-05 – Connecteurs Slack/Teams (HOLD)**
+  - Livrables : étude besoin roadmap V1.1.
+  - Acceptation : décision documentée.
+
+- **BILL-01 – Facturation Stripe**
+  - Livrables : plans Freemium/Starter/Business/Enterprise, facturation par employé.
+  - Acceptation : paiements test réussis, limites respectées.
+
+- **BILL-02 – Gestion freemium & upsell**
+  - Livrables : feature flags par plan, upgrade/downgrade, trial.
+  - Acceptation : restrictions appliquées, conversion mesurée.
+
+---
+
+### Phase K – UX & Internationalisation (TODO)
+
+- **Objectif** : maximiser adoption et cohérence UI.
+
+- **UX-01 – Design tokens & documentation**
+  - Livrables : tokens couleur/typo/espacement centralisés, documentation mise à jour.
+  - Acceptation : réutilisation 100%, cohérence UI.
+
+- **UX-02 – Layout application & navigation**
+  - Livrables : sidebar rétractable, header, breadcrumbs.
+  - Acceptation : max 3 clics vers features clés, animations 300ms.
+
+- **UX-03 – Responsive & mobile-first**
+  - Livrables : breakpoints 320–2560px, gestuelle mobile.
+  - Acceptation : tests Safari iOS + Chrome Android validés.
+
+- **UX-04 – Site marketing & pages publiques**
+  - Livrables : landing hero, features, pricing, FAQ, CTA essais.
+  - Acceptation : design premium, Lighthouse >90.
+
+- **UX-05 – Micro-interactions & animations**
+  - Livrables : hover, transitions sidebar, scroll doux.
+  - Acceptation : animations 300ms, fluides.
+
+- **UX-06 – Accessibilité WCAG 2.1 AA**
+  - Livrables : focus visible, contrastes, navigation clavier.
+  - Acceptation : audit axe sans erreur grave, checklist AA signée.
+
+- **UX-07 – Internationalisation FR/EN**
+  - Livrables : `next-intl` (ou équivalent), traductions marketing + app.
+  - Acceptation : détection langue, formats locaux.
+
+- **UX-08 – Onboarding interactif & aide**
+  - Livrables : checklist <10 min, bulles d’aide, centre d’aide intégré.
+  - Acceptation : taux complétion >80%.
+
+- **GOV-01 – Harmonisation doc design vs produit**
+  - Livrables : décision sur dark mode vs design guidelines, doc mise à jour.
+  - Acceptation : alignement clair, docs synchronisées.
+
+---
+
+### Phase L – Qualité & Tests (TODO)
+
+- **Objectif** : garantir la fiabilité de bout en bout.
+
+- **QA-01 – Tests unitaires** : Vitest/Jest sur utils, hooks, services (couverture >70%).
+- **QA-02 – Tests intégration** : API, components, validations (mocks Supabase via MSW).
+- **QA-03 – Tests E2E** : Playwright/Cypress (auth, CRUD, IA, planning, congés).
+- **QA-04 – Tests performance** : bench 100 employés (chargement <2s, génération IA <30s).
+- **QA-05 – Tests sécurité** : audit OWASP, scan dépendances, pentest ciblé.
+- **QA-06 – Audit accessibilité** : rapport axe, corrections, validation AA.
+
+---
+
+### Phase M – Ops & Conformité (TODO)
+
+- **Objectif** : industrialiser le déploiement et assurer conformité légale.
+
+- **OPS-01 – Pipeline CI/CD GitHub Actions** : build/lint/tests sur PR, déploiement Vercel (preview + prod).
+- **OPS-02 – Monitoring & alerting** : Sentry, analytics, traçage request-id.
+- **OPS-03 – Journalisation structurée** : logger JSON, corrélation requêtes.
+- **OPS-04 – Sauvegardes & reprise** : backups automatiques Supabase, tests restauration (RPO <1h).
+- **OPS-05 – Pilotage coûts** : dashboards OpenAI/Supabase, alertes budget.
+- **OPS-06 – Conformité RGPD** : DPA, registre traitements, droit à l’oubli, anonymisation.
+- **OPS-07 – SLA & support** : process support <2h, outil ticketing, escalade incidents.
+
+---
+
+### Phase N – Documentation & Lancement (TODO)
+
+- **Objectif** : préparer l’adoption externe et interne.
+
+- **DOC-01 – Documentation technique** : guide onboarding dev, architecture, conventions commit.
+- **DOC-02 – Guides utilisateur** : tutoriels manager/employé, vidéos, FAQ.
+- **DOC-03 – Documentation API** : portail Swagger/OpenAPI, exemples TS/Python.
+- **DOC-04 – Base de connaissances support** : articles résolution, checklist RGPD.
+- **DOC-05 – Changelog & release notes** : process release, communication clients.
+- **LAUNCH-01 – Programme beta & feedback** : pilotes, boucle feedback (Notion/Linear).
+- **LAUNCH-02 – Go-to-market plan** : stratégie marketing, contenu blog, campagnes.
+- **LAUNCH-03 – Onboarding customer success** : playbook, checklists kickoff.
+- **LAUNCH-04 – Boucle amélioration continue** : NPS trimestriel, roadmap publique.
+
+---
+
+## 4. Rappels transverses
+
+- Toujours exécuter `npm run lint`, `npm run type-check`, `npm run build` avant PR.
+- Synchroniser les types Supabase après chaque migration (`supabase gen types ...`).
+- Respecter strictement `docs/DESIGN.md`, `docs/ARCHITECTURE.md`, `docs/TYPESCRIPT.md`.
+- Documenter toute décision majeure ou déviation par rapport au BRD.

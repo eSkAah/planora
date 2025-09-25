@@ -8,7 +8,11 @@
 
 import { redirect } from 'next/navigation';
 
-import { prisma } from '@/lib/database';
+import {
+  getPrismaClient,
+  isDatabaseConfigured,
+  supabaseAdmin,
+} from '@/lib/database/client';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { accountCreationSchema, userLoginSchema } from '@/lib/validations';
 
@@ -23,10 +27,17 @@ type ActionResult<T = unknown> = {
  * Create a new company and user account
  */
 export async function createAccount(formData: FormData): Promise<ActionResult> {
-  try {
-    const supabase = await createServerSupabaseClient();
+  const db = getPrismaClient();
 
-    // Extract and validate form data
+  if (!isDatabaseConfigured() || !db) {
+    return {
+      success: false,
+      error:
+        "La base de données n'est pas configurée. Définissez DATABASE_URL avant de créer un compte.",
+    };
+  }
+
+  try {
     const rawData = {
       company: {
         name: formData.get('company.name') as string,
@@ -55,9 +66,9 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
 
     const { company, user } = validation.data;
 
-    // Check if company already exists
-    const existingCompany = await prisma.company.findUnique({
+    const existingCompany = await db.company.findUnique({
       where: { name: company.name },
+      select: { id: true },
     });
 
     if (existingCompany) {
@@ -67,8 +78,10 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
       };
     }
 
-    // Create company first
-    const newCompany = await prisma.company.create({
+    const supabase = await createServerSupabaseClient();
+    const adminClient = supabaseAdmin;
+
+    const newCompany = await db.company.create({
       data: {
         name: company.name,
         country: company.country,
@@ -76,7 +89,6 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
       },
     });
 
-    // Create user account with Supabase Auth
     const { data: authUser, error: authError } = await supabase.auth.signUp({
       email: user.email,
       password: user.password,
@@ -91,10 +103,7 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
     });
 
     if (authError || !authUser.user) {
-      // Cleanup: remove company if user creation failed
-      await prisma.company.delete({
-        where: { id: newCompany.id },
-      });
+      await db.company.delete({ where: { id: newCompany.id } });
 
       return {
         success: false,
@@ -102,9 +111,8 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
       };
     }
 
-    // Create user profile in our users table
     try {
-      await prisma.user.create({
+      await db.user.create({
         data: {
           id: authUser.user.id,
           email: user.email,
@@ -115,13 +123,10 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
         },
       });
     } catch {
-      // Cleanup: remove auth user and company if profile creation failed
-      if (authUser.user) {
-        await supabase.auth.admin?.deleteUser(authUser.user.id);
+      if (authUser.user && adminClient) {
+        await adminClient.auth.admin.deleteUser(authUser.user.id);
       }
-      await prisma.company.delete({
-        where: { id: newCompany.id },
-      });
+      await db.company.delete({ where: { id: newCompany.id } });
 
       return {
         success: false,
@@ -141,7 +146,6 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
       },
     };
   } catch (error) {
-    // Log error in development
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
       console.error('Registration error:', error);
@@ -158,8 +162,6 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
  */
 export async function signIn(formData: FormData): Promise<ActionResult> {
   try {
-    const supabase = await createServerSupabaseClient();
-
     const rawData = {
       email: formData.get('email') as string,
       password: formData.get('password') as string,
@@ -176,6 +178,8 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
     }
 
     const { email, password } = validation.data;
+
+    const supabase = await createServerSupabaseClient();
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -197,7 +201,6 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
       },
     };
   } catch (error) {
-    // Log error in development
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
       console.error('Sign in error:', error);
@@ -210,14 +213,16 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
 }
 
 /**
- * Sign out user
+ * Sign out action (server)
  */
-export async function signOut(): Promise<void> {
+export async function signOutAction(): Promise<void> {
   const supabase = await createServerSupabaseClient();
   const { error } = await supabase.auth.signOut();
+
   if (error && process.env.NODE_ENV === 'development') {
     // eslint-disable-next-line no-console
     console.error('Sign out error:', error);
   }
-  redirect('/');
+
+  redirect('/auth/login');
 }

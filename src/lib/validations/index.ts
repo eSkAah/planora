@@ -6,6 +6,7 @@
  */
 
 export * from './auth';
+export * from './employees';
 
 // Examples of future validation modules:
 // export { employeeSchema } from './employee';

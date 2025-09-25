@@ -6,6 +6,7 @@
  */
 
 export { prisma, supabase, supabaseAdmin } from './client';
+export { getPrismaClient } from './client';
 export type { Database } from './types';
 
 // Re-export Prisma types for convenience

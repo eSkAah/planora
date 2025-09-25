@@ -6,7 +6,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -44,124 +44,69 @@
 }
 
 :root {
-  --radius: 0.875rem;
+  --radius: 1.5rem; /* 24px pour les arrondis Apple-style */
 
-  /* Planora Premium Theme - Inspiré Apple */
-  --background: oklch(0.985 0.001 106.35);
-  --foreground: oklch(0.09 0.005 258.34);
-  --card: oklch(0.98 0.002 106.35);
-  --card-foreground: oklch(0.11 0.005 258.34);
-  --popover: oklch(0.985 0.001 106.35);
-  --popover-foreground: oklch(0.09 0.005 258.34);
+  /* Planora Premium Theme - Design System Exact */
+  /* Couleur principale: Bleu nuit foncé #0A1A2F */
+  --background: #ffffff; /* Couleur tertiaire: Blanc pur */
+  --foreground: #0a1a2f; /* Couleur principale pour le texte */
+  --card: #ffffff;
+  --card-foreground: #0a1a2f;
+  --popover: #ffffff;
+  --popover-foreground: #0a1a2f;
 
-  /* Primary: Bleu premium Apple-style */
-  --primary: oklch(0.54 0.233 252.72);
-  --primary-foreground: oklch(0.985 0.001 106.35);
+  /* Primary: Bleu nuit foncé #0A1A2F */
+  --primary: #0a1a2f;
+  --primary-foreground: #ffffff;
 
-  /* Secondary: Gris premium sophistiqué */
-  --secondary: oklch(0.96 0.004 258.34);
-  --secondary-foreground: oklch(0.13 0.005 258.34);
+  /* Secondary: Jaune padel adouci #F2E94E */
+  --secondary: #f2e94e;
+  --secondary-foreground: #0a1a2f;
 
-  /* Muted: Tons neutres élégants */
-  --muted: oklch(0.97 0.002 258.34);
-  --muted-foreground: oklch(0.46 0.006 258.34);
+  /* Muted: Tons neutres élégants basés sur le design */
+  --muted: #f8f9fa;
+  --muted-foreground: #6b7280;
 
-  /* Accent: Violet premium moderne */
-  --accent: oklch(0.96 0.008 285.85);
-  --accent-foreground: oklch(0.13 0.005 258.34);
+  /* Accent: Vert pastel #A8E6CF */
+  --accent: #a8e6cf;
+  --accent-foreground: #0a1a2f;
 
-  /* Success: Vert émeraude premium */
-  --success: oklch(0.55 0.16 162.84);
-  --success-foreground: oklch(0.985 0.001 106.35);
+  /* Success: Vert pastel pour les états de succès */
+  --success: #a8e6cf;
+  --success-foreground: #0a1a2f;
 
-  /* Warning: Orange sophistiqué */
-  --warning: oklch(0.72 0.18 65.89);
-  --warning-foreground: oklch(0.985 0.001 106.35);
+  /* Warning: Jaune padel pour les avertissements */
+  --warning: #f2e94e;
+  --warning-foreground: #0a1a2f;
 
-  /* Destructive: Rouge premium */
-  --destructive: oklch(0.58 0.24 19.27);
-  --destructive-foreground: oklch(0.985 0.001 106.35);
+  /* Destructive: Rouge contraste avec le design */
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
 
-  --border: oklch(0.92 0.003 258.34);
-  --input: oklch(0.98 0.002 258.34);
-  --ring: oklch(0.54 0.233 252.72);
+  --border: #e5e7eb;
+  --input: #ffffff;
+  --ring: #0a1a2f; /* Focus avec la couleur principale */
 
-  /* Chart colors palette premium */
-  --chart-1: oklch(0.54 0.233 252.72);
-  --chart-2: oklch(0.55 0.16 162.84);
-  --chart-3: oklch(0.62 0.19 285.85);
-  --chart-4: oklch(0.72 0.18 65.89);
-  --chart-5: oklch(0.58 0.22 340.34);
+  /* Chart colors palette selon design system */
+  --chart-1: #0a1a2f; /* Bleu nuit principal */
+  --chart-2: #f2e94e; /* Jaune accent */
+  --chart-3: #a8e6cf; /* Vert pastel */
+  --chart-4: #6b7280; /* Gris neutre */
+  --chart-5: #9ca3af; /* Gris plus clair */
 
-  /* Sidebar design Apple-like */
-  --sidebar: oklch(0.975 0.002 258.34);
-  --sidebar-foreground: oklch(0.13 0.005 258.34);
-  --sidebar-primary: oklch(0.54 0.233 252.72);
-  --sidebar-primary-foreground: oklch(0.985 0.001 106.35);
-  --sidebar-accent: oklch(0.96 0.004 258.34);
-  --sidebar-accent-foreground: oklch(0.13 0.005 258.34);
-  --sidebar-border: oklch(0.92 0.003 258.34);
-  --sidebar-ring: oklch(0.54 0.233 252.72);
+  /* Sidebar design exact selon DESIGN.md */
+  --sidebar: #fafafa; /* Fond très légèrement teinté */
+  --sidebar-foreground: #0a1a2f;
+  --sidebar-primary: #0a1a2f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f2e94e; /* Accent jaune pour les hover */
+  --sidebar-accent-foreground: #0a1a2f;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #0a1a2f;
 }
 
-.dark {
-  /* Planora Dark Premium Theme - Style Apple */
-  --background: oklch(0.06 0.004 258.34);
-  --foreground: oklch(0.94 0.004 258.34);
-  --card: oklch(0.09 0.005 258.34);
-  --card-foreground: oklch(0.92 0.004 258.34);
-  --popover: oklch(0.09 0.005 258.34);
-  --popover-foreground: oklch(0.92 0.004 258.34);
-
-  /* Primary: Bleu Apple premium pour dark mode */
-  --primary: oklch(0.64 0.22 252.72);
-  --primary-foreground: oklch(0.06 0.004 258.34);
-
-  /* Secondary: Gris foncé premium */
-  --secondary: oklch(0.15 0.006 258.34);
-  --secondary-foreground: oklch(0.9 0.004 258.34);
-
-  /* Muted: Tons foncés élégants */
-  --muted: oklch(0.12 0.005 258.34);
-  --muted-foreground: oklch(0.62 0.006 258.34);
-
-  /* Accent: Violet foncé moderne */
-  --accent: oklch(0.18 0.01 285.85);
-  --accent-foreground: oklch(0.9 0.004 258.34);
-
-  /* Success: Vert émeraude pour dark */
-  --success: oklch(0.58 0.15 162.84);
-  --success-foreground: oklch(0.06 0.004 258.34);
-
-  /* Warning: Orange pour dark mode */
-  --warning: oklch(0.75 0.17 65.89);
-  --warning-foreground: oklch(0.06 0.004 258.34);
-
-  /* Destructive: Rouge pour dark mode */
-  --destructive: oklch(0.65 0.22 19.27);
-  --destructive-foreground: oklch(0.94 0.004 258.34);
-
-  --border: oklch(0.2 0.006 258.34);
-  --input: oklch(0.15 0.005 258.34);
-  --ring: oklch(0.64 0.22 252.72);
-
-  /* Chart colors palette premium dark */
-  --chart-1: oklch(0.64 0.22 252.72);
-  --chart-2: oklch(0.58 0.15 162.84);
-  --chart-3: oklch(0.68 0.18 285.85);
-  --chart-4: oklch(0.75 0.17 65.89);
-  --chart-5: oklch(0.65 0.2 340.34);
-
-  /* Sidebar dark Apple-like */
-  --sidebar: oklch(0.08 0.005 258.34);
-  --sidebar-foreground: oklch(0.9 0.004 258.34);
-  --sidebar-primary: oklch(0.64 0.22 252.72);
-  --sidebar-primary-foreground: oklch(0.06 0.004 258.34);
-  --sidebar-accent: oklch(0.15 0.006 258.34);
-  --sidebar-accent-foreground: oklch(0.9 0.004 258.34);
-  --sidebar-border: oklch(0.2 0.006 258.34);
-  --sidebar-ring: oklch(0.64 0.22 252.72);
-}
+/* DESIGN.md: "Pas de Dark mode → un seul thème premium" */
+/* Le design system ne prévoit qu'un seul thème premium, pas de dark mode */
 
 @layer base {
   * {

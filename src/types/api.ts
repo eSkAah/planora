@@ -25,14 +25,14 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 export interface ApiError {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   field?: string;
 }
 
 /**
  * API Success Response
  */
-export interface ApiSuccess<T = any> {
+export interface ApiSuccess<T = unknown> {
   data: T;
   message?: string;
   meta?: {
@@ -45,7 +45,7 @@ export interface ApiSuccess<T = any> {
 /**
  * Paginated API Response
  */
-export interface ApiPaginatedResponse<T = any> {
+export interface ApiPaginatedResponse<T = unknown> {
   data: T[];
   pagination: {
     page: number;
@@ -65,7 +65,7 @@ export interface ApiPaginatedResponse<T = any> {
 /**
  * API Response Union Type
  */
-export type ApiResponse<T = any> = ApiSuccess<T> | { error: ApiError };
+export type ApiResponse<T = unknown> = ApiSuccess<T> | { error: ApiError };
 
 /**
  * Authentication Types
@@ -328,7 +328,7 @@ export interface ReportResponse {
 export interface SearchRequest {
   query: string;
   entity_types?: ('employees' | 'schedules' | 'shifts')[];
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   limit?: number;
   offset?: number;
 }
@@ -359,7 +359,7 @@ export interface FilterOptions {
 export interface WebhookEvent {
   id: string;
   type: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   timestamp: string;
   company_id: string;
 }

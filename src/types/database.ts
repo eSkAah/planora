@@ -243,7 +243,7 @@ export interface Notification extends BaseEntity {
   category: 'schedule' | 'leave' | 'system' | 'reminder';
   is_read: boolean;
   action_url?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 /**
@@ -255,8 +255,8 @@ export interface AuditLog extends BaseEntity {
   action: string;
   entity_type: string;
   entity_id: string;
-  old_values?: Record<string, any>;
-  new_values?: Record<string, any>;
+  old_values?: Record<string, unknown>;
+  new_values?: Record<string, unknown>;
   ip_address?: string;
   user_agent?: string;
 }
