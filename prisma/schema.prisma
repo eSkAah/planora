@@ -19,48 +19,48 @@ datasource db {
 // ==============================================
 
 enum UserRole {
-  SUPER_ADMIN
-  ADMIN
-  MANAGER
-  EMPLOYEE
-  VIEWER
+  SUPER_ADMIN @map("super_admin")
+  ADMIN @map("admin")
+  MANAGER @map("manager")
+  EMPLOYEE @map("employee")
+  VIEWER @map("viewer")
 }
 
 enum ContractType {
-  FULL_TIME
-  PART_TIME
-  TEMPORARY
-  INTERN
-  FREELANCE
+  FULL_TIME @map("full_time")
+  PART_TIME @map("part_time")
+  TEMPORARY @map("temporary")
+  INTERN @map("intern")
+  FREELANCE @map("freelance")
 }
 
 enum ShiftType {
-  MORNING
-  AFTERNOON
-  EVENING
-  NIGHT
-  CUSTOM
+  MORNING @map("morning")
+  AFTERNOON @map("afternoon")
+  EVENING @map("evening")
+  NIGHT @map("night")
+  CUSTOM @map("custom")
 }
 
 enum ScheduleStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
+  DRAFT @map("draft")
+  PUBLISHED @map("published")
+  ARCHIVED @map("archived")
 }
 
 enum AssignmentStatus {
-  SCHEDULED
-  CONFIRMED
-  IN_PROGRESS
-  COMPLETED
-  MISSED
-  CANCELLED
+  SCHEDULED @map("scheduled")
+  CONFIRMED @map("confirmed")
+  IN_PROGRESS @map("in_progress")
+  COMPLETED @map("completed")
+  MISSED @map("missed")
+  CANCELLED @map("cancelled")
 }
 
 enum GenerationMethod {
-  MANUAL
-  AI
-  TEMPLATE
+  MANUAL @map("manual")
+  AI @map("ai")
+  TEMPLATE @map("template")
 }
 
 // ==============================================

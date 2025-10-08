@@ -1,14 +1,20 @@
 import {
+  afterAll,
   beforeAll,
   beforeEach,
   describe,
   expect,
   it,
   jest,
-  afterAll,
 } from '@jest/globals';
 
 type PrismaMock = ReturnType<typeof createPrismaMock>;
+
+type SupabaseAdminMock = ReturnType<
+  typeof createSupabaseAdminScaffold
+>['client'];
+
+type SupabaseAdminScaffold = ReturnType<typeof createSupabaseAdminScaffold>;
 
 const createPrismaMock = () => ({
   company: {
@@ -21,16 +27,33 @@ const createPrismaMock = () => ({
   },
 });
 
-let prismaMock: PrismaMock = createPrismaMock();
+const createSupabaseAdminScaffold = () => {
+  const createUser = jest.fn();
+  const deleteUser = jest.fn();
+  const from = jest.fn();
 
-const supabaseAdminMock = {
-  auth: {
-    admin: {
-      deleteUser: jest.fn(),
+  return {
+    client: {
+      auth: {
+        admin: {
+          createUser,
+          deleteUser,
+        },
+      },
+      from,
     },
-  },
+    handlers: {
+      createUser,
+      deleteUser,
+      from,
+    },
+  };
 };
 
+let prismaMock: PrismaMock = createPrismaMock();
+let supabaseAdminScaffold: SupabaseAdminScaffold =
+  createSupabaseAdminScaffold();
+let currentSupabaseAdminMock: SupabaseAdminMock = supabaseAdminScaffold.client;
 const createServerSupabaseClientMock = jest.fn();
 
 jest.unstable_mockModule('@/generated/prisma', () => ({
@@ -50,8 +73,10 @@ jest.unstable_mockModule(
 
 let createAccount: typeof import('@/lib/auth/actions').createAccount;
 let signIn: typeof import('@/lib/auth/actions').signIn;
+let signOutAction: typeof import('@/lib/auth/actions').signOutAction;
 let databaseClientModule: typeof import('@/lib/database/client');
 let supabaseServerModule: typeof import('@/lib/supabase/server');
+let redirectMock: jest.Mock;
 let originalEnv: NodeJS.ProcessEnv;
 
 beforeAll(async () => {
@@ -83,7 +108,10 @@ beforeAll(async () => {
 
   Object.defineProperty(databaseClientModule, 'supabaseAdmin', {
     configurable: true,
-    get: () => supabaseAdminMock,
+    get: () => currentSupabaseAdminMock,
+    set: value => {
+      currentSupabaseAdminMock = value as SupabaseAdminMock;
+    },
   });
 
   jest
@@ -92,9 +120,13 @@ beforeAll(async () => {
       createServerSupabaseClientMock as unknown as typeof supabaseServerModule.createServerSupabaseClient
     );
 
+  const navigationModule = await import('next/navigation');
+  redirectMock = navigationModule.redirect as jest.Mock;
+
   const actionsModule = await import('@/lib/auth/actions');
   createAccount = actionsModule.createAccount;
   signIn = actionsModule.signIn;
+  signOutAction = actionsModule.signOutAction;
 });
 
 afterAll(() => {
@@ -121,8 +153,15 @@ describe('auth server actions', () => {
     (
       databaseClientModule.getPrismaClient as unknown as jest.Mock
     ).mockReturnValue(prismaMock);
-    supabaseAdminMock.auth.admin.deleteUser.mockReset();
-    createServerSupabaseClientMock.mockClear();
+
+    supabaseAdminScaffold = createSupabaseAdminScaffold();
+    currentSupabaseAdminMock = supabaseAdminScaffold.client;
+
+    createServerSupabaseClientMock.mockReset();
+    redirectMock.mockReset();
+    jest
+      .spyOn(databaseClientModule, 'isDatabaseConfigured')
+      .mockReturnValue(true);
   });
 
   it('fails validation with detailed errors when form data is incomplete', async () => {
@@ -136,64 +175,140 @@ describe('auth server actions', () => {
     expect(createServerSupabaseClientMock).not.toHaveBeenCalled();
   });
 
-  it('cleans up company when Supabase signUp fails', async () => {
-    (prismaMock.company.findUnique as jest.Mock).mockResolvedValue(null);
-    (prismaMock.company.create as jest.Mock).mockResolvedValue({
-      id: 'company-id',
-    });
+  it('cleans up company when user creation fails', async () => {
+    jest
+      .spyOn(databaseClientModule, 'isDatabaseConfigured')
+      .mockReturnValue(false);
+    (databaseClientModule.getPrismaClient as jest.Mock).mockReturnValue(null);
 
-    (createServerSupabaseClientMock as jest.Mock).mockResolvedValue({
+    const companiesSelectMaybeSingle = jest
+      .fn()
+      .mockResolvedValue({ data: null, error: null });
+    const companiesSelect = jest.fn(() => ({
+      eq: jest.fn(() => ({ maybeSingle: companiesSelectMaybeSingle })),
+    }));
+    const companiesInsertSingle = jest
+      .fn()
+      .mockResolvedValue({ data: { id: 'company-id' }, error: null });
+    const companiesInsert = jest.fn(() => ({
+      select: jest.fn(() => ({ single: companiesInsertSingle })),
+    }));
+    const companiesDelete = jest.fn(() => ({
+      eq: jest.fn(async () => ({ error: null })),
+    }));
+
+    currentSupabaseAdminMock = {
       auth: {
-        signUp: jest.fn().mockResolvedValue({
-          data: { user: null, session: null },
-          error: { message: 'signup failed' },
-        }),
+        admin: {
+          createUser: jest.fn(async () => ({
+            data: null,
+            error: { message: 'User creation failed' },
+          })),
+          deleteUser: jest.fn(),
+        },
       },
-    } as unknown);
+      from: jest.fn((table: string) => {
+        if (table === 'companies') {
+          return {
+            select: companiesSelect,
+            insert: companiesInsert,
+            delete: companiesDelete,
+          } as unknown;
+        }
+        return {} as unknown;
+      }),
+    };
 
     const result = await createAccount(buildValidFormData());
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe('signup failed');
-    expect(prismaMock.company.delete as jest.Mock).toHaveBeenCalledWith({
-      where: { id: 'company-id' },
-    });
+    expect(result.error).toBe('User creation failed');
+    expect(companiesDelete).toHaveBeenCalled();
   });
 
-  it('creates company and user profile on success', async () => {
-    (prismaMock.company.findUnique as jest.Mock).mockResolvedValue(null);
-    (prismaMock.company.create as jest.Mock).mockResolvedValue({
-      id: 'company-id',
-    });
+  it('creates tenant using Supabase admin when Prisma is unavailable', async () => {
+    jest
+      .spyOn(databaseClientModule, 'isDatabaseConfigured')
+      .mockReturnValue(false);
+    (databaseClientModule.getPrismaClient as jest.Mock).mockReturnValue(null);
 
-    const signUpMock = jest.fn().mockResolvedValue({
-      data: {
-        user: { id: 'user-id', email: 'marie.manager@aurora.dev' },
-        session: { id: 'session-id' },
-      },
-      error: null,
-    });
+    const companiesSelectMaybeSingle = jest
+      .fn()
+      .mockResolvedValue({ data: null, error: null });
+    const companiesSelect = jest.fn(() => ({
+      eq: jest.fn(() => ({ maybeSingle: companiesSelectMaybeSingle })),
+    }));
+    const companiesInsertSingle = jest
+      .fn()
+      .mockResolvedValue({ data: { id: 'company-id' }, error: null });
+    const companiesInsert = jest.fn(() => ({
+      select: jest.fn(() => ({ single: companiesInsertSingle })),
+    }));
+    const companiesDelete = jest.fn(() => ({
+      eq: jest.fn(async () => ({ error: null })),
+    }));
+    const usersInsert = jest.fn(async () => ({ error: null }));
 
-    (createServerSupabaseClientMock as jest.Mock).mockResolvedValue({
+    currentSupabaseAdminMock = {
       auth: {
-        signUp: signUpMock,
+        admin: {
+          createUser: jest.fn(async () => ({
+            data: {
+              user: { id: 'user-id', email: 'marie.manager@aurora.dev' },
+            },
+            error: null,
+          })),
+          deleteUser: jest.fn(),
+        },
       },
-    } as unknown);
+      from: jest.fn((table: string) => {
+        if (table === 'companies') {
+          return {
+            select: companiesSelect,
+            insert: companiesInsert,
+            delete: companiesDelete,
+          } as unknown;
+        }
+        if (table === 'users') {
+          return {
+            insert: usersInsert,
+          } as unknown;
+        }
+        return {} as unknown;
+      }),
+    };
 
     const result = await createAccount(buildValidFormData());
 
     expect(result.success).toBe(true);
-    expect(prismaMock.company.create as jest.Mock).toHaveBeenCalled();
-    expect(prismaMock.user.create as jest.Mock).toHaveBeenCalledWith({
-      data: {
-        id: 'user-id',
-        email: 'marie.manager@aurora.dev',
-        firstName: 'Marie',
-        lastName: 'Dupont',
-        role: 'ADMIN',
-        companyId: 'company-id',
-      },
+    expect(companiesSelect).toHaveBeenCalledWith('id');
+    expect(companiesInsert).toHaveBeenCalledWith({
+      name: 'Aurora Retail',
+      country: 'France',
+      sector: 'Retail',
     });
+    expect(usersInsert).toHaveBeenCalledWith({
+      id: 'user-id',
+      email: 'marie.manager@aurora.dev',
+      first_name: 'Marie',
+      last_name: 'Dupont',
+      role: 'admin',
+      company_id: 'company-id',
+      is_active: true,
+    });
+  });
+
+  it('returns explicit error when Supabase admin client is missing', async () => {
+    jest
+      .spyOn(databaseClientModule, 'isDatabaseConfigured')
+      .mockReturnValue(false);
+    (databaseClientModule.getPrismaClient as jest.Mock).mockReturnValue(null);
+    currentSupabaseAdminMock = null as unknown as SupabaseAdminMock;
+
+    const result = await createAccount(buildValidFormData());
+
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/Supabase admin client is not configured/i);
   });
 
   it('returns error when sign in validation fails', async () => {
@@ -217,14 +332,11 @@ describe('auth server actions', () => {
       error: null,
     });
 
-    (createServerSupabaseClientMock as jest.Mock).mockImplementation(
-      async () =>
-        ({
-          auth: {
-            signInWithPassword: signInMock,
-          },
-        }) as unknown
-    );
+    (createServerSupabaseClientMock as jest.Mock).mockResolvedValue({
+      auth: {
+        signInWithPassword: signInMock,
+      },
+    } as unknown);
 
     const formData = new FormData();
     formData.set('email', 'marie.manager@aurora.dev');
@@ -238,5 +350,19 @@ describe('auth server actions', () => {
     });
     expect(result.success).toBe(true);
     expect((result.data as { session?: unknown })?.session).toBeDefined();
+  });
+
+  it('signs out through Supabase and redirects home', async () => {
+    const signOutMock = jest.fn().mockResolvedValue({ error: null });
+    (createServerSupabaseClientMock as jest.Mock).mockResolvedValue({
+      auth: {
+        signOut: signOutMock,
+      },
+    } as unknown);
+
+    await signOutAction();
+
+    expect(signOutMock).toHaveBeenCalled();
+    expect(redirectMock).toHaveBeenCalledWith('/');
   });
 });

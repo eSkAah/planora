@@ -1,0 +1,157 @@
+# =============================================================================
+# PLANORA - RÈGLES DE DÉVELOPPEMENT AVEC CLAUDE CODE
+# =============================================================================
+# Ce fichier contient les consignes et bonnes pratiques pour le développement
+# du projet Planora avec Claude Code.
+# =============================================================================
+
+## 🧪 TESTS E2E OBLIGATOIRES
+
+Pour chaque feature importante développée, créer un test E2E avec Playwright pour garantir que tout fonctionne correctement en conditions réelles.
+
+### Quand créer un test E2E :
+- ✅ Nouvelle feature d'authentification (signup, login, logout)
+- ✅ Flux complet de création/modification de données critiques
+- ✅ Workflows multi-étapes (création d'emploi, planning, etc.)
+- ✅ Intégrations externes (Supabase, OpenAI, etc.)
+- ✅ Parcours utilisateur critiques (onboarding, paiement, etc.)
+
+### Framework de test :
+- **Playwright** (préféré pour Next.js)
+- Les tests E2E sont dans `/e2e/` ou `/tests/e2e/`
+- Configuration dans `playwright.config.ts`
+
+### Structure des tests :
+```typescript
+// e2e/auth/signup.spec.ts
+test('should create account successfully', async ({ page }) => {
+  // 1. Navigation
+  // 2. Remplissage du formulaire
+  // 3. Validation
+  // 4. Vérification dans la DB
+});
+```
+
+## 📁 STRUCTURE DU PROJET
+
+```
+planora/
+├── src/
+│   ├── app/                  # Next.js App Router
+│   ├── components/           # Composants React
+│   ├── lib/                  # Utilitaires et logique métier
+│   │   ├── auth/             # Actions d'authentification
+│   │   ├── database/         # Client Supabase & Prisma
+│   │   └── validations/      # Schémas Zod
+├── e2e/                      # Tests E2E Playwright
+├── __tests__/                # Tests unitaires Jest
+└── prisma/                   # Schéma Prisma & migrations
+```
+
+## 🔧 STACK TECHNIQUE
+
+- **Framework**: Next.js 15 (App Router)
+- **Base de données**: Supabase (PostgreSQL)
+- **ORM**: Prisma
+- **Auth**: Supabase Auth
+- **Validation**: Zod
+- **Tests unitaires**: Jest
+- **Tests E2E**: Playwright
+- **Styling**: Tailwind CSS
+- **AI**: OpenAI API
+
+## 🚀 WORKFLOW DE DÉVELOPPEMENT
+
+### 1. Feature Development
+1. Créer une branche depuis `develop`
+2. Implémenter la feature
+3. Écrire les tests unitaires (Jest)
+4. Écrire les tests E2E (Playwright) pour les features importantes
+5. Vérifier que tous les tests passent
+6. Créer une PR vers `develop`
+
+### 2. Tests avant commit
+```bash
+npm run test          # Tests unitaires
+npm run test:e2e      # Tests E2E
+npm run build         # Vérification TypeScript
+npm run lint          # Linting
+```
+
+### 3. Configuration
+- Variables d'environnement : `.env.local` (dev) / `.env` (ignoré par git)
+- Ne jamais commit de secrets (API keys, passwords, etc.)
+
+## 📝 CONVENTIONS DE CODE
+
+### Imports
+```typescript
+// 1. External dependencies
+import { useState } from 'react';
+
+// 2. Internal aliases
+import { Button } from '@/components/ui/button';
+import { createAccount } from '@/lib/auth/actions';
+
+// 3. Relative imports (éviter si possible)
+import { helper } from '../utils';
+```
+
+### Naming
+- **Components**: PascalCase (`UserProfile.tsx`)
+- **Hooks**: camelCase avec prefix `use` (`useAuth.ts`)
+- **Utils**: camelCase (`formatDate.ts`)
+- **Server Actions**: camelCase (`createAccount`)
+- **Types/Interfaces**: PascalCase (`UserRole`, `ActionResult`)
+
+### Server Actions
+- Toujours dans des fichiers avec `'use server'`
+- Return type: `Promise<ActionResult<T>>`
+- Validation avec Zod avant traitement
+- Gestion d'erreurs avec rollback si nécessaire
+
+### Database
+- Migrations Prisma pour les changements de schéma
+- Utiliser Supabase Admin pour les opérations serveur sensibles
+- Rollback automatique en cas d'erreur (transactions)
+
+## 🔐 SÉCURITÉ
+
+- ✅ Valider toutes les entrées utilisateur avec Zod
+- ✅ Utiliser `SUPABASE_SERVICE_ROLE_KEY` uniquement côté serveur
+- ✅ RLS (Row Level Security) activé sur Supabase
+- ✅ Sanitizer les erreurs avant de les retourner au client
+- ✅ Ne jamais exposer de secrets dans le code client
+
+## 🐛 DEBUGGING
+
+### Logs Supabase
+```bash
+# Via MCP Supabase
+mcp supabase get_logs --service api
+mcp supabase get_logs --service auth
+```
+
+### Advisors Supabase
+```bash
+# Vérifier les problèmes de sécurité/performance
+mcp supabase get_advisors --type security
+mcp supabase get_advisors --type performance
+```
+
+## 📊 MONITORING
+
+- Vérifier les advisors Supabase après chaque modification de schéma
+- S'assurer que RLS est activé sur toutes les tables sensibles
+- Tester les performances sur des datasets réalistes
+
+## 🎯 PRIORITÉS
+
+1. **Sécurité** : Validation, authentification, autorisation
+2. **Fiabilité** : Tests E2E pour les features critiques
+3. **Performance** : Optimisation des requêtes, caching
+4. **UX** : Feedback utilisateur, états de chargement, erreurs claires
+
+---
+
+**Note**: Ce fichier est maintenu par l'équipe de développement et doit être mis à jour régulièrement pour refléter les meilleures pratiques actuelles du projet.

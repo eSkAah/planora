@@ -8,11 +8,7 @@
 
 import { redirect } from 'next/navigation';
 
-import {
-  getPrismaClient,
-  isDatabaseConfigured,
-  supabaseAdmin,
-} from '@/lib/database/client';
+import { supabaseAdmin } from '@/lib/database/client';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { accountCreationSchema, userLoginSchema } from '@/lib/validations';
 
@@ -27,16 +23,6 @@ type ActionResult<T = unknown> = {
  * Create a new company and user account
  */
 export async function createAccount(formData: FormData): Promise<ActionResult> {
-  const db = getPrismaClient();
-
-  if (!isDatabaseConfigured() || !db) {
-    return {
-      success: false,
-      error:
-        "La base de données n'est pas configurée. Définissez DATABASE_URL avant de créer un compte.",
-    };
-  }
-
   try {
     const rawData = {
       company: {
@@ -50,7 +36,7 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
         confirmPassword: formData.get('user.confirmPassword') as string,
         firstName: formData.get('user.firstName') as string,
         lastName: formData.get('user.lastName') as string,
-        role: (formData.get('user.role') as string) || 'employee',
+        role: (formData.get('user.role') as string) || 'EMPLOYEE',
       },
     };
 
@@ -66,10 +52,28 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
 
     const { company, user } = validation.data;
 
-    const existingCompany = await db.company.findUnique({
-      where: { name: company.name },
-      select: { id: true },
-    });
+    if (!supabaseAdmin) {
+      return {
+        success: false,
+        error:
+          'Supabase admin client is not configured. Define SUPABASE_SERVICE_ROLE_KEY to enable account creation.',
+      };
+    }
+
+    // Check if company name already exists
+    const { data: existingCompany, error: existingCompanyError } =
+      await supabaseAdmin
+        .from('companies')
+        .select('id')
+        .eq('name', company.name)
+        .maybeSingle();
+
+    if (existingCompanyError) {
+      return {
+        success: false,
+        error: existingCompanyError.message,
+      };
+    }
 
     if (existingCompany) {
       return {
@@ -78,59 +82,88 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
       };
     }
 
-    const supabase = await createServerSupabaseClient();
-    const adminClient = supabaseAdmin;
+    // Create company
+    const { data: insertedCompany, error: insertCompanyError } =
+      await supabaseAdmin
+        .from('companies')
+        .insert({
+          name: company.name,
+          country: company.country,
+          sector: company.sector,
+        })
+        .select('id')
+        .single();
 
-    const newCompany = await db.company.create({
-      data: {
-        name: company.name,
-        country: company.country,
-        sector: company.sector,
-      },
-    });
-
-    const { data: authUser, error: authError } = await supabase.auth.signUp({
-      email: user.email,
-      password: user.password,
-      options: {
-        data: {
-          first_name: user.firstName,
-          last_name: user.lastName,
-          role: user.role,
-          company_id: newCompany.id,
-        },
-      },
-    });
-
-    if (authError || !authUser.user) {
-      await db.company.delete({ where: { id: newCompany.id } });
-
+    if (insertCompanyError || !insertedCompany) {
       return {
         success: false,
-        error: authError?.message || 'Failed to create user account',
+        error:
+          insertCompanyError?.message || 'Failed to create company in database',
       };
     }
 
-    try {
-      await db.user.create({
-        data: {
-          id: authUser.user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role.toUpperCase() as 'ADMIN' | 'MANAGER' | 'EMPLOYEE',
-          companyId: newCompany.id,
+    // Map role to lowercase for Supabase database
+    const roleMap = {
+      ADMIN: 'admin',
+      MANAGER: 'manager',
+      EMPLOYEE: 'employee',
+      SUPER_ADMIN: 'super_admin',
+      VIEWER: 'viewer',
+    } as const;
+    const dbRole = roleMap[user.role as keyof typeof roleMap] || 'employee';
+
+    // Create user in Supabase Auth
+    const { data: createdUser, error: adminError } =
+      await supabaseAdmin.auth.admin.createUser({
+        email: user.email,
+        password: user.password,
+        email_confirm: true, // Auto-confirm email for better UX
+        user_metadata: {
+          first_name: user.firstName,
+          last_name: user.lastName,
+          role: dbRole,
+          company_id: insertedCompany.id,
         },
       });
-    } catch {
-      if (authUser.user && adminClient) {
-        await adminClient.auth.admin.deleteUser(authUser.user.id);
-      }
-      await db.company.delete({ where: { id: newCompany.id } });
+
+    if (adminError || !createdUser?.user) {
+      await supabaseAdmin
+        .from('companies')
+        .delete()
+        .eq('id', insertedCompany.id);
 
       return {
         success: false,
-        error: 'Failed to create user profile',
+        error: adminError?.message || 'Failed to create user account',
+      };
+    }
+
+    const supabaseUser = createdUser.user;
+
+    // Create user profile in database
+    const { error: insertUserError } = await supabaseAdmin
+      .from('users')
+      .insert({
+        id: supabaseUser.id,
+        email: user.email,
+        first_name: user.firstName,
+        last_name: user.lastName,
+        role: dbRole,
+        company_id: insertedCompany.id,
+        is_active: true,
+      });
+
+    if (insertUserError) {
+      // Rollback: delete auth user and company
+      await supabaseAdmin.auth.admin.deleteUser(supabaseUser.id);
+      await supabaseAdmin
+        .from('companies')
+        .delete()
+        .eq('id', insertedCompany.id);
+
+      return {
+        success: false,
+        error: insertUserError.message || 'Failed to create user profile',
       };
     }
 
@@ -138,11 +171,11 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
       success: true,
       data: {
         user: {
-          id: authUser.user.id,
-          email: authUser.user.email,
-          company_id: newCompany.id,
+          id: supabaseUser.id,
+          email: supabaseUser.email,
+          company_id: insertedCompany.id,
         },
-        requiresEmailConfirmation: !authUser.session,
+        requiresEmailConfirmation: false, // Email is auto-confirmed
       },
     };
   } catch (error) {
