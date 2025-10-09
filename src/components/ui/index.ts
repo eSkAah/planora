@@ -121,6 +121,10 @@ export {
 // Composants d'affichage
 export { Avatar, AvatarFallback, AvatarImage } from './avatar';
 export { Progress } from './progress';
+export { Stepper } from './stepper';
+export { Calendar } from './calendar';
+export { Popover, PopoverTrigger, PopoverContent } from './popover';
+export { Checkbox } from './checkbox';
 
 // Toasts
 export {

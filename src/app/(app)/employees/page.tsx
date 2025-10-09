@@ -1,0 +1,715 @@
+'use client';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { PlusCircle, Search, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  useToast,
+} from '@/components/ui';
+import {
+  createEmployee,
+  getEmployees,
+} from '@/lib/actions/employees';
+import {
+  createEmployeeSchema,
+  contractTypes,
+  type CreateEmployeeInput,
+} from '@/lib/validations/employees';
+
+type Employee = NonNullable<Awaited<ReturnType<typeof getEmployees>>['data']>[number];
+
+export default function EmployeesPage() {
+  const { toast } = useToast();
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  // Dialog states
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [temporaryPassword, setTemporaryPassword] = useState('');
+  const [newEmployeeName, setNewEmployeeName] = useState('');
+
+  const createForm = useForm<CreateEmployeeInput>({
+    resolver: zodResolver(createEmployeeSchema) as any,
+    defaultValues: {
+      email: '',
+      firstName: '',
+      lastName: '',
+      phone: '',
+      dateOfBirth: new Date(),
+      address: '',
+      city: '',
+      postalCode: '',
+      emergencyContactName: '',
+      emergencyContactPhone: '',
+      hireDate: new Date(),
+      contractType: 'full_time',
+      position: '',
+      department: '',
+      employeeNumber: '',
+      managerId: '',
+    },
+  });
+
+  const loadEmployees = async () => {
+    setIsLoading(true);
+    const result = await getEmployees();
+    if (result.success && result.data) {
+      setEmployees(result.data);
+    } else if (result.error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erreur',
+        description: result.error,
+      });
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadEmployees();
+  }, []);
+
+  const handleCreateEmployee = async (data: CreateEmployeeInput) => {
+    const result = await createEmployee(data);
+
+    if (result.success && result.data) {
+      toast({
+        title: 'Employé créé',
+        description: `L'employé a été créé avec succès.`,
+      });
+
+      setTemporaryPassword(result.data.temporaryPassword);
+      setNewEmployeeName(`${data.firstName} ${data.lastName}`);
+      setCreateDialogOpen(false);
+      setPasswordDialogOpen(true);
+      createForm.reset();
+      loadEmployees();
+    } else if (result.error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erreur',
+        description: result.error,
+      });
+    }
+  };
+
+  const handleCopyPassword = () => {
+    navigator.clipboard.writeText(temporaryPassword);
+    toast({
+      title: 'Copié',
+      description: 'Le mot de passe a été copié dans le presse-papier.',
+    });
+  };
+
+  // Filter employees
+  const filteredEmployees = employees.filter((employee) => {
+    const matchesSearch =
+      searchQuery === '' ||
+      employee.user?.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      employee.user?.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      employee.user?.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesDepartment =
+      departmentFilter === '' ||
+      (employee.department &&
+        employee.department.toLowerCase().includes(departmentFilter.toLowerCase()));
+
+    const matchesStatus =
+      statusFilter === '' || (statusFilter === 'active' ? employee.isActive : !employee.isActive);
+
+    return matchesSearch && matchesDepartment && matchesStatus;
+  });
+
+  // Get unique departments
+  const departments = Array.from(
+    new Set(employees.map((e) => e.department).filter((d): d is string => Boolean(d)))
+  );
+
+  // Stats
+  const stats = {
+    total: employees.length,
+    active: employees.filter((e) => e.isActive).length,
+    inactive: employees.filter((e) => !e.isActive).length,
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-semibold text-white">Employés</h1>
+          <p className="mt-2 text-white/70">Gérez vos employés et leurs informations</p>
+        </div>
+        <Button
+          onClick={() => setCreateDialogOpen(true)}
+          className="rounded-2xl bg-[#F2E94E] px-6 py-6 text-[#0A1A2F] transition-all duration-300 hover:bg-[#F2E94E]/90 hover:shadow-lg hover:shadow-[#F2E94E]/20"
+        >
+          <PlusCircle className="mr-2 h-5 w-5" />
+          Nouvel employé
+        </Button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="rounded-[24px] border border-white/15 bg-white/12 backdrop-blur-2xl">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-white/70">Total</p>
+                <p className="mt-2 text-3xl font-semibold text-white">{stats.total}</p>
+                <p className="mt-1 text-xs text-white/50">Employés</p>
+              </div>
+              <div className="rounded-full bg-[#F2E94E]/20 p-3">
+                <Users className="h-6 w-6 text-[#F2E94E]" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-[24px] border border-white/15 bg-white/12 backdrop-blur-2xl">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-white/70">Actifs</p>
+                <p className="mt-2 text-3xl font-semibold text-white">{stats.active}</p>
+                <p className="mt-1 text-xs text-white/50">En poste</p>
+              </div>
+              <div className="rounded-full bg-green-500/20 p-3">
+                <Users className="h-6 w-6 text-green-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-[24px] border border-white/15 bg-white/12 backdrop-blur-2xl">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-white/70">Inactifs</p>
+                <p className="mt-2 text-3xl font-semibold text-white">{stats.inactive}</p>
+                <p className="mt-1 text-xs text-white/50">Partis</p>
+              </div>
+              <div className="rounded-full bg-red-500/20 p-3">
+                <Users className="h-6 w-6 text-red-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card className="rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl">
+        <CardContent className="p-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
+              <Input
+                placeholder="Rechercher..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="rounded-2xl border-white/20 bg-white/5 pl-10 text-white placeholder:text-white/50"
+              />
+            </div>
+
+            <Select value={departmentFilter || 'all'} onValueChange={(v) => setDepartmentFilter(v === 'all' ? '' : v)}>
+              <SelectTrigger className="rounded-2xl border-white/20 bg-white/5 text-white">
+                <SelectValue placeholder="Département" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les départements</SelectItem>
+                {departments.map((dept) => (
+                  <SelectItem key={dept} value={dept}>
+                    {dept}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={statusFilter || 'all'} onValueChange={(v) => setStatusFilter(v === 'all' ? '' : v)}>
+              <SelectTrigger className="rounded-2xl border-white/20 bg-white/5 text-white">
+                <SelectValue placeholder="Statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous</SelectItem>
+                <SelectItem value="active">Actifs</SelectItem>
+                <SelectItem value="inactive">Inactifs</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Employees List */}
+      <Card className="rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl">
+        <CardHeader>
+          <CardTitle className="text-white">Liste des employés</CardTitle>
+          <CardDescription className="text-white/65">
+            {filteredEmployees.length} employé{filteredEmployees.length !== 1 ? 's' : ''}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <p className="text-white/50">Chargement...</p>
+            </div>
+          ) : filteredEmployees.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Users className="mb-4 h-12 w-12 text-white/30" />
+              <p className="text-sm text-white/50">
+                {employees.length === 0
+                  ? 'Aucun employé pour le moment'
+                  : 'Aucun employé ne correspond à votre recherche'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredEmployees.map((employee) => (
+                <div
+                  key={employee.id}
+                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F2E94E]/20 text-lg font-semibold text-[#F2E94E]">
+                      {employee.user?.firstName[0]}
+                      {employee.user?.lastName[0]}
+                    </div>
+                    <div>
+                      <p className="font-medium text-white">
+                        {employee.user?.firstName} {employee.user?.lastName}
+                      </p>
+                      <p className="text-sm text-white/60">{employee.user?.email}</p>
+                      {employee.position && (
+                        <p className="text-xs text-white/50">{employee.position}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {employee.department && (
+                      <span className="rounded-full bg-blue-500/20 px-3 py-1 text-xs font-medium text-blue-300">
+                        {employee.department}
+                      </span>
+                    )}
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${
+                        employee.isActive
+                          ? 'bg-green-500/20 text-green-300'
+                          : 'bg-red-500/20 text-red-300'
+                      }`}
+                    >
+                      {employee.isActive ? 'Actif' : 'Inactif'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Create Employee Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[32px] border-white/20 bg-[#0A1A2F] sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="text-white">Nouvel employé</DialogTitle>
+            <DialogDescription className="text-white/70">
+              Créer un nouvel employé avec compte utilisateur
+            </DialogDescription>
+          </DialogHeader>
+
+          <Form {...createForm}>
+            <form onSubmit={createForm.handleSubmit(handleCreateEmployee)} className="space-y-6">
+              {/* User Information */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-white">Informations utilisateur</h3>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={createForm.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Prénom</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            className="rounded-2xl border-white/20 bg-white/5 text-white"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={createForm.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Nom</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            className="rounded-2xl border-white/20 bg-white/5 text-white"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={createForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="email"
+                          className="rounded-2xl border-white/20 bg-white/5 text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={createForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Téléphone (optionnel)</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="rounded-2xl border-white/20 bg-white/5 text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Personal Information */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-white">Informations personnelles</h3>
+
+                <FormField
+                  control={createForm.control}
+                  name="dateOfBirth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Date de naissance</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                          onChange={(e) => field.onChange(new Date(e.target.value))}
+                          className="rounded-2xl border-white/20 bg-white/5 text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={createForm.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Adresse</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="rounded-2xl border-white/20 bg-white/5 text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={createForm.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Ville</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            className="rounded-2xl border-white/20 bg-white/5 text-white"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={createForm.control}
+                    name="postalCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Code postal</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            className="rounded-2xl border-white/20 bg-white/5 text-white"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Professional Information */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-white">Informations professionnelles</h3>
+
+                <FormField
+                  control={createForm.control}
+                  name="hireDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Date d&apos;embauche</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                          onChange={(e) => field.onChange(new Date(e.target.value))}
+                          className="rounded-2xl border-white/20 bg-white/5 text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={createForm.control}
+                  name="contractType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Type de contrat</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="rounded-2xl border-white/20 bg-white/5 text-white">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {contractTypes.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type === 'full_time'
+                                ? 'Temps plein'
+                                : type === 'part_time'
+                                  ? 'Temps partiel'
+                                  : type === 'temporary'
+                                    ? 'Temporaire'
+                                    : type === 'intern'
+                                      ? 'Stage'
+                                      : 'Freelance'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={createForm.control}
+                    name="position"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Poste (optionnel)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            className="rounded-2xl border-white/20 bg-white/5 text-white"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={createForm.control}
+                    name="department"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Département (optionnel)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            className="rounded-2xl border-white/20 bg-white/5 text-white"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={createForm.control}
+                  name="employeeNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Numéro employé (optionnel)</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="rounded-2xl border-white/20 bg-white/5 text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Emergency Contact */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-white">Contact d&apos;urgence (optionnel)</h3>
+
+                <FormField
+                  control={createForm.control}
+                  name="emergencyContactName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Nom</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="rounded-2xl border-white/20 bg-white/5 text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={createForm.control}
+                  name="emergencyContactPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Téléphone</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="rounded-2xl border-white/20 bg-white/5 text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setCreateDialogOpen(false)}
+                  className="rounded-2xl text-white hover:bg-white/10"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createForm.formState.isSubmitting}
+                  className="rounded-2xl bg-[#F2E94E] text-[#0A1A2F] hover:bg-[#F2E94E]/90"
+                >
+                  {createForm.formState.isSubmitting ? 'Création...' : 'Créer'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Temporary Password Dialog */}
+      <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+        <DialogContent className="rounded-[32px] border-white/20 bg-[#0A1A2F] sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-white">Mot de passe temporaire</DialogTitle>
+            <DialogDescription className="text-white/70">
+              Le compte pour {newEmployeeName} a été créé. Voici le mot de passe temporaire :
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-white/20 bg-white/5 p-4">
+              <code className="break-all text-sm text-[#F2E94E]">{temporaryPassword}</code>
+            </div>
+
+            <p className="text-sm text-white/50">
+              Copiez ce mot de passe et partagez-le avec l&apos;employé. Il devra le changer lors
+              de sa première connexion.
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <Button
+                onClick={handleCopyPassword}
+                variant="ghost"
+                className="rounded-2xl text-white hover:bg-white/10"
+              >
+                Copier
+              </Button>
+              <Button
+                onClick={() => setPasswordDialogOpen(false)}
+                className="rounded-2xl bg-[#F2E94E] text-[#0A1A2F] hover:bg-[#F2E94E]/90"
+              >
+                J&apos;ai copié le mot de passe
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

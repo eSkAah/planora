@@ -48,15 +48,5 @@ export async function getUser() {
   }
 }
 
-export async function getSession() {
-  const supabase = await createServerSupabaseClient();
-
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    return session;
-  } catch {
-    return null;
-  }
-}
+// Removed getSession() - use getUser() instead for security
+// getSession() reads from cookies and may not be authentic
