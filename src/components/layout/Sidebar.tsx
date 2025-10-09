@@ -45,19 +45,25 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-4">
         {!isCollapsed && (
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="flex items-center gap-2 transition-opacity hover:opacity-80"
+          >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F2E94E]">
               <Calendar className="h-5 w-5 text-[#071427]" />
             </div>
             <span className="text-xl font-semibold text-white">Planora</span>
-          </Link>
+          </button>
         )}
         {isCollapsed && (
-          <Link href="/dashboard" className="mx-auto flex items-center">
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="mx-auto flex items-center transition-opacity hover:opacity-80"
+          >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F2E94E]">
               <Calendar className="h-5 w-5 text-[#071427]" />
             </div>
-          </Link>
+          </button>
         )}
       </div>
 
@@ -65,7 +71,9 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 px-3 py-4">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+          // Fix: Exact match for routes to avoid conflicts (e.g., /settings/company vs /settings)
+          const isActive = pathname === item.href ||
+            (pathname.startsWith(item.href + '/') && item.href !== '/settings');
 
           return (
             <Link
