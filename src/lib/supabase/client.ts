@@ -13,3 +13,6 @@ export function createClientSupabaseClient() {
     publicEnv.supabaseAnonKey
   );
 }
+
+// Alias for convenience
+export const createClient = createClientSupabaseClient;

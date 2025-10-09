@@ -1,7 +1,8 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check, Copy, PlusCircle, Search, Users } from 'lucide-react';
+import { Check, Copy, Edit, MoreVertical, PlusCircle, Search, Trash2, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -17,6 +18,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Form,
   FormControl,
   FormField,
@@ -33,17 +38,22 @@ import {
 } from '@/components/ui';
 import {
   createEmployee,
+  deleteEmployee,
   getEmployees,
+  updateEmployee,
 } from '@/lib/actions/employees';
 import {
   createEmployeeSchema,
+  updateEmployeeSchema,
   contractTypes,
   type CreateEmployeeInput,
+  type UpdateEmployeeInput,
 } from '@/lib/validations/employees';
 
 type Employee = NonNullable<Awaited<ReturnType<typeof getEmployees>>['data']>[number];
 
 export default function EmployeesPage() {
+  const router = useRouter();
   const { toast } = useToast();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,10 +63,12 @@ export default function EmployeesPage() {
 
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [temporaryPassword, setTemporaryPassword] = useState('');
   const [newEmployeeName, setNewEmployeeName] = useState('');
   const [isCopied, setIsCopied] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
   const createForm = useForm<CreateEmployeeInput>({
     resolver: zodResolver(createEmployeeSchema) as any,
@@ -78,6 +90,10 @@ export default function EmployeesPage() {
       employeeNumber: '',
       managerId: '',
     },
+  });
+
+  const editForm = useForm<UpdateEmployeeInput>({
+    resolver: zodResolver(updateEmployeeSchema) as any,
   });
 
   const loadEmployees = async () => {
@@ -130,6 +146,65 @@ export default function EmployeesPage() {
     navigator.clipboard.writeText(temporaryPassword);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const handleEditEmployee = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    editForm.reset({
+      firstName: employee.user?.firstName,
+      lastName: employee.user?.lastName,
+      phone: employee.user?.phone || undefined,
+      position: employee.position || undefined,
+      department: employee.department || undefined,
+      employeeNumber: employee.employeeNumber || undefined,
+      isActive: employee.isActive,
+    });
+    setEditDialogOpen(true);
+  };
+
+  const onSubmitEdit = async (data: UpdateEmployeeInput) => {
+    if (!selectedEmployee) return;
+
+    const result = await updateEmployee(selectedEmployee.id, data);
+
+    if (result.success) {
+      toast({
+        title: 'Employé modifié',
+        description: 'Les informations de l\'employé ont été mises à jour',
+      });
+      setEditDialogOpen(false);
+      router.refresh();
+      await loadEmployees();
+    } else if (result.error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erreur',
+        description: result.error,
+      });
+    }
+  };
+
+  const handleDeleteEmployee = async (employee: Employee) => {
+    if (!confirm(`Voulez-vous vraiment désactiver ${employee.user?.firstName} ${employee.user?.lastName} ?`)) {
+      return;
+    }
+
+    const result = await deleteEmployee(employee.id);
+
+    if (result.success) {
+      toast({
+        title: 'Employé désactivé',
+        description: 'L\'employé a été désactivé avec succès',
+      });
+      router.refresh();
+      await loadEmployees();
+    } else if (result.error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erreur',
+        description: result.error,
+      });
+    }
   };
 
   // Filter employees
@@ -330,6 +405,34 @@ export default function EmployeesPage() {
                     >
                       {employee.isActive ? 'Actif' : 'Inactif'}
                     </span>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 rounded-xl p-0 text-white/70 hover:bg-white/10 hover:text-white"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem
+                          onClick={() => handleEditEmployee(employee)}
+                          className="cursor-pointer"
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Modifier
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteEmployee(employee)}
+                          className="cursor-pointer text-red-400 focus:text-red-400"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Désactiver
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               ))}
@@ -724,6 +827,146 @@ export default function EmployeesPage() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Employee Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[32px] border-white/20 bg-[#0A1A2F] sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="text-white">Modifier l&apos;employé</DialogTitle>
+            <DialogDescription className="text-white/70">
+              Modifiez les informations de {selectedEmployee?.user?.firstName} {selectedEmployee?.user?.lastName}
+            </DialogDescription>
+          </DialogHeader>
+
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(onSubmitEdit)} className="space-y-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={editForm.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Prénom</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="rounded-2xl border-white/20 bg-white/5 text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editForm.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Nom</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="rounded-2xl border-white/20 bg-white/5 text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={editForm.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Téléphone</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        className="rounded-2xl border-white/20 bg-white/5 text-white"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={editForm.control}
+                  name="position"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Poste</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="rounded-2xl border-white/20 bg-white/5 text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editForm.control}
+                  name="department"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Département</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="rounded-2xl border-white/20 bg-white/5 text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={editForm.control}
+                name="employeeNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Numéro employé</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        className="rounded-2xl border-white/20 bg-white/5 text-white"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setEditDialogOpen(false)}
+                  className="rounded-2xl text-white hover:bg-white/10"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={editForm.formState.isSubmitting}
+                  className="rounded-2xl bg-[#F2E94E] text-[#0A1A2F] hover:bg-[#F2E94E]/90"
+                >
+                  {editForm.formState.isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>
