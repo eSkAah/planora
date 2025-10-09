@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang='fr' suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}
+        className={`${inter.variable} ${geistMono.variable} font-sans antialiased bg-[#071427] min-h-screen`}
         suppressHydrationWarning
       >
         {children}

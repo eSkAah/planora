@@ -7,7 +7,6 @@ import { CalendarIcon, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 
 import {
   Button,
@@ -24,6 +23,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  useToast,
 } from '@/components/ui';
 import { generateSchedule } from '@/lib/actions/schedules';
 import { generateScheduleSchema, type GenerateScheduleInput } from '@/lib/validations/schedules';
@@ -35,6 +35,7 @@ interface GenerateScheduleFormProps {
 
 export function GenerateScheduleForm({ onSuccess }: GenerateScheduleFormProps) {
   const router = useRouter();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<GenerateScheduleInput>({
@@ -69,16 +70,27 @@ export function GenerateScheduleForm({ onSuccess }: GenerateScheduleFormProps) {
       const result = await generateSchedule(formData);
 
       if (result.success) {
-        toast.success('Planning généré avec succès');
+        toast({
+          title: 'Succès',
+          description: 'Planning généré avec succès',
+        });
         form.reset();
         router.refresh();
         onSuccess?.();
       } else {
-        toast.error(result.error || 'Erreur lors de la génération du planning');
+        toast({
+          title: 'Erreur',
+          description: result.error || 'Erreur lors de la génération du planning',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Error generating schedule:', error);
-      toast.error('Une erreur est survenue');
+      toast({
+        title: 'Erreur',
+        description: 'Une erreur est survenue',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -231,7 +243,7 @@ export function GenerateScheduleForm({ onSuccess }: GenerateScheduleFormProps) {
                   {
                     id: 'minimize_costs',
                     label: 'Minimiser les coûts',
-                    description: 'Réduire les coûts de main-d'œuvre',
+                    description: 'Réduire les coûts de main-d&apos;œuvre',
                   },
                   {
                     id: 'minimize_overtime',
