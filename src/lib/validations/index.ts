@@ -6,6 +6,7 @@
  */
 
 export * from './auth';
+export * from './companies';
 export * from './employees';
 export * from './onboarding';
 export * from './schedules';

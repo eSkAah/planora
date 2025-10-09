@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PlusCircle, Search, Users } from 'lucide-react';
+import { Check, Copy, PlusCircle, Search, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -56,6 +56,7 @@ export default function EmployeesPage() {
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [temporaryPassword, setTemporaryPassword] = useState('');
   const [newEmployeeName, setNewEmployeeName] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
 
   const createForm = useForm<CreateEmployeeInput>({
     resolver: zodResolver(createEmployeeSchema) as any,
@@ -112,7 +113,10 @@ export default function EmployeesPage() {
       setCreateDialogOpen(false);
       setPasswordDialogOpen(true);
       createForm.reset();
-      loadEmployees();
+
+      // Force refresh from server and reload data
+      router.refresh();
+      await loadEmployees();
     } else if (result.error) {
       toast({
         variant: 'destructive',
@@ -124,10 +128,8 @@ export default function EmployeesPage() {
 
   const handleCopyPassword = () => {
     navigator.clipboard.writeText(temporaryPassword);
-    toast({
-      title: 'Copié',
-      description: 'Le mot de passe a été copié dans le presse-papier.',
-    });
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   // Filter employees
@@ -683,8 +685,26 @@ export default function EmployeesPage() {
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="rounded-2xl border border-white/20 bg-white/5 p-4">
-              <code className="break-all text-sm text-[#F2E94E]">{temporaryPassword}</code>
+            <div className="relative">
+              <div className="rounded-2xl border border-white/20 bg-white/5 p-4 pr-12">
+                <code className="break-all text-sm text-[#F2E94E]">{temporaryPassword}</code>
+              </div>
+              <button
+                onClick={handleCopyPassword}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl bg-white/10 p-2 transition-all hover:bg-white/20"
+                type="button"
+              >
+                {isCopied ? (
+                  <Check className="h-4 w-4 text-green-400" />
+                ) : (
+                  <Copy className="h-4 w-4 text-white/70" />
+                )}
+              </button>
+              {isCopied && (
+                <span className="absolute -top-8 right-0 animate-in fade-in slide-in-from-bottom-2 text-xs font-medium text-green-400">
+                  Copié ✓
+                </span>
+              )}
             </div>
 
             <p className="text-sm text-white/50">
@@ -692,16 +712,12 @@ export default function EmployeesPage() {
               de sa première connexion.
             </p>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end">
               <Button
-                onClick={handleCopyPassword}
-                variant="ghost"
-                className="rounded-2xl text-white hover:bg-white/10"
-              >
-                Copier
-              </Button>
-              <Button
-                onClick={() => setPasswordDialogOpen(false)}
+                onClick={() => {
+                  setPasswordDialogOpen(false);
+                  setIsCopied(false);
+                }}
                 className="rounded-2xl bg-[#F2E94E] text-[#0A1A2F] hover:bg-[#F2E94E]/90"
               >
                 J&apos;ai copié le mot de passe
