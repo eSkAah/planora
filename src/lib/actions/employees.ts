@@ -10,6 +10,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { supabaseAdmin } from '@/lib/database/client';
+import { sendWelcomeEmail } from '@/lib/services/email';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import {
   createEmployeeSchema,
@@ -25,32 +26,7 @@ type ActionResult<T = unknown> = {
   fieldErrors?: Record<string, string[]>;
 };
 
-/**
- * Generate a random temporary password
- */
-function generateTemporaryPassword(): string {
-  const length = 12;
-  const charset =
-    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-  let password = '';
-
-  // Ensure at least one of each required character type
-  password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
-  password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
-  password += '0123456789'[Math.floor(Math.random() * 10)];
-  password += '!@#$%^&*'[Math.floor(Math.random() * 8)];
-
-  // Fill the rest randomly
-  for (let i = password.length; i < length; i++) {
-    password += charset[Math.floor(Math.random() * charset.length)];
-  }
-
-  // Shuffle the password
-  return password
-    .split('')
-    .sort(() => Math.random() - 0.5)
-    .join('');
-}
+// Note: Temporary passwords are no longer used - we now use magic link authentication
 
 /**
  * Get all employees for the current company
@@ -230,10 +206,11 @@ export async function getEmployees(): Promise<
 
 /**
  * Create a new employee (creates user account + employee record)
+ * Sends a magic link via email for the employee to access their account
  */
 export async function createEmployee(
   data: CreateEmployeeInput
-): Promise<ActionResult<{ id: string; temporaryPassword: string }>> {
+): Promise<ActionResult<{ id: string }>> {
   try {
     if (!supabaseAdmin) {
       return {
@@ -297,15 +274,11 @@ export async function createEmployee(
       };
     }
 
-    // Generate temporary password
-    const temporaryPassword = generateTemporaryPassword();
-
-    // Create user in Supabase Auth
+    // Create user in Supabase Auth without password (will use magic link)
     const { data: authData, error: createAuthError } =
       await supabaseAdmin.auth.admin.createUser({
         email: validation.data.email,
-        password: temporaryPassword,
-        email_confirm: true,
+        email_confirm: false, // Will confirm via magic link
         user_metadata: {
           first_name: validation.data.firstName,
           last_name: validation.data.lastName,
@@ -407,13 +380,49 @@ export async function createEmployee(
       // Don't rollback for contract error, just log it
     }
 
+    // Get company name for email
+    const { data: companyNameData } = await supabaseAdmin
+      .from('companies')
+      .select('name')
+      .eq('id', userData.company_id as string)
+      .single();
+
+    const companyName = companyNameData?.name || 'Planora';
+
+    // Generate magic link for employee
+    const { data: linkData, error: linkError } =
+      await supabaseAdmin.auth.admin.generateLink({
+        type: 'magiclink',
+        email: validation.data.email,
+      });
+
+    if (linkError || !linkData) {
+      console.error('Error generating magic link:', linkError);
+      // Don't fail the employee creation if email fails, just log it
+      console.warn('⚠️  Employee created but magic link email could not be sent');
+    } else {
+      // Send welcome email with magic link
+      try {
+        await sendWelcomeEmail({
+          email: validation.data.email,
+          employeeName: `${validation.data.firstName} ${validation.data.lastName}`,
+          companyName,
+          magicLink: linkData.properties.action_link,
+        });
+        console.log('✅ Welcome email sent successfully');
+      } catch (emailError) {
+        console.error('Error sending welcome email:', emailError);
+        // Don't fail the employee creation if email fails
+        console.warn('⚠️  Employee created but welcome email could not be sent');
+      }
+    }
+
     revalidatePath('/employees');
 
     return {
       success: true,
       data: {
         id: employeeData.id,
-        temporaryPassword,
       },
     };
   } catch (error) {

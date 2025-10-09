@@ -31,6 +31,10 @@ export const serverEnvSchema = z
       .min(1, 'OPENAI_API_KEY cannot be empty')
       .optional(),
     OPENAI_MODEL: z.string().min(1).default('gpt-4'),
+    RESEND_API_KEY: z
+      .string()
+      .min(1, 'RESEND_API_KEY cannot be empty')
+      .optional(),
     NEXTAUTH_SECRET: z
       .string()
       .min(32, 'NEXTAUTH_SECRET must be at least 32 characters long')
@@ -72,6 +76,7 @@ export const rawServerEnv: Record<keyof ServerEnvSchema, string | undefined> = {
   SUPABASE_SERVICE_ROLE_KEY: normalize(process.env.SUPABASE_SERVICE_ROLE_KEY),
   OPENAI_API_KEY: normalize(process.env.OPENAI_API_KEY),
   OPENAI_MODEL: normalize(process.env.OPENAI_MODEL),
+  RESEND_API_KEY: normalize(process.env.RESEND_API_KEY),
   NEXTAUTH_SECRET: normalize(process.env.NEXTAUTH_SECRET),
   NEXTAUTH_URL: normalize(process.env.NEXTAUTH_URL),
   SMTP_HOST: normalize(process.env.SMTP_HOST),
@@ -101,6 +106,7 @@ export const serverEnv = {
   supabaseServiceRoleKey: data.SUPABASE_SERVICE_ROLE_KEY ?? null,
   openAiApiKey: data.OPENAI_API_KEY ?? null,
   openAiModel: data.OPENAI_MODEL || 'gpt-4',
+  resendApiKey: data.RESEND_API_KEY ?? null,
   nextAuthSecret: data.NEXTAUTH_SECRET,
   nextAuthUrl: data.NEXTAUTH_URL,
   smtp: {

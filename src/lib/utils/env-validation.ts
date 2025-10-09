@@ -45,6 +45,7 @@ export function validateEnvironmentVariables(): ValidationResult {
     const warnIfMissing = [
       'SUPABASE_SERVICE_ROLE_KEY',
       'OPENAI_API_KEY',
+      'RESEND_API_KEY',
     ] as const;
     warnIfMissing.forEach(key => {
       if (!rawServerEnv[key]) {

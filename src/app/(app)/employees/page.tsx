@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check, Copy, Edit, MoreVertical, PlusCircle, Search, Trash2, Users } from 'lucide-react';
+import { Edit, MoreVertical, PlusCircle, Search, Trash2, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -64,10 +64,6 @@ export default function EmployeesPage() {
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
-  const [temporaryPassword, setTemporaryPassword] = useState('');
-  const [newEmployeeName, setNewEmployeeName] = useState('');
-  const [isCopied, setIsCopied] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
   const createForm = useForm<CreateEmployeeInput>({
@@ -121,13 +117,10 @@ export default function EmployeesPage() {
     if (result.success && result.data) {
       toast({
         title: 'Employé créé',
-        description: `L'employé a été créé avec succès.`,
+        description: `Un email avec un lien de connexion a été envoyé à ${data.email}`,
       });
 
-      setTemporaryPassword(result.data.temporaryPassword);
-      setNewEmployeeName(`${data.firstName} ${data.lastName}`);
       setCreateDialogOpen(false);
-      setPasswordDialogOpen(true);
       createForm.reset();
 
       // Force refresh from server and reload data
@@ -140,12 +133,6 @@ export default function EmployeesPage() {
         description: result.error,
       });
     }
-  };
-
-  const handleCopyPassword = () => {
-    navigator.clipboard.writeText(temporaryPassword);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
   };
 
   const handleEditEmployee = (employee: Employee) => {
@@ -774,59 +761,6 @@ export default function EmployeesPage() {
               </div>
             </form>
           </Form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Temporary Password Dialog */}
-      <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
-        <DialogContent className="rounded-[32px] border-white/20 bg-[#0A1A2F] sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="text-white">Mot de passe temporaire</DialogTitle>
-            <DialogDescription className="text-white/70">
-              Le compte pour {newEmployeeName} a été créé. Voici le mot de passe temporaire :
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="relative">
-              <div className="rounded-2xl border border-white/20 bg-white/5 p-4 pr-12">
-                <code className="break-all text-sm text-[#F2E94E]">{temporaryPassword}</code>
-              </div>
-              <button
-                onClick={handleCopyPassword}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl bg-white/10 p-2 transition-all hover:bg-white/20"
-                type="button"
-              >
-                {isCopied ? (
-                  <Check className="h-4 w-4 text-green-400" />
-                ) : (
-                  <Copy className="h-4 w-4 text-white/70" />
-                )}
-              </button>
-              {isCopied && (
-                <span className="absolute -top-8 right-0 animate-in fade-in slide-in-from-bottom-2 text-xs font-medium text-green-400">
-                  Copié ✓
-                </span>
-              )}
-            </div>
-
-            <p className="text-sm text-white/50">
-              Copiez ce mot de passe et partagez-le avec l&apos;employé. Il devra le changer lors
-              de sa première connexion.
-            </p>
-
-            <div className="flex justify-end">
-              <Button
-                onClick={() => {
-                  setPasswordDialogOpen(false);
-                  setIsCopied(false);
-                }}
-                className="rounded-2xl bg-[#F2E94E] text-[#0A1A2F] hover:bg-[#F2E94E]/90"
-              >
-                J&apos;ai copié le mot de passe
-              </Button>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
 
