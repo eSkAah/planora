@@ -32,30 +32,17 @@ test.describe('Complete Application Workflow', () => {
 
     await page.click('button:has-text("Créer mon compte")');
 
-    // Verify account created
-    await expect(page.getByText('Compte créé').first()).toBeVisible({
-      timeout: 10000,
-    });
-
-    await page.waitForTimeout(2000);
-
-    // ====================================
-    // STEP 2: Login
-    // ====================================
-    await page.getByLabel('Adresse e-mail').fill(userEmail);
-    await page.locator('input[type="password"][name="password"]').fill(password);
-    await page.click('button:has-text("Se connecter")');
-
-    // Wait for redirect to onboarding or dashboard
+    // Wait for auto-signin and redirect to onboarding or dashboard
     await page.waitForURL(/\/(onboarding|dashboard)/, { timeout: 15000 });
 
     // ====================================
-    // STEP 3: Verify authenticated pages
+    // STEP 2: Verify authenticated pages
     // ====================================
     // Navigate to dashboard
     await page.goto('/dashboard');
     await page.waitForTimeout(2000);
-    await expect(page.getByText('Bienvenue')).toBeVisible({ timeout: 10000 });
+    // Verify we're on dashboard by checking for Dashboard heading or stats
+    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible({ timeout: 10000 });
 
     // Navigate to employees - may redirect to onboarding if not complete
     await page.goto('/employees');

@@ -12,23 +12,72 @@
 
 ### Vision du produit
 
-Planora est une application SaaS multi-tenant qui révolutionne la gestion des plannings d'entreprise grâce à l'intelligence artificielle. L'objectif est de transformer une tâche chronophage et complexe en un processus automatisé, optimisé et conforme aux réglementations légales.
+**Planora automatise la création de plannings mensuels grâce à l'IA**, transformant une tâche de 4-8h en un processus de 30 secondes. L'application génère des plannings optimisés en respectant automatiquement les contraintes légales et individuelles, puis permet une modification intuitive avec validation IA en temps réel.
 
-### Problème résolu
+### Problème résolu - La douleur des managers
 
-- **Temps de création** : Génération manuelle des plannings prend 4-8h par mois
-- **Erreurs humaines** : Non-conformité aux règles légales (repos, heures max)
-- **Complexité** : Gestion des disponibilités, compétences, remplacements
-- **Coûts** : Surcharge administrative et erreurs coûteuses
+Chaque mois, les managers passent **4 à 8 heures** à créer manuellement des plannings en jonglant avec :
 
-### Solution proposée
+- ⚖️ **Contraintes légales** : 35h/semaine FR, repos minimum, heures sup limitées
+- 📝 **Contrats individuels** : Temps plein, temps partiel, heures maximales
+- 📅 **Disponibilités** : "Pas dispo mercredi", "Préfère les matins"
+- 🎯 **Compétences** : "Certifié bar", "Manager de service"
+- ⏰ **Heures supplémentaires** : Calcul manuel complexe et source d'erreurs
+- ⚡ **Équité** : Distribution équitable de la charge entre employés
 
-Une plateforme intelligente qui génère automatiquement des plannings optimaux en respectant :
+**Résultat :** Stress, erreurs coûteuses, non-conformité légale, insatisfaction employés
 
-- Les contraintes légales par pays
-- Les disponibilités et préférences des employés
-- Les besoins opérationnels de l'entreprise
-- L'optimisation des coûts et de la satisfaction
+### Solution Planora - 3 fonctionnalités clés
+
+#### 🤖 1. Génération Automatique par IA (30 secondes)
+L'IA analyse toutes les contraintes et génère un planning mensuel complet optimisé :
+- Respect 100% des contraintes légales FR/LU
+- Prise en compte de tous les contrats individuels
+- Respect des disponibilités et préférences
+- Optimisation équité et satisfaction
+- **Calcul automatique des heures supplémentaires**
+
+#### 📅 2. Visualisation Claire et Modification Intuitive
+Interface calendrier premium avec vues multiples (mois/semaine/employé) :
+- Visualisation claire de tout le planning
+- Modification drag & drop ultra-intuitive
+- **Validation IA instantanée** lors des modifications manuelles
+- Alertes visuelles si non-conforme
+- Suggestions automatiques d'ajustements
+
+#### ⏰ 3. Suivi Automatique des Heures Supplémentaires
+Tracking précis et alertes intelligentes :
+- Calcul automatique selon législation FR/LU
+- Alertes avant dépassement de contingent
+- Export Excel pour la paie
+- Historique complet et rapports détaillés
+
+---
+
+## 📖 GLOSSAIRE - Terminologie
+
+Pour éviter toute confusion, voici les termes clés utilisés dans Planora :
+
+### 📅 Planning
+Le **planning** est l'organisation complète du travail sur une période (semaine, mois).
+- Exemple : "Le planning du mois de janvier 2025"
+- Contient toutes les périodes de travail de tous les employés
+
+### ⏰ Période de travail / Horaire / Shift
+Une **période de travail** (aussi appelée "horaire" ou "shift") est une plage horaire assignée à un employé.
+- Exemples : Lundi 9h-17h, Mardi 14h-22h, Mercredi Repos, Jeudi 6h-14h (Matin)
+- Types courants : Matin (6h-14h), Après-midi (14h-22h), Nuit (22h-6h), Journée (9h-17h)
+
+### 👤 Contraintes employé
+Les **contraintes** sont les limitations et préférences de chaque employé :
+- Contraintes légales : Contrat (35h, 40h, temps partiel), repos minimum
+- Disponibilités : "Pas disponible le mercredi", "Préfère les matins"
+- Compétences : "Certifié serveur bar", "Manager de service"
+
+### ⏱️ Heures supplémentaires
+Les **heures supplémentaires** sont les heures travaillées au-delà du contrat normal.
+- Exemple : Employé en 35h/semaine qui travaille 40h → 5h supplémentaires
+- Règles : Contingent annuel, majorations, limites légales FR/LU
 
 ---
 

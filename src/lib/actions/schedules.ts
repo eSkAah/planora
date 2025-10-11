@@ -2,6 +2,13 @@
 
 import { revalidatePath } from 'next/cache';
 
+import { generateScheduleWithAI } from '@/lib/ai/schedule-generator';
+import type {
+  EmployeeData,
+  GenerateScheduleInput as AIGenerateScheduleInput,
+  LegalConstraints,
+  ShiftTemplate as AIShiftTemplate,
+} from '@/lib/ai/schedule-generator';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import {
   createScheduleAssignmentSchema,
@@ -550,48 +557,107 @@ export async function generateSchedule(formData: FormData) {
       return { success: false, error: 'Erreur lors de la création du planning' };
     }
 
-    // Generate assignments using a simple algorithm
-    // This is a basic implementation - can be enhanced with AI later
-    const assignments = [];
-    const startDate = new Date(validation.data.startDate);
-    const endDate = new Date(validation.data.endDate);
+    // Get company data for legal constraints
+    const { data: companyData } = await supabase
+      .from('companies')
+      .select('country, legal_hours_per_week')
+      .eq('id', userData.company_id)
+      .single();
 
-    for (
-      let date = new Date(startDate);
-      date <= endDate;
-      date.setDate(date.getDate() + 1)
-    ) {
-      const dayOfWeek = date.getDay();
-      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const country = (companyData?.country as 'FR' | 'LU') || 'FR';
+    const legalHoursPerWeek = companyData?.legal_hours_per_week || (country === 'FR' ? 35 : 40);
 
-      if (!validation.data.includeWeekends && isWeekend) {
-        continue;
-      }
+    // Prepare data for AI generation
+    const employeesData: EmployeeData[] = employees.map((emp) => {
+      // Get user info
+      const userInfo = Array.isArray(emp.user) ? emp.user[0] : emp.user;
 
-      // Assign shifts for each day
-      // Use morning, afternoon, and evening shifts
-      const dailyShifts = shiftTemplates.filter((t) =>
-        isWeekend ? t.is_weekend_shift : !t.is_weekend_shift
-      );
+      return {
+        id: emp.id,
+        firstName: userInfo?.first_name || 'Unknown',
+        lastName: userInfo?.last_name || '',
+        email: userInfo?.email || '',
+        contractType: (emp.contract_type as any) || 'full_time',
+        hoursPerWeek: emp.hours_per_week || legalHoursPerWeek,
+        position: emp.position || undefined,
+        department: emp.department || undefined,
+        // TODO: Add availability and preferences from database when implemented
+        availableDays: undefined,
+        unavailableDates: undefined,
+        preferredShiftTypes: undefined,
+      };
+    });
 
-      for (const shift of dailyShifts.slice(0, 3)) {
-        // Max 3 shifts per day
-        // Assign to a random employee (simple algorithm)
-        const employee = employees[Math.floor(Math.random() * employees.length)];
+    const shiftsData: AIShiftTemplate[] = shiftTemplates.map((shift) => ({
+      id: shift.id,
+      name: shift.name,
+      startTime: shift.start_time,
+      endTime: shift.end_time,
+      breakDurationMinutes: shift.break_duration_minutes || 0,
+      type: (shift.shift_type as any) || 'full_day',
+      requiredPosition: shift.required_position || undefined,
+      isWeekendShift: shift.is_weekend_shift || false,
+    }));
 
-        assignments.push({
-          schedule_id: scheduleData.id,
-          employee_id: employee.id,
-          shift_template_id: shift.id,
-          company_id: userData.company_id,
-          date: date.toISOString().split('T')[0],
-          start_time: shift.start_time,
-          end_time: shift.end_time,
-          break_duration_minutes: shift.break_duration_minutes,
-          status: 'scheduled',
-        });
-      }
+    const legalConstraints: LegalConstraints = {
+      country,
+      maxHoursPerWeek: legalHoursPerWeek,
+      minRestHoursDaily: 11, // EU standard
+      minRestHoursWeekly: country === 'FR' ? 35 : 44,
+      maxConsecutiveDays: 6,
+      maxOvertimeHoursPerWeek: country === 'FR' ? 48 : 40,
+    };
+
+    const aiInput: AIGenerateScheduleInput = {
+      startDate: validation.data.startDate.toISOString().split('T')[0],
+      endDate: validation.data.endDate.toISOString().split('T')[0],
+      employees: employeesData,
+      shiftTemplates: shiftsData,
+      legalConstraints,
+      constraints: validation.data.constraints || {
+        includeWeekends: validation.data.includeWeekends,
+        minRestHoursBetweenShifts: 11,
+        maxConsecutiveDays: 6,
+        respectAvailability: true,
+        respectSkills: true,
+      },
+      optimizationGoals: validation.data.optimizationGoals || [],
+    };
+
+    // Generate schedule with AI
+    console.log('🤖 Starting AI schedule generation...');
+    let aiResult;
+
+    try {
+      aiResult = await generateScheduleWithAI(aiInput);
+      console.log('✅ AI generation completed successfully');
+    } catch (error) {
+      console.error('❌ AI generation failed:', error);
+      // Cleanup: delete the schedule we created
+      await supabase.from('schedules').delete().eq('id', scheduleData.id);
+
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? `Échec de la génération IA : ${error.message}`
+            : 'Échec de la génération IA. Vérifiez votre configuration OpenAI.',
+      };
     }
+
+    // Prepare assignments for database insertion
+    const assignments = aiResult.assignments.map((assignment) => ({
+      schedule_id: scheduleData.id,
+      employee_id: assignment.employeeId,
+      shift_template_id: assignment.shiftTemplateId,
+      company_id: userData.company_id,
+      date: assignment.date,
+      start_time: assignment.startTime,
+      end_time: assignment.endTime,
+      break_duration_minutes: assignment.breakDurationMinutes,
+      notes: assignment.notes || null,
+      status: 'scheduled' as const,
+    }));
 
     // Insert all assignments
     if (assignments.length > 0) {
@@ -601,9 +667,36 @@ export async function generateSchedule(formData: FormData) {
 
       if (assignmentsError) {
         console.error('Error creating assignments:', assignmentsError);
-        // Don't fail the whole operation, just log the error
+        // Cleanup: delete the schedule
+        await supabase.from('schedules').delete().eq('id', scheduleData.id);
+
+        return {
+          success: false,
+          error: 'Erreur lors de la création des assignations. Veuillez réessayer.',
+        };
       }
+
+      console.log(`✅ Inserted ${assignments.length} schedule assignments`);
     }
+
+    // Update schedule with AI statistics
+    await supabase
+      .from('schedules')
+      .update({
+        total_hours: aiResult.statistics.totalHours,
+        coverage_score: aiResult.statistics.coverageScore,
+        metadata: {
+          ai_generation: {
+            model: 'openai',
+            compliance_score: aiResult.statistics.complianceScore,
+            overtime_hours: aiResult.statistics.overtimeHours,
+            warnings: aiResult.warnings,
+            reasoning: aiResult.reasoning,
+            employee_hours: aiResult.statistics.employeeHours,
+          },
+        },
+      })
+      .eq('id', scheduleData.id);
 
     // Update totals
     await updateScheduleTotals(scheduleData.id);

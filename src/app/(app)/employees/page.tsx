@@ -1,7 +1,18 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Edit, MoreVertical, PlusCircle, Search, Trash2, Users } from 'lucide-react';
+import {
+  Edit,
+  LayoutGrid,
+  List,
+  Mail,
+  MoreVertical,
+  Phone,
+  PlusCircle,
+  Search,
+  Trash2,
+  Users,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -49,6 +60,7 @@ import {
   type CreateEmployeeInput,
   type UpdateEmployeeInput,
 } from '@/lib/validations/employees';
+import { cn } from '@/lib/utils';
 
 type Employee = NonNullable<Awaited<ReturnType<typeof getEmployees>>['data']>[number];
 
@@ -60,6 +72,7 @@ export default function EmployeesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -335,10 +348,41 @@ export default function EmployeesPage() {
       {/* Employees List */}
       <Card className="rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl">
         <CardHeader>
-          <CardTitle className="text-white">Liste des employés</CardTitle>
-          <CardDescription className="text-white/65">
-            {filteredEmployees.length} employé{filteredEmployees.length !== 1 ? 's' : ''}
-          </CardDescription>
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-white">Liste des employés</CardTitle>
+              <CardDescription className="text-white/65">
+                {filteredEmployees.length} employé{filteredEmployees.length !== 1 ? 's' : ''}
+              </CardDescription>
+            </div>
+            {/* View Toggle */}
+            <div className="flex items-center gap-1 rounded-2xl bg-white/5 p-1">
+              <button
+                onClick={() => setViewMode('list')}
+                className={cn(
+                  'rounded-xl p-2.5 transition-all duration-300',
+                  viewMode === 'list'
+                    ? 'bg-white/10 text-white shadow-lg shadow-white/10'
+                    : 'text-white/50 hover:text-white/70 hover:bg-white/5'
+                )}
+                title="Vue liste"
+              >
+                <List className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={cn(
+                  'rounded-xl p-2.5 transition-all duration-300',
+                  viewMode === 'grid'
+                    ? 'bg-white/10 text-white shadow-lg shadow-white/10'
+                    : 'text-white/50 hover:text-white/70 hover:bg-white/5'
+                )}
+                title="Vue grille"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -354,15 +398,16 @@ export default function EmployeesPage() {
                   : 'Aucun employé ne correspond à votre recherche'}
               </p>
             </div>
-          ) : (
+          ) : viewMode === 'list' ? (
+            /* List View - Enhanced with premium hover effects */
             <div className="space-y-3">
               {filteredEmployees.map((employee) => (
                 <div
                   key={employee.id}
-                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10"
+                  className="group flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4 transition-all duration-300 hover:scale-[1.01] hover:border-white/20 hover:bg-white/10 hover:shadow-lg hover:shadow-white/5"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F2E94E]/20 text-lg font-semibold text-[#F2E94E]">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F2E94E]/20 text-lg font-semibold text-[#F2E94E] transition-all duration-300 group-hover:bg-[#F2E94E]/30 group-hover:shadow-lg group-hover:shadow-[#F2E94E]/20">
                       {employee.user?.firstName[0]}
                       {employee.user?.lastName[0]}
                     </div>
@@ -420,6 +465,93 @@ export default function EmployeesPage() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* Grid View - Premium card design */
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredEmployees.map((employee) => (
+                <div
+                  key={employee.id}
+                  className="group relative rounded-3xl border border-white/10 bg-white/5 p-6 transition-all duration-300 hover:scale-[1.02] hover:border-white/20 hover:bg-white/8 hover:shadow-2xl hover:shadow-white/10"
+                >
+                  {/* Actions Dropdown - Top Right */}
+                  <div className="absolute right-4 top-4">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 rounded-xl p-0 text-white/50 opacity-0 transition-all duration-300 hover:bg-white/10 hover:text-white group-hover:opacity-100"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem
+                          onClick={() => handleEditEmployee(employee)}
+                          className="cursor-pointer"
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Modifier
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteEmployee(employee)}
+                          className="cursor-pointer text-red-400 focus:text-red-400"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Désactiver
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  {/* Avatar & Name */}
+                  <div className="mb-4 flex flex-col items-center text-center">
+                    <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F2E94E]/20 text-2xl font-bold text-[#F2E94E] shadow-lg shadow-[#F2E94E]/10 transition-all duration-300 group-hover:bg-[#F2E94E]/30 group-hover:shadow-2xl group-hover:shadow-[#F2E94E]/20">
+                      {employee.user?.firstName[0]}
+                      {employee.user?.lastName[0]}
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">
+                      {employee.user?.firstName} {employee.user?.lastName}
+                    </h3>
+                    {employee.position && (
+                      <p className="mt-1 text-sm text-white/60">{employee.position}</p>
+                    )}
+                  </div>
+
+                  {/* Contact Info */}
+                  <div className="mb-4 space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-white/70">
+                      <Mail className="h-4 w-4 text-white/50" />
+                      <span className="truncate">{employee.user?.email}</span>
+                    </div>
+                    {employee.user?.phone && (
+                      <div className="flex items-center gap-2 text-sm text-white/70">
+                        <Phone className="h-4 w-4 text-white/50" />
+                        <span>{employee.user.phone}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-2">
+                    {employee.department && (
+                      <span className="rounded-full bg-blue-500/20 px-3 py-1 text-xs font-medium text-blue-300">
+                        {employee.department}
+                      </span>
+                    )}
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${
+                        employee.isActive
+                          ? 'bg-green-500/20 text-green-300'
+                          : 'bg-red-500/20 text-red-300'
+                      }`}
+                    >
+                      {employee.isActive ? 'Actif' : 'Inactif'}
+                    </span>
                   </div>
                 </div>
               ))}

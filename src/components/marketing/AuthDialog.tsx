@@ -109,14 +109,23 @@ export default function AuthDialog({
       toast({
         variant: 'success',
         title: 'Compte créé',
-        description: 'Vous pouvez maintenant vous connecter.',
+        description: response.data?.autoSignedIn
+          ? 'Vous êtes maintenant connecté. Redirection...'
+          : 'Vous pouvez maintenant vous connecter.',
       });
 
-      onRegistered?.(data.user.email);
       form.reset(defaultValues);
       setShowPassword(false);
       setShowConfirmPassword(false);
       onOpenChange(false);
+
+      // If auto-signed in, redirect to dashboard
+      if (response.data?.autoSignedIn) {
+        window.location.href = '/dashboard';
+      } else {
+        // Fallback to old behavior if auto-signin failed
+        onRegistered?.(data.user.email);
+      }
     } catch {
       toast({
         variant: 'destructive',

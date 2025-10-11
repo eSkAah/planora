@@ -27,7 +27,7 @@ export async function sendEmail({
   to,
   subject,
   react,
-  from = 'Planora <noreply@planora.app>',
+  from = 'Planora <onboarding@resend.dev>',
 }: SendEmailOptions) {
   if (!resend) {
     console.error('❌ Resend API key not configured - email not sent');
@@ -83,6 +83,31 @@ export async function sendWelcomeEmail({
     react: WelcomeEmployeeEmail({
       employeeName,
       companyName,
+      magicLink,
+    }),
+  });
+}
+
+/**
+ * Send magic link login email
+ */
+export async function sendLoginMagicLink({
+  email,
+  userName,
+  magicLink,
+}: {
+  email: string;
+  userName?: string;
+  magicLink: string;
+}) {
+  // Dynamic import to avoid loading React Email components on every import
+  const { LoginMagicLinkEmail } = await import('@/emails/LoginMagicLinkEmail');
+
+  return sendEmail({
+    to: email,
+    subject: 'Connexion à votre compte Planora',
+    react: LoginMagicLinkEmail({
+      userName: userName || '',
       magicLink,
     }),
   });

@@ -136,7 +136,7 @@ export default function CompanySettingsPage() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Company Info Card */}
-          <Card className="rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl lg:col-span-1">
+          <Card className="group rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-white/5 lg:col-span-1">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-[#F2E94E]/20 p-3">
@@ -184,7 +184,7 @@ export default function CompanySettingsPage() {
           </Card>
 
           {/* Settings Form */}
-          <Card className="rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl lg:col-span-2">
+          <Card className="group rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-white/5 lg:col-span-2">
             <CardHeader>
               <CardTitle className="text-white">Paramètres</CardTitle>
               <CardDescription className="text-white/60">
@@ -327,7 +327,7 @@ export default function CompanySettingsPage() {
                     <Button
                       type="submit"
                       disabled={form.formState.isSubmitting || !form.formState.isDirty}
-                      className="rounded-2xl bg-[#F2E94E] px-6 py-6 text-[#0A1A2F] hover:bg-[#F2E94E]/90"
+                      className="rounded-2xl bg-[#F2E94E] px-6 py-6 text-[#0A1A2F] transition-all duration-300 hover:bg-[#F2E94E]/90 hover:shadow-lg hover:shadow-[#F2E94E]/20"
                     >
                       {form.formState.isSubmitting ? (
                         <>

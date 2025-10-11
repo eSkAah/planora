@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.describe('Account Creation', () => {
   test('should create account and complete basic workflow', async ({ page }) => {
@@ -26,9 +26,7 @@ test.describe('Account Creation', () => {
 
     await page.click('button:has-text("Créer mon compte")');
 
-    // Verify account created
-    await expect(page.getByText('Compte créé').first()).toBeVisible({
-      timeout: 10000,
-    });
+    // Wait for auto-signin and redirect to onboarding/dashboard
+    await page.waitForURL(/\/(onboarding|dashboard)/, { timeout: 15000 });
   });
 });

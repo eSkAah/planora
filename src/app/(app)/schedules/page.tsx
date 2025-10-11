@@ -7,6 +7,8 @@ import {
   ChevronRight,
   Clock,
   Filter,
+  LayoutGrid,
+  List,
   Plus,
   Sparkles,
   Users,
@@ -34,6 +36,7 @@ import {
   SelectValue,
 } from '@/components/ui';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
+import { cn } from '@/lib/utils';
 import { GenerateScheduleForm } from './_components/GenerateScheduleForm';
 
 interface Schedule {
@@ -56,6 +59,7 @@ export default function SchedulesPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [showGenerateForm, setShowGenerateForm] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   useEffect(() => {
     loadSchedules();
@@ -412,11 +416,42 @@ export default function SchedulesPage() {
       {/* Schedules List */}
       <Card className="rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl">
         <CardHeader>
-          <CardTitle className="text-white">Plannings existants</CardTitle>
-          <CardDescription className="text-white/65">
-            {schedules.length} planning{schedules.length !== 1 ? 's' : ''} trouvé
-            {schedules.length !== 1 ? 's' : ''}
-          </CardDescription>
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-white">Plannings existants</CardTitle>
+              <CardDescription className="text-white/65">
+                {schedules.length} planning{schedules.length !== 1 ? 's' : ''} trouvé
+                {schedules.length !== 1 ? 's' : ''}
+              </CardDescription>
+            </div>
+            {/* View Toggle */}
+            <div className="flex items-center gap-1 rounded-2xl bg-white/5 p-1">
+              <button
+                onClick={() => setViewMode('list')}
+                className={cn(
+                  'rounded-xl p-2.5 transition-all duration-300',
+                  viewMode === 'list'
+                    ? 'bg-white/10 text-white shadow-lg shadow-white/10'
+                    : 'text-white/50 hover:text-white/70 hover:bg-white/5'
+                )}
+                title="Vue liste"
+              >
+                <List className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={cn(
+                  'rounded-xl p-2.5 transition-all duration-300',
+                  viewMode === 'grid'
+                    ? 'bg-white/10 text-white shadow-lg shadow-white/10'
+                    : 'text-white/50 hover:text-white/70 hover:bg-white/5'
+                )}
+                title="Vue grille"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -441,18 +476,19 @@ export default function SchedulesPage() {
                 Créer un planning
               </Button>
             </div>
-          ) : (
+          ) : viewMode === 'list' ? (
+            /* List View - Enhanced with premium hover effects */
             <div className="space-y-3">
               {schedules.map((schedule) => (
                 <Card
                   key={schedule.id}
-                  className="cursor-pointer rounded-[24px] border border-white/10 bg-white/5 transition-all hover:border-white/20 hover:bg-white/10"
+                  className="group cursor-pointer rounded-[24px] border border-white/10 bg-white/5 transition-all duration-300 hover:scale-[1.005] hover:border-white/20 hover:bg-white/10 hover:shadow-lg hover:shadow-white/5"
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
-                          <h3 className="text-lg font-semibold text-white">
+                          <h3 className="text-lg font-semibold text-white transition-colors group-hover:text-[#F2E94E]">
                             {schedule.title}
                           </h3>
                           {getStatusBadge(schedule.status)}
@@ -460,7 +496,7 @@ export default function SchedulesPage() {
                         {schedule.description && (
                           <p className="mt-2 text-sm text-white/60">{schedule.description}</p>
                         )}
-                        <div className="mt-4 flex items-center gap-6 text-sm text-white/50">
+                        <div className="mt-4 flex flex-wrap items-center gap-6 text-sm text-white/50">
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
                             <span>{formatDateRange(schedule.start_date, schedule.end_date)}</span>
@@ -480,6 +516,61 @@ export default function SchedulesPage() {
                             </div>
                           )}
                         </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            /* Grid View - Premium compact cards */
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {schedules.map((schedule) => (
+                <Card
+                  key={schedule.id}
+                  className="group cursor-pointer rounded-[24px] border border-white/10 bg-white/5 transition-all duration-300 hover:scale-[1.02] hover:border-white/20 hover:bg-white/8 hover:shadow-2xl hover:shadow-white/10"
+                >
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      {/* Title & Status */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-white transition-colors group-hover:text-[#F2E94E]">
+                          {schedule.title}
+                        </h3>
+                        <div className="mt-2">
+                          {getStatusBadge(schedule.status)}
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      {schedule.description && (
+                        <p className="line-clamp-2 text-sm text-white/60">
+                          {schedule.description}
+                        </p>
+                      )}
+
+                      {/* Stats Grid */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-white/70">
+                          <Calendar className="h-4 w-4 text-white/50" />
+                          <span className="truncate">
+                            {formatDateRange(schedule.start_date, schedule.end_date)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-white/70">
+                          <Clock className="h-4 w-4 text-white/50" />
+                          <span>{Number(schedule.total_hours).toFixed(0)} heures</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-white/70">
+                          <Sparkles className="h-4 w-4 text-white/50" />
+                          <span>{getGenerationMethodLabel(schedule.generation_method)}</span>
+                        </div>
+                        {schedule.coverage_score !== null && (
+                          <div className="flex items-center gap-2 text-sm text-white/70">
+                            <Users className="h-4 w-4 text-white/50" />
+                            <span>{Number(schedule.coverage_score).toFixed(0)}% couverture</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>

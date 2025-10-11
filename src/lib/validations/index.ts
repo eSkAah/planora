@@ -8,8 +8,10 @@
 export * from './auth';
 export * from './companies';
 export * from './employees';
+export * from './leaves';
 export * from './onboarding';
 export * from './schedules';
+export * from './shifts';
 export * from './users';
 
 // Examples of future validation modules:

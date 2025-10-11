@@ -311,16 +311,16 @@ export default function TeamPage() {
         </div>
         <Button
           onClick={() => setIsDialogOpen(true)}
-          className="rounded-2xl bg-[#F2E94E] text-[#0A1A2F] hover:bg-[#f6f07a]"
+          className="rounded-2xl bg-[#F2E94E] px-6 py-6 text-[#0A1A2F] transition-all duration-300 hover:bg-[#f6f07a] hover:shadow-lg hover:shadow-[#F2E94E]/20"
         >
-          <UserPlus className="mr-2 h-4 w-4" />
+          <UserPlus className="mr-2 h-5 w-5" />
           Nouvel utilisateur
         </Button>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="rounded-[24px] border border-white/15 bg-white/12 backdrop-blur-2xl">
+        <Card className="group rounded-[24px] border border-white/15 bg-white/12 backdrop-blur-2xl transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-white/5">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -332,7 +332,7 @@ export default function TeamPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-[24px] border border-white/15 bg-white/12 backdrop-blur-2xl">
+        <Card className="group rounded-[24px] border border-white/15 bg-white/12 backdrop-blur-2xl transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-white/5">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -346,7 +346,7 @@ export default function TeamPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-[24px] border border-white/15 bg-white/12 backdrop-blur-2xl">
+        <Card className="group rounded-[24px] border border-white/15 bg-white/12 backdrop-blur-2xl transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-white/5">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -362,7 +362,7 @@ export default function TeamPage() {
       </div>
 
       {/* Users list */}
-      <Card className="rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl">
+      <Card className="group rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-white/5">
         <CardHeader className="px-8 pt-8">
           <CardTitle className="text-white">Utilisateurs</CardTitle>
           <CardDescription className="text-white/65">
@@ -373,7 +373,7 @@ export default function TeamPage() {
           {users.map((user) => (
             <div
               key={user.id}
-              className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10"
+              className="group flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4 transition-all duration-300 hover:scale-[1.01] hover:border-white/20 hover:bg-white/10 hover:shadow-lg hover:shadow-white/5"
             >
               <div className="flex items-center gap-4">
                 <Avatar className="h-12 w-12 border-2 border-white/20">

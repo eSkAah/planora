@@ -25,17 +25,7 @@ test.describe('Team Management', () => {
 
     await page.click('button:has-text("Créer mon compte")');
 
-    await expect(page.getByText('Compte créé').first()).toBeVisible({
-      timeout: 10000,
-    });
-
-    await page.waitForTimeout(2000);
-
-    // Login
-    await page.getByLabel('Adresse e-mail').fill(userEmail);
-    await page.locator('input[type="password"][name="password"]').fill('TestPassword123!');
-    await page.click('button:has-text("Se connecter")');
-
+    // Wait for auto-signin and redirect to onboarding/dashboard
     await page.waitForURL(/\/(onboarding|dashboard)/, { timeout: 15000 });
 
     // Navigate to team settings

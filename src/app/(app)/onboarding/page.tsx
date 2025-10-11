@@ -267,7 +267,7 @@ export default function OnboardingPage() {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Card className="rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl">
+              <Card className="group rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-white/5">
                 <CardHeader className="space-y-2 px-8 pt-8">
                   <CardTitle className="text-2xl font-semibold text-white">
                     Informations de l&apos;entreprise
@@ -358,7 +358,7 @@ export default function OnboardingPage() {
                         <Button
                           type="submit"
                           disabled={isPending}
-                          className="h-12 min-w-[160px] rounded-2xl bg-[#F2E94E] text-[#0A1A2F] hover:bg-[#f6f07a]"
+                          className="h-12 min-w-[160px] rounded-2xl bg-[#F2E94E] text-[#0A1A2F] transition-all duration-300 hover:bg-[#f6f07a] hover:shadow-lg hover:shadow-[#F2E94E]/20"
                         >
                           {isPending ? (
                             <>
@@ -388,7 +388,7 @@ export default function OnboardingPage() {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Card className="rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl">
+              <Card className="group rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-white/5">
                 <CardHeader className="space-y-2 px-8 pt-8">
                   <CardTitle className="text-2xl font-semibold text-white">
                     Paramètres légaux
@@ -465,7 +465,7 @@ export default function OnboardingPage() {
                         <Button
                           type="submit"
                           disabled={isPending}
-                          className="h-12 min-w-[160px] rounded-2xl bg-[#F2E94E] text-[#0A1A2F] hover:bg-[#f6f07a]"
+                          className="h-12 min-w-[160px] rounded-2xl bg-[#F2E94E] text-[#0A1A2F] transition-all duration-300 hover:bg-[#f6f07a] hover:shadow-lg hover:shadow-[#F2E94E]/20"
                         >
                           {isPending ? (
                             <>
@@ -494,7 +494,7 @@ export default function OnboardingPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Card className="rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl">
+              <Card className="group rounded-[32px] border border-white/15 bg-white/12 backdrop-blur-2xl transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-white/5">
                 <CardHeader className="space-y-2 px-8 pt-8">
                   <CardTitle className="text-2xl font-semibold text-white">
                     Prêt à démarrer
@@ -536,7 +536,7 @@ export default function OnboardingPage() {
                     <Button
                       onClick={handleFinalStep}
                       disabled={isPending}
-                      className="h-12 min-w-[180px] rounded-2xl bg-[#F2E94E] text-[#0A1A2F] hover:bg-[#f6f07a]"
+                      className="h-12 min-w-[180px] rounded-2xl bg-[#F2E94E] text-[#0A1A2F] transition-all duration-300 hover:bg-[#f6f07a] hover:shadow-lg hover:shadow-[#F2E94E]/20"
                     >
                       {isPending ? (
                         <>

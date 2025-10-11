@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { type FormEvent, useMemo, useState, useTransition } from 'react';
@@ -17,15 +17,14 @@ import {
   Label,
   useToast,
 } from '@/components/ui';
-import { signIn } from '@/lib/auth/actions';
+import { sendMagicLinkLogin } from '@/lib/auth/actions';
 
 export default function Landing() {
   const [showLoginCard, setShowLoginCard] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isPending, startTransition] = useTransition();
-  const [showPassword, setShowPassword] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const { toast } = useToast();
 
   const advantages = useMemo(
@@ -49,28 +48,33 @@ export default function Landing() {
   const handleLoginSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
+    if (!email) {
+      toast({
+        variant: 'destructive',
+        title: 'Email requis',
+        description: 'Veuillez entrer votre adresse email.',
+      });
+      return;
+    }
 
     startTransition(async () => {
-      const response = await signIn(formData);
+      const response = await sendMagicLinkLogin(email);
+
       if (!response.success) {
         toast({
           variant: 'destructive',
-          title: 'Connexion impossible',
-          description: response.error ?? 'Vérifiez vos identifiants.',
+          title: 'Erreur',
+          description: response.error ?? 'Une erreur est survenue.',
         });
         return;
       }
 
+      // Show success state
+      setEmailSent(true);
       toast({
-        variant: 'success',
-        title: 'Connexion réussie',
-        description: 'Ouverture de votre espace.',
+        title: 'Email envoyé !',
+        description: 'Vérifiez votre boîte de réception pour vous connecter.',
       });
-
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 350);
     });
   };
 
@@ -78,7 +82,7 @@ export default function Landing() {
     setRegisterOpen(false);
     setShowLoginCard(true);
     setEmail(registeredEmail);
-    setPassword('');
+    setEmailSent(false);
   };
 
   return (
@@ -133,110 +137,113 @@ export default function Landing() {
               <Card className='rounded-[32px] border border-white/15 bg-white/12 p-0 text-[#0A1A2F] shadow-[0_35px_120px_-40px_rgba(3,13,28,0.75)] backdrop-blur-2xl'>
                 <CardHeader className='space-y-2 px-8 pt-8 text-left text-white'>
                   <CardTitle className='text-2xl font-semibold'>
-                    Connexion Planora
+                    {emailSent ? 'Email envoyé !' : 'Connexion Planora'}
                   </CardTitle>
                   <p className='text-sm text-white/65'>
-                    Connectez-vous avec votre identifiant professionnel.
+                    {emailSent
+                      ? 'Vérifiez votre boîte de réception'
+                      : 'Recevez un lien de connexion par email'}
                   </p>
                 </CardHeader>
                 <CardContent className='space-y-6 px-8 pb-8'>
-                  <motion.form
-                    onSubmit={handleLoginSubmit}
-                    className='space-y-5'
-                    initial='hidden'
-                    animate='visible'
-                    variants={{
-                      hidden: { opacity: 0, y: 16 },
-                      visible: {
-                        opacity: 1,
-                        y: 0,
-                        transition: {
-                          staggerChildren: 0.08,
-                          delayChildren: 0.12,
-                          ease: [0.18, 0.9, 0.24, 1],
-                        },
-                      },
-                    }}
-                  >
+                  {emailSent ? (
                     <motion.div
-                      variants={{
-                        hidden: { opacity: 0, y: 12 },
-                        visible: { opacity: 1, y: 0 },
-                      }}
-                      className='space-y-2 text-left'
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className='rounded-2xl border border-[#F2E94E]/20 bg-[#F2E94E]/10 p-6 text-center'
                     >
-                      <Label htmlFor='email' className='text-white/70'>
-                        Adresse e-mail
-                      </Label>
-                      <Input
-                        id='email'
-                        name='email'
-                        type='email'
-                        value={email}
-                        onChange={event => setEmail(event.target.value)}
-                        placeholder='vous@entreprise.com'
-                        autoComplete='email'
-                        required
-                        className='h-12 rounded-2xl border-white/20 bg-white/20 text-white placeholder:text-white/35 focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'
-                      />
-                    </motion.div>
-
-                    <motion.div
-                      variants={{
-                        hidden: { opacity: 0, y: 12 },
-                        visible: { opacity: 1, y: 0 },
-                      }}
-                      className='space-y-2 text-left'
-                    >
-                      <Label htmlFor='password' className='text-white/70'>
-                        Mot de passe
-                      </Label>
-                      <div className='relative'>
-                        <Input
-                          id='password'
-                          name='password'
-                          type={showPassword ? 'text' : 'password'}
-                          value={password}
-                          onChange={event => setPassword(event.target.value)}
-                          placeholder='Votre mot de passe'
-                          autoComplete='current-password'
-                          required
-                          className='h-12 rounded-2xl border-white/20 bg-white/20 pr-12 text-white placeholder:text-white/35 focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'
-                        />
-                        <button
-                          type='button'
-                          onClick={() => setShowPassword(prev => !prev)}
-                          className='absolute top-1/2 right-4 -translate-y-1/2 text-white/60 transition hover:text-white'
-                          aria-label={
-                            showPassword
-                              ? 'Masquer le mot de passe'
-                              : 'Afficher le mot de passe'
-                          }
-                        >
-                          {showPassword ? (
-                            <EyeOff className='h-4 w-4' />
-                          ) : (
-                            <Eye className='h-4 w-4' />
-                          )}
-                        </button>
+                      <div className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#F2E94E]/20'>
+                        <Sparkles className='h-8 w-8 text-[#F2E94E]' />
                       </div>
-                    </motion.div>
-
-                    <motion.div
-                      variants={{
-                        hidden: { opacity: 0, y: 12 },
-                        visible: { opacity: 1, y: 0 },
-                      }}
-                    >
+                      <p className='mb-2 text-lg font-semibold text-white'>
+                        Un email a été envoyé à
+                      </p>
+                      <p className='mb-6 text-white/70'>{email}</p>
+                      <p className='text-sm text-white/60'>
+                        Cliquez sur le lien dans l&apos;email pour vous connecter.
+                        Le lien est valide pendant 1 heure.
+                      </p>
                       <Button
-                        type='submit'
-                        disabled={isPending}
-                        className='h-12 w-full cursor-pointer rounded-2xl bg-[#F2E94E] text-[#0A1A2F] transition hover:bg-[#f6f07a] focus-visible:ring-[#F2E94E]/40'
+                        onClick={() => {
+                          setEmailSent(false);
+                          setEmail('');
+                        }}
+                        variant='ghost'
+                        className='mt-6 w-full rounded-2xl text-white hover:bg-white/10'
                       >
-                        {isPending ? 'Connexion…' : 'Se connecter'}
+                        Renvoyer à une autre adresse
                       </Button>
                     </motion.div>
-                  </motion.form>
+                  ) : (
+                    <motion.form
+                      onSubmit={handleLoginSubmit}
+                      className='space-y-5'
+                      initial='hidden'
+                      animate='visible'
+                      variants={{
+                        hidden: { opacity: 0, y: 16 },
+                        visible: {
+                          opacity: 1,
+                          y: 0,
+                          transition: {
+                            staggerChildren: 0.08,
+                            delayChildren: 0.12,
+                            ease: [0.18, 0.9, 0.24, 1],
+                          },
+                        },
+                      }}
+                    >
+                      <motion.div
+                        variants={{
+                          hidden: { opacity: 0, y: 12 },
+                          visible: { opacity: 1, y: 0 },
+                        }}
+                        className='space-y-2 text-left'
+                      >
+                        <Label htmlFor='email' className='text-white/70'>
+                          Adresse e-mail professionnelle
+                        </Label>
+                        <Input
+                          id='email'
+                          name='email'
+                          type='email'
+                          value={email}
+                          onChange={event => setEmail(event.target.value)}
+                          placeholder='vous@entreprise.com'
+                          autoComplete='email'
+                          required
+                          disabled={isPending}
+                          className='h-12 rounded-2xl border-white/20 bg-white/20 text-white placeholder:text-white/35 focus:border-[#F2E94E]/60 focus:ring-[#F2E94E]/40'
+                        />
+                      </motion.div>
+
+                      <motion.div
+                        variants={{
+                          hidden: { opacity: 0, y: 12 },
+                          visible: { opacity: 1, y: 0 },
+                        }}
+                      >
+                        <Button
+                          type='submit'
+                          disabled={isPending}
+                          className='h-12 w-full cursor-pointer rounded-2xl bg-[#F2E94E] text-[#0A1A2F] transition-all duration-300 hover:bg-[#f6f07a] hover:shadow-lg hover:shadow-[#F2E94E]/20 focus-visible:ring-[#F2E94E]/40'
+                        >
+                          {isPending ? 'Envoi en cours…' : '✨ Recevoir le lien de connexion'}
+                        </Button>
+                      </motion.div>
+
+                      <motion.div
+                        variants={{
+                          hidden: { opacity: 0, y: 12 },
+                          visible: { opacity: 1, y: 0 },
+                        }}
+                        className='rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/65'
+                      >
+                        🔒 Connexion sécurisée sans mot de passe. Vous recevrez un lien
+                        de connexion unique par email.
+                      </motion.div>
+                    </motion.form>
+                  )}
 
                   <motion.div
                     variants={{

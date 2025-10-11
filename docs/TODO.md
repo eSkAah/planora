@@ -1,8 +1,70 @@
 # 🎯 PLANORA - TODO UNIFIÉ & PRIORISÉ
 
 **Document créé :** 8 Octobre 2024
-**Dernière mise à jour :** 8 Octobre 2024
+**Dernière mise à jour :** 10 Octobre 2025
 **Status du projet :** Phase 1 - Infrastructure (70% complété)
+
+---
+
+## 🎯 MISSION DE PLANORA
+
+**Planora automatise la création de plannings mensuels grâce à l'IA, en respectant les contraintes légales et individuelles de chaque employé.**
+
+### Problème résolu
+Les managers passent **4-8h/mois** à créer manuellement des plannings complexes en jonglant avec:
+- Contraintes légales (35h/semaine FR, repos minimum)
+- Contrats individuels (temps partiel, temps plein, heures max)
+- Disponibilités et préférences des employés
+- Compétences requises pour chaque poste
+- Heures supplémentaires à comptabiliser
+- Équité entre employés
+
+### Solution
+**Génération automatique en 30 secondes** de plannings optimisés + Modification intuitive avec validation IA + Suivi des heures supplémentaires
+
+---
+
+## 📖 GLOSSAIRE - Terminologie de l'application
+
+Pour éviter toute confusion, voici les termes clés utilisés dans Planora :
+
+### 📅 **Planning**
+Le **planning** est l'organisation complète du travail sur une période (semaine, mois).
+- **Exemple :** "Le planning du mois de janvier"
+- **Contient :** Toutes les périodes de travail de tous les employés
+
+### ⏰ **Période de travail / Horaire / Shift**
+Une **période de travail** (aussi appelée "horaire" ou "shift") est une plage horaire assignée à un employé.
+- **Exemples :**
+  - Lundi 9h-17h
+  - Mardi 14h-22h
+  - Mercredi Repos
+  - Jeudi 6h-14h (Matin)
+- **Types courants :**
+  - Matin : 6h-14h
+  - Après-midi : 14h-22h
+  - Nuit : 22h-6h
+  - Journée : 9h-17h
+
+### 👤 **Contraintes employé**
+Les **contraintes** sont les limitations et préférences de chaque employé :
+- **Contraintes légales :** Contrat (35h, 40h, temps partiel), repos minimum
+- **Disponibilités :** "Pas disponible le mercredi", "Préfère les matins"
+- **Compétences :** "Certifié serveur bar", "Manager de service"
+
+### ⏱️ **Heures supplémentaires**
+Les **heures supplémentaires** sont les heures travaillées au-delà du contrat normal.
+- **Exemple :** Employé en 35h/semaine qui travaille 40h → 5h supplémentaires
+- **Règles :** Contingent annuel, majorations, limites légales
+
+### 🤖 **Génération automatique**
+L'**IA génère** automatiquement tout le planning du mois en respectant toutes les contraintes.
+- **Input :** Employés + Contraintes + Besoins opérationnels
+- **Output :** Planning complet optimisé
+
+### ✅ **Validation IA**
+Lors de **modifications manuelles**, l'IA vérifie instantanément si ça reste conforme.
+- **Exemple :** Manager déplace un horaire → IA vérifie conformité → Alerte si problème
 
 ---
 
@@ -321,7 +383,9 @@
 
 ## 🎨 Backlog V1 (Moyen terme - 1-2 mois)
 
-### 🤖 Intelligence Artificielle - Génération de planning
+### 🤖 FONCTIONNALITÉ CLÉ #1 : Génération Automatique de Planning par IA
+
+**🎯 Objectif principal :** Remplacer la création manuelle mensuelle (4-8h) par une génération automatique en 30 secondes
 
 #### V1-1 : Configuration OpenAI (S - 1 jour)
 **ID :** AI-01
@@ -339,26 +403,48 @@
 #### V1-2 : Prompt engineering sectoriel (M - 2-3 jours)
 **ID :** AI-02
 **Priorité :** P2
-**Objectif :** Prompts optimisés par secteur
+**Objectif :** Prompts optimisés par secteur pour génération de plannings
 **Livrables :**
 - Prompts versionnés dans `src/lib/ai/prompts/`
 - Secteurs : Retail, Hôtellerie, Santé, Industrie, Générique
-- Variables dynamiques : contraintes, disponibilités, compétences
+- Variables dynamiques :
+  - Contraintes légales (35h FR, 40h LU, repos min)
+  - Contrats individuels (temps plein, temps partiel, heures max)
+  - Disponibilités et préférences des employés
+  - Compétences requises par poste
+  - Heures supplémentaires actuelles
 - Documentation d'usage
 
 **Effort :** M
 
 ---
 
-#### V1-3 : Service génération planning (XL - 6-8 jours)
+#### V1-3 : 🔥 Moteur de Génération Automatique de Planning (XL - 6-8 jours)
 **ID :** AI-03
-**Priorité :** P2
-**Objectif :** Moteur de génération IA
+**Priorité :** P2 (CRITIQUE pour la valeur différenciante)
+**Objectif :** Génération automatique de plannings mensuels optimisés
+
+**Ce que fait l'IA :**
+1. **Analyse** les contraintes légales (35h/semaine, repos, heures max)
+2. **Prend en compte** les contrats individuels de chaque employé
+3. **Respecte** les disponibilités et préférences saisies
+4. **Optimise** l'équité et la répartition de charge
+5. **Génère** un planning mensuel complet en <30s
+6. **Calcule** automatiquement les heures supplémentaires prévisionnelles
+
 **Livrables :**
 - API route `POST /api/ai/generate-schedule`
-- Input : période, employés, contraintes, préférences
-- Appel OpenAI avec prompt + validation conformité
-- Output : planning JSON avec scores
+- Input :
+  - Période (mois/semaine)
+  - Liste employés avec contrats et contraintes
+  - Besoins opérationnels (nombre de personnes par jour/créneau)
+  - Préférences et disponibilités
+- Appel OpenAI avec prompt sectoriel + validation conformité
+- Output : Planning JSON optimisé avec:
+  - Assignations complètes par employé
+  - Calcul des heures par employé
+  - Heures supplémentaires détectées
+  - Score de qualité et conformité
 - Queue si génération >30s (BullMQ ou équivalent)
 - Logs détaillés des générations
 
@@ -366,21 +452,31 @@
 - Génération <30s pour 100 employés
 - Conformité 100% aux règles légales
 - Score qualité >85%
+- Calcul automatique des heures supplémentaires
+- Génération complète du mois sans intervention manuelle
 
 **Effort :** XL (6-8 jours)
 
 ---
 
-#### V1-4 : Interface génération IA (M - 3 jours)
-**ID :** AI-04 (nouveau)
+#### V1-4 : Interface de Génération Automatique (M - 3 jours)
+**ID :** AI-04
 **Priorité :** P2
-**Objectif :** UI pour déclencher et configurer la génération
+**Objectif :** UI intuitive pour déclencher la génération automatique
 **Livrables :**
-- Bouton "Générer avec IA" dans `/schedules`
-- Modal de configuration (période, contraintes custom, secteur)
-- Loading state avec progression
-- Preview planning généré avant validation
-- Possibilité de regénérer ou ajuster
+- Bouton "Générer le planning du mois" dans `/schedules`
+- Modal de configuration :
+  - Sélection période (ex: Janvier 2025)
+  - Sélection secteur d'activité
+  - Configuration besoins opérationnels
+  - Contraintes spécifiques optionnelles
+- Loading state avec progression (analyse, génération, validation)
+- Preview du planning généré avec statistiques:
+  - Heures par employé
+  - Heures supplémentaires détectées
+  - Score de conformité
+  - Alertes éventuelles
+- Actions: Valider / Regénérer / Ajuster manuellement
 
 **Dépendances :** AI-03
 
@@ -388,26 +484,184 @@
 
 ---
 
-### 📅 Planning - Édition interactive
+#### V1-5 : 🔥 Validation IA lors des Modifications Manuelles (M - 3 jours)
+**ID :** AI-05 (NOUVEAU - PRIORITAIRE)
+**Priorité :** P2 (IMPORTANT)
+**Objectif :** Analyser en temps réel si les modifications manuelles restent conformes
 
-#### V1-5 : Drag & Drop planning (L - 4-5 jours)
-**ID :** SCHED-03
-**Priorité :** P2
-**Objectif :** Édition interactive avec drag & drop
+**Ce que fait l'analyse IA :**
+1. Lors de la modification d'horaires d'un employé
+2. Vérifier instantanément si :
+   - Les heures totales respectent le contrat
+   - Les heures supplémentaires sont dans les limites
+   - Le repos quotidien/hebdomadaire est respecté
+   - La charge de travail reste équitable
+3. Afficher alertes visuelles si non-conforme
+4. Suggérer des ajustements automatiques
+
 **Livrables :**
-- Drag & drop de shifts dans le calendrier
-- Redimensionnement des shifts (horaires)
-- Duplication rapide (Ctrl+D)
-- Validation temps réel des contraintes
-- Undo/Redo (historique 20 actions)
+- Hook `useScheduleValidation()` pour validation temps réel
+- Service d'analyse IA des modifications
+- Alertes visuelles dans l'interface de planning:
+  - 🟢 Vert : Conforme
+  - 🟠 Orange : Warning (heures sup approchant limite)
+  - 🔴 Rouge : Non-conforme (bloquer sauvegarde)
+- Messages explicites en français
+- Suggestions d'ajustements automatiques
 
-**Technologies :** `@dnd-kit/core` ou `react-beautiful-dnd`
+**Critères d'acceptation :**
+- Validation <500ms après modification
+- Détection 100% des non-conformités
+- Messages clairs pour l'utilisateur
+- Blocage sauvegarde si violation critique
+
+**Effort :** M (3 jours)
+
+**Dépendances :** AI-03, SCHED-03
+
+---
+
+### 📅 FONCTIONNALITÉ CLÉ #2 : Visualisation et Modification Intuitive du Planning
+
+**🎯 Objectif :** Interface claire pour visualiser le planning mensuel/hebdomadaire et le modifier intuitivement avec validation IA en temps réel
+
+#### MVP-7 : Calendrier Planning - Vue Mensuelle/Hebdomadaire (L - 4-5 jours)
+**ID :** SCHED-02
+**Priorité :** P1 (CRITIQUE)
+**Objectif :** Visualisation claire du planning avec vues multiples
+
+**Livrables :**
+- Page `/schedules` avec calendrier interactif
+- **Vues principales :**
+  - 📅 Vue Mensuelle : Tout le mois en un coup d'œil
+  - 📆 Vue Hebdomadaire : Détail semaine par semaine
+  - 👤 Vue Par Employé : Planning individuel
+- Affichage des périodes de travail avec:
+  - Horaires (ex: Lundi 9h-17h, Mardi 14h-22h)
+  - Codes couleur par type d'horaire
+  - Indicateurs visuels (heures sup, repos, congés)
+- Filtres : employé, département, type d'horaire
+- **Statistiques en temps réel :**
+  - Heures totales par employé
+  - Heures supplémentaires cumulées
+  - Alertes de conformité
+- Performance : chargement <2s pour 100 employés
+
+**Technologies :** `@tanstack/react-table` ou `react-big-calendar`
 
 **Effort :** L
 
 ---
 
-#### V1-6 : Versioning & publication (M - 3 jours)
+#### V1-6 : 🔥 Modification Intuitive avec Validation IA (L - 4-5 jours)
+**ID :** SCHED-03
+**Priorité :** P2 (IMPORTANT)
+**Objectif :** Modification drag & drop avec validation IA instantanée
+
+**Fonctionnalités principales :**
+1. **Modification intuitive :**
+   - Drag & drop des périodes de travail dans le calendrier
+   - Redimensionnement des horaires (étirer pour ajuster)
+   - Double-clic pour édition rapide
+   - Copier-coller d'une journée à l'autre
+   - Duplication rapide (Ctrl+D)
+   - Undo/Redo (historique 20 actions)
+
+2. **Validation IA en temps réel :**
+   - Lors de chaque modification, analyse instantanée :
+     - Conformité avec le contrat de l'employé
+     - Détection heures supplémentaires
+     - Respect repos quotidien/hebdomadaire
+     - Équité de charge entre employés
+   - Alertes visuelles immédiates :
+     - 🟢 Modification valide
+     - 🟠 Attention (heures sup)
+     - 🔴 Bloquant (non-conforme)
+   - Suggestions automatiques d'ajustements
+
+3. **Interface intelligente :**
+   - Tooltip avec détails employé au survol
+   - Calcul automatique des heures lors du déplacement
+   - Preview avant validation
+   - Confirmation pour modifications importantes
+
+**Technologies :** `@dnd-kit/core` + Hook `useScheduleValidation()`
+
+**Critères d'acceptation :**
+- Modification fluide sans lag
+- Validation <500ms après modification
+- Sauvegarde automatique toutes les 30s
+- Undo/Redo fonctionnel
+- Détection 100% des non-conformités
+
+**Effort :** L
+
+**Dépendances :** SCHED-02, AI-05
+
+---
+
+### ⏰ FONCTIONNALITÉ CLÉ #3 : Suivi des Heures Supplémentaires
+
+**🎯 Objectif :** Calcul automatique et suivi précis des heures supplémentaires pour chaque employé
+
+#### V1-7 : 🔥 Module de Suivi des Heures Supplémentaires (M - 3 jours)
+**ID :** OVERTIME-01 (NOUVEAU - PRIORITAIRE)
+**Priorité :** P2 (IMPORTANT)
+**Objectif :** Calcul et tracking automatique des heures supplémentaires
+
+**Fonctionnalités :**
+1. **Calcul automatique :**
+   - Lors de la génération IA : détection automatique des heures sup
+   - Lors des modifications : recalcul instantané
+   - Respect des règles légales :
+     - France : Contingent annuel, majorations
+     - Luxembourg : 2h/jour max, 8h/semaine max
+   - Différenciation heures sup normales vs heures sup majorées
+
+2. **Visualisation :**
+   - Badge sur le planning : "⏰ +5h" si heures sup détectées
+   - Page `/overtime` avec tableau détaillé :
+     - Heures sup par employé
+     - Heures sup par semaine/mois
+     - Cumul annuel vs contingent
+     - Taux de majoration appliqué
+   - Graphiques d'évolution mensuelle
+   - Export Excel pour la paie
+
+3. **Alertes intelligentes :**
+   - 🟠 Warning : Approche limite contingent (80%)
+   - 🔴 Critique : Limite atteinte ou dépassée
+   - Notification manager + RH
+   - Blocage automatique si dépassement non autorisé
+
+4. **Intégration planning :**
+   - Affichage temps réel dans le calendrier
+   - Coloration spéciale des journées avec heures sup
+   - Tooltip détaillé au survol
+   - Filtre "Employés avec heures sup"
+
+**Livrables :**
+- Service `OvertimeCalculator` avec règles FR/LU
+- Hook `useOvertimeTracking(employeeId, period)`
+- Composant `OvertimeWidget` pour le planning
+- Page `/overtime` avec rapports détaillés
+- Export Excel compatible paie
+- API endpoint `GET /api/overtime/:employeeId`
+
+**Critères d'acceptation :**
+- Calcul exact selon législation FR/LU
+- Performance : calcul <100ms pour 1 mois
+- Historique complet des heures sup
+- Export validé par comptable
+- Alertes automatiques fonctionnelles
+
+**Effort :** M (3 jours)
+
+**Dépendances :** SCHED-02, COM-01 (moteur règles légales)
+
+---
+
+#### V1-8 : Versioning & publication (M - 3 jours)
 **ID :** SCHED-04
 **Priorité :** P2
 **Objectif :** Gestion statuts brouillon/publié
