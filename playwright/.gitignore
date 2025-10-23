@@ -1,0 +1,3 @@
+# Playwright test data
+.test-data.json
+.auth/

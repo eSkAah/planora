@@ -19,6 +19,9 @@ const eslintConfig = [
       'node_modules/**',
       'src/generated/**',
       'prisma/generated/**',
+      'scripts/**', // Ignore scripts - console.log is expected
+      'e2e/global-teardown*.ts', // Ignore test cleanup scripts
+      'e2e/testDataTracker.ts', // Ignore test utilities
     ],
   },
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
