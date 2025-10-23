@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Planora is a workforce scheduling and planning application built with Next.js 15, TypeScript, Supabase, and Tailwind CSS. It provides multi-tenant functionality for companies to manage employees, schedules, and business operations with AI-assisted planning capabilities.
+Planora is an AI-powered workforce scheduling platform built with Next.js 15, featuring a hybrid Prisma + Supabase architecture. It provides multi-tenant workforce management with role-based access control, AI-assisted schedule generation, and comprehensive employee management for French and Luxembourg markets.
 
 ## Development Commands
 
@@ -12,7 +12,7 @@ Planora is a workforce scheduling and planning application built with Next.js 15
 # Development
 npm run dev              # Start development server with Turbopack
 npm run build           # Build for production
-npm run start           # Start production server
+npm start               # Start production server
 
 # Code Quality
 npm run lint            # Run ESLint
@@ -20,142 +20,263 @@ npm run lint:fix        # Run ESLint with auto-fix
 npm run format          # Format code with Prettier
 npm run format:check    # Check code formatting
 npm run type-check      # Run TypeScript type checking
+npm run verify          # Run lint + type-check + build
 
-# Git Hooks
-npm run prepare         # Setup Husky git hooks
+# Database Operations
+npm run db:generate     # Generate Prisma client
+npm run db:push         # Push schema changes to database
+npm run db:migrate      # Run database migrations
+npm run db:studio       # Open Prisma Studio
+
+# Supabase Operations
+npm run supabase:types  # Generate TypeScript types from Supabase
+npm run supabase:db:push    # Push to Supabase database
+npm run supabase:db:reset   # Reset Supabase database with seed
+
+# Testing
+npm test                # Run Jest unit tests
+npm run test:watch      # Run Jest in watch mode
+npm run test:e2e        # Run Playwright E2E tests
+npm run test:e2e:ui     # Run E2E tests with UI
+npm run test:e2e:debug  # Debug E2E tests
 ```
 
 ## Architecture Overview
 
+### Hybrid Database Architecture
+
+**Critical**: This application uses a dual database approach:
+
+- **Prisma**: Primary ORM for complex business logic and type-safe queries
+- **Supabase**: Authentication, real-time features, and Row Level Security (RLS)
+
+The database client (`src/lib/database/client.ts`) exports both:
+
+- `prisma` - For business operations
+- `supabase` / `supabaseAdmin` - For auth and real-time
+
 ### Tech Stack
-- **Framework**: Next.js 15.4.6 with App Router
-- **Language**: TypeScript with strict configuration
-- **Database**: Supabase (PostgreSQL with RLS)
-- **Styling**: Tailwind CSS v4
-- **Authentication**: Supabase Auth
-- **Validation**: Zod schemas
-- **State Management**: Planned Zustand + TanStack Query
-- **AI Integration**: Planned OpenAI integration
+
+- **Framework**: Next.js 15 with App Router and Turbopack
+- **Language**: TypeScript with strict configuration (all strict flags enabled)
+- **Database**: PostgreSQL via Prisma + Supabase hybrid
+- **Authentication**: Supabase Auth with magic link support
+- **UI**: ShadCN/UI components + Tailwind CSS v4
+- **AI**: OpenAI integration for schedule generation
+- **Email**: Resend for transactional emails
+- **Testing**: Jest (unit) + Playwright (E2E)
+- **Validation**: Zod schemas throughout
 
 ### Project Structure
+
 ```
 src/
-├── app/                 # Next.js App Router pages
-│   ├── auth/           # Authentication routes
-│   ├── layout.tsx      # Root layout
-│   └── page.tsx        # Home page
-├── components/         # React components
-│   ├── ui/            # Base UI components
-│   ├── forms/         # Form components
-│   ├── charts/        # Data visualization
-│   ├── layout/        # Layout components
-│   └── features/      # Business-specific components
-├── lib/               # Core utilities and business logic
-│   ├── api/           # API clients and endpoints
-│   ├── auth/          # Authentication logic (actions.ts)
-│   ├── database/      # Supabase client and types
-│   ├── ai/            # AI integration utilities
-│   ├── utils/         # General utilities
-│   ├── validations/   # Zod schemas (auth.ts)
-│   └── constants/     # App constants
-├── hooks/             # Custom React hooks
-├── store/             # State management
-└── types/             # TypeScript type definitions
-```
-
-### Database Schema
-Multi-tenant architecture with Row Level Security (RLS):
-- `companies` table with unique company isolation
-- `users` table linked to Supabase Auth with role-based access
-- User roles: `super_admin`, `admin`, `manager`, `employee`, `viewer`
-
-## TypeScript Configuration
-
-Strict TypeScript is enforced with all strict flags enabled:
-- `strict: true`
-- `noImplicitAny: true`
-- `strictNullChecks: true`
-- `noUncheckedIndexedAccess: true`
-- All additional strict checks enabled
-
-### Path Aliases
-```typescript
-"@/*": ["./src/*"]
-"@/components/*": ["./src/components/*"]
-"@/lib/*": ["./src/lib/*"]
-"@/hooks/*": ["./src/hooks/*"]
-"@/store/*": ["./src/store/*"]
-"@/types/*": ["./src/types/*"]
+├── app/                    # Next.js App Router
+│   ├── (app)/             # Protected routes group
+│   │   ├── dashboard/     # Main dashboard
+│   │   ├── employees/     # Employee management
+│   │   ├── schedules/     # Schedule management with AI
+│   │   ├── onboarding/    # Company setup flow
+│   │   └── settings/      # Company & team settings
+│   ├── auth/register/     # Public registration
+│   └── api/               # API routes
+├── components/            # React components
+│   ├── ui/               # ShadCN/UI base components
+│   ├── marketing/        # Landing page components
+│   ├── layout/           # App layout components
+│   └── [domain]/         # Feature-specific components
+├── lib/                  # Core business logic
+│   ├── actions/          # Server actions per domain
+│   ├── ai/               # OpenAI schedule generator
+│   ├── auth/             # Authentication actions
+│   ├── database/         # Hybrid database clients
+│   ├── env/              # Environment validation
+│   ├── services/         # External services (email)
+│   ├── supabase/         # Supabase-specific utilities
+│   └── validations/      # Zod schemas per domain
+├── hooks/                # React hooks
+├── emails/               # React Email templates
+└── types/                # TypeScript definitions
 ```
 
 ## Key Implementation Patterns
 
-### Authentication Flow
-- Server actions in `src/lib/auth/actions.ts`
-- Account creation with company setup
-- User profile creation in both Auth and users table
-- Comprehensive error handling and cleanup on failures
+### Authentication & Authorization
 
-### Database Integration
-- Supabase client configuration in `src/lib/database/client.ts`
-- Separate admin client for server-side operations
-- Environment variable validation with proper error handling
+- **Magic Links**: Primary auth method via Supabase + Resend
+- **Server Actions**: All auth logic in `src/lib/auth/actions.ts`
+- **Middleware**: Route protection + onboarding flow in `src/middleware.ts`
+- **RLS**: Company data isolation via Supabase Row Level Security
 
-### Validation
-- Zod schemas for all form inputs
-- Centralized validation in `src/lib/validations/`
-- Type-safe form handling with server actions
+### Multi-Tenant Architecture
 
-### Component Organization
-- Feature-based component grouping
-- Strict TypeScript props interfaces
-- Composition over inheritance pattern
+- **Company Isolation**: All data scoped by `company_id`
+- **Role-Based Access**: `SUPER_ADMIN`, `ADMIN`, `MANAGER`, `EMPLOYEE`, `VIEWER`
+- **Onboarding Flow**: Mandatory setup for new companies
+- **Settings**: Per-company configuration in JSON column
 
-## Code Quality Standards
+### AI Schedule Generation
 
-### Pre-commit Hooks
-- ESLint with TypeScript rules
-- Prettier formatting
-- Lint-staged for staged files only
+- **Location**: `src/lib/ai/schedule-generator.ts`
+- **Provider**: OpenAI GPT models
+- **Input**: Employee constraints, legal requirements, business needs
+- **Output**: Optimized work schedules with conflict resolution
 
-### ESLint Configuration
-- TypeScript-specific rules enabled
-- Next.js optimizations
-- Prettier integration
+### Data Flow Patterns
 
-## Environment Setup
+```typescript
+// Server Actions Pattern
+Component → Server Action → Validation → Database → Response
 
-Required environment variables:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` (optional, for admin operations)
+// Real-time Updates Pattern
+Component → Supabase Subscription → Real-time UI Updates
+
+// AI Generation Pattern
+User Input → Validation → AI Service → Schedule Generation → Database
+```
+
+### Environment Configuration
+
+**Critical Environment Variables**:
+
+- `DATABASE_URL` - Prisma database connection
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
+- `SUPABASE_SERVICE_ROLE_KEY` - Server-side Supabase admin
+- `OPENAI_API_KEY` - AI schedule generation
+- `RESEND_API_KEY` - Email service
+
+Environment validation is handled in `src/lib/env/` with separate public/server schemas.
+
+## TypeScript Configuration
+
+**Strict Mode Enabled**: All TypeScript strict flags are active. Key requirements:
+
+- No `any` types allowed
+- Null checks enforced (`noUncheckedIndexedAccess`)
+- All imports must be typed
+- Validation schemas must use Zod
+
+**Path Aliases**:
+
+```typescript
+"@/*": ["./src/*"]
+"@/components/*": ["./src/components/*"]
+"@/lib/*": ["./src/lib/*"]
+// etc.
+```
 
 ## Testing Strategy
 
-While test setup is not yet implemented, the architecture supports:
-- Unit tests for hooks and utilities
-- Integration tests for API endpoints
-- E2E tests for critical user flows
+### Unit Tests (`__tests__/`)
+
+- Authentication actions
+- Validation schemas
+- Utility functions
+- Business logic
+
+### E2E Tests (`e2e/`)
+
+- Complete user workflows
+- Authentication flows
+- AI schedule generation
+- Multi-tenant isolation
+- Magic link functionality
+
+### Key Test Commands
+
+```bash
+# Run specific test file
+npm test auth-actions.test.ts
+
+# Run specific E2E test
+npx playwright test e2e/auth/signup.spec.ts
+
+# Debug failing E2E test
+npm run test:e2e:debug
+```
+
+## Database Management
+
+### Prisma Operations
+
+```bash
+# After schema changes
+npm run db:generate && npm run db:push
+
+# Create new migration
+npm run db:migrate
+
+# View data
+npm run db:studio
+```
+
+### Supabase Operations
+
+```bash
+# Update TypeScript types after schema changes
+npm run supabase:types
+
+# Reset database with seed data
+npm run supabase:db:reset
+```
 
 ## Development Workflow
 
-1. Always run `npm run type-check` before committing
-2. Use strict TypeScript - avoid `any` types
-3. Validate all user inputs with Zod schemas
-4. Follow the existing component and file naming conventions
-5. Implement proper error handling in server actions
-6. Maintain RLS policies for data security
+1. **Environment Setup**: Copy `.env.example` and configure all required variables
+2. **Database**: Run `npm run db:generate && npm run db:push`
+3. **Type Safety**: Always run `npm run type-check` before committing
+4. **Code Quality**: Pre-commit hooks enforce linting and formatting
+5. **Testing**: E2E tests require proper environment configuration
 
-## Multi-tenant Considerations
+## AI Integration
 
-- All database queries must respect company isolation
-- User roles determine access levels within companies
-- RLS policies enforce data segregation
-- Company creation includes proper cleanup on failures
+### Schedule Generation
 
-## AI Integration (Planned)
+- **Service**: `src/lib/ai/schedule-generator.ts`
+- **Model**: Configurable OpenAI model (GPT-4 recommended)
+- **Inputs**: Employee data, legal constraints, business requirements
+- **Validation**: Extensive error handling and fallback logic
 
-The architecture is prepared for AI-assisted scheduling features:
-- OpenAI integration utilities in `src/lib/ai/`
-- Structured for schedule generation and optimization
-- Type-safe AI response handling
+### Usage Pattern
+
+```typescript
+import { generateSchedule } from '@/lib/ai/schedule-generator';
+
+const result = await generateSchedule({
+  employees: employeeData,
+  constraints: legalRequirements,
+  preferences: businessNeeds,
+});
+```
+
+## Security Considerations
+
+### Authentication Security
+
+- Magic links expire after use
+- Session validation on every protected route
+- Supabase RLS policies enforce data isolation
+
+### Data Security
+
+- All user inputs validated with Zod schemas
+- Server-side validation for all mutations
+- Company data strictly isolated via RLS
+- No sensitive data in client-side code
+
+## Multi-Tenant Implementation
+
+### Data Isolation
+
+- Every table has `company_id` foreign key
+- RLS policies prevent cross-company access
+- User roles scoped within company context
+
+### Onboarding Flow
+
+- Mandatory company setup for new registrations
+- Settings stored in companies.settings JSONB column
+- Middleware enforces onboarding completion
+
+This architecture ensures scalable, secure, and maintainable workforce management for multiple organizations while leveraging AI for intelligent scheduling.
