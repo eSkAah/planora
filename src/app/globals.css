@@ -1,26 +1,174 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --radius: 1.5rem; /* 24px pour les arrondis Apple-style */
+
+  /* Planora Premium Theme - Design System Exact */
+  /* Couleur principale: Bleu nuit foncé #0A1A2F */
+  --background: #ffffff; /* Couleur tertiaire: Blanc pur */
+  --foreground: #0a1a2f; /* Couleur principale pour le texte */
+  --card: #ffffff;
+  --card-foreground: #0a1a2f;
+  --popover: #ffffff;
+  --popover-foreground: #0a1a2f;
+
+  /* Primary: Bleu nuit foncé #0A1A2F */
+  --primary: #0a1a2f;
+  --primary-foreground: #ffffff;
+
+  /* Secondary: Jaune padel adouci #F2E94E */
+  --secondary: #f2e94e;
+  --secondary-foreground: #0a1a2f;
+
+  /* Muted: Tons neutres élégants basés sur le design */
+  --muted: #f8f9fa;
+  --muted-foreground: #6b7280;
+
+  /* Accent: Vert pastel #A8E6CF */
+  --accent: #a8e6cf;
+  --accent-foreground: #0a1a2f;
+
+  /* Success: Vert pastel pour les états de succès */
+  --success: #a8e6cf;
+  --success-foreground: #0a1a2f;
+
+  /* Warning: Jaune padel pour les avertissements */
+  --warning: #f2e94e;
+  --warning-foreground: #0a1a2f;
+
+  /* Destructive: Rouge contraste avec le design */
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: #e5e7eb;
+  --input: #ffffff;
+  --ring: #0a1a2f; /* Focus avec la couleur principale */
+
+  /* Chart colors palette selon design system */
+  --chart-1: #0a1a2f; /* Bleu nuit principal */
+  --chart-2: #f2e94e; /* Jaune accent */
+  --chart-3: #a8e6cf; /* Vert pastel */
+  --chart-4: #6b7280; /* Gris neutre */
+  --chart-5: #9ca3af; /* Gris plus clair */
+
+  /* Sidebar design exact selon DESIGN.md */
+  --sidebar: #fafafa; /* Fond très légèrement teinté */
+  --sidebar-foreground: #0a1a2f;
+  --sidebar-primary: #0a1a2f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f2e94e; /* Accent jaune pour les hover */
+  --sidebar-accent-foreground: #0a1a2f;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #0a1a2f;
+}
+
+/* DESIGN.md: "Pas de Dark mode → un seul thème premium" */
+/* Le design system ne prévoit qu'un seul thème premium, pas de dark mode */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Animations premium style Apple */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes gradient-x {
+  0%,
+  100% {
+    transform: translateX(0%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 10s linear infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-gradient-x {
+  animation: gradient-x 15s ease infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
 }

@@ -56,7 +56,7 @@ export const userRegistrationSchema = z
         /^[a-zA-ZÀ-ÿ\s'-]+$/,
         'Last name can only contain letters, spaces, hyphens, and apostrophes'
       ),
-    role: z.enum(['admin', 'manager', 'employee']).default('employee'),
+    role: z.enum(['ADMIN', 'MANAGER', 'EMPLOYEE']),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: 'Passwords do not match',

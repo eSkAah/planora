@@ -8,7 +8,8 @@
 
 import { redirect } from 'next/navigation';
 
-import { supabase } from '@/lib/database';
+import { supabaseAdmin } from '@/lib/database/client';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { accountCreationSchema, userLoginSchema } from '@/lib/validations';
 
 type ActionResult<T = unknown> = {
@@ -23,7 +24,6 @@ type ActionResult<T = unknown> = {
  */
 export async function createAccount(formData: FormData): Promise<ActionResult> {
   try {
-    // Extract and validate form data
     const rawData = {
       company: {
         name: formData.get('company.name') as string,
@@ -36,7 +36,7 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
         confirmPassword: formData.get('user.confirmPassword') as string,
         firstName: formData.get('user.firstName') as string,
         lastName: formData.get('user.lastName') as string,
-        role: (formData.get('user.role') as string) || 'employee',
+        role: (formData.get('user.role') as string) || 'EMPLOYEE',
       },
     };
 
@@ -45,112 +45,178 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
     if (!validation.success) {
       return {
         success: false,
-        error: 'Validation failed',
+        error: 'Veuillez vérifier les informations saisies.',
         fieldErrors: validation.error.flatten().fieldErrors,
       };
     }
 
     const { company, user } = validation.data;
 
-    // Check if company already exists
-    const { data: existingCompany } = await supabase
-      .from('companies')
-      .select('id')
-      .eq('name', company.name)
-      .single();
+    if (!supabaseAdmin) {
+      return {
+        success: false,
+        error: 'Le service n\'est pas disponible actuellement. Veuillez réessayer plus tard.',
+      };
+    }
+
+    // Check if company name already exists
+    const { data: existingCompany, error: existingCompanyError } =
+      await supabaseAdmin
+        .from('companies')
+        .select('id')
+        .eq('name', company.name)
+        .maybeSingle();
+
+    if (existingCompanyError) {
+      return {
+        success: false,
+        error: 'Une erreur est survenue lors de la vérification. Veuillez réessayer.',
+      };
+    }
 
     if (existingCompany) {
       return {
         success: false,
-        error: 'Company name already exists',
+        error: 'Une entreprise avec ce nom existe déjà. Veuillez choisir un autre nom.',
       };
     }
 
-    // Create company first
-    const { data: newCompany, error: companyError } = await supabase
-      .from('companies')
-      .insert({
-        name: company.name,
-        country: company.country,
-        sector: company.sector,
-      })
-      .select('id')
-      .single();
+    // Create company with onboarding marked as completed
+    const { data: insertedCompany, error: insertCompanyError } =
+      await supabaseAdmin
+        .from('companies')
+        .insert({
+          name: company.name,
+          country: company.country,
+          sector: company.sector,
+          settings: {
+            onboarding_completed: true,
+          },
+        })
+        .select('id')
+        .single();
 
-    if (companyError || !newCompany) {
+    if (insertCompanyError || !insertedCompany) {
       return {
         success: false,
-        error: `Failed to create company: ${companyError?.message || 'Unknown error'}`,
+        error: 'Impossible de créer l\'entreprise. Veuillez réessayer.',
       };
     }
 
-    // Create user account with Supabase Auth
-    const { data: authUser, error: authError } = await supabase.auth.signUp({
-      email: user.email,
-      password: user.password,
-      options: {
-        data: {
+    // Map role to lowercase for Supabase database
+    const roleMap = {
+      ADMIN: 'admin',
+      MANAGER: 'manager',
+      EMPLOYEE: 'employee',
+      SUPER_ADMIN: 'super_admin',
+      VIEWER: 'viewer',
+    } as const;
+    const dbRole = roleMap[user.role as keyof typeof roleMap] || 'employee';
+
+    // Create user in Supabase Auth
+    const { data: createdUser, error: adminError } =
+      await supabaseAdmin.auth.admin.createUser({
+        email: user.email,
+        password: user.password,
+        email_confirm: true, // Auto-confirm email for better UX
+        user_metadata: {
           first_name: user.firstName,
           last_name: user.lastName,
-          role: user.role,
-          company_id: newCompany.id,
+          role: dbRole,
+          company_id: insertedCompany.id,
         },
-      },
-    });
+      });
 
-    if (authError || !authUser.user) {
-      // Cleanup: remove company if user creation failed
-      await supabase.from('companies').delete().eq('id', newCompany.id);
+    if (adminError || !createdUser?.user) {
+      await supabaseAdmin
+        .from('companies')
+        .delete()
+        .eq('id', insertedCompany.id);
+
+      // Check if it's a duplicate email error
+      const isDuplicateEmail = adminError?.message?.includes('already registered') ||
+                                adminError?.message?.includes('duplicate') ||
+                                adminError?.message?.includes('already exists');
 
       return {
         success: false,
-        error: authError?.message || 'Failed to create user account',
+        error: isDuplicateEmail
+          ? 'Cet email est déjà utilisé. Connectez-vous ou utilisez un autre email.'
+          : 'Impossible de créer votre compte. Veuillez réessayer.',
       };
     }
 
-    // Create user profile in our users table
-    const { error: profileError } = await supabase.from('users').insert({
-      id: authUser.user.id,
-      email: user.email,
-      first_name: user.firstName,
-      last_name: user.lastName,
-      role: user.role as 'admin' | 'manager' | 'employee',
-      company_id: newCompany.id,
-    });
+    const supabaseUser = createdUser.user;
 
-    if (profileError) {
-      // Cleanup: remove auth user and company if profile creation failed
-      if (authUser.user) {
-        await supabase.auth.admin?.deleteUser(authUser.user.id);
-      }
-      await supabase.from('companies').delete().eq('id', newCompany.id);
+    // Create user profile in database
+    const { error: insertUserError } = await supabaseAdmin
+      .from('users')
+      .insert({
+        id: supabaseUser.id,
+        email: user.email,
+        first_name: user.firstName,
+        last_name: user.lastName,
+        role: dbRole,
+        company_id: insertedCompany.id,
+        is_active: true,
+      });
+
+    if (insertUserError) {
+      // Rollback: delete auth user and company
+      await supabaseAdmin.auth.admin.deleteUser(supabaseUser.id);
+      await supabaseAdmin
+        .from('companies')
+        .delete()
+        .eq('id', insertedCompany.id);
+
+      // Check if it's a duplicate key error
+      const isDuplicateError = insertUserError.message?.includes('duplicate') ||
+                                insertUserError.message?.includes('unique constraint');
 
       return {
         success: false,
-        error: 'Failed to create user profile',
+        error: isDuplicateError
+          ? 'Cet email est déjà utilisé. Connectez-vous ou utilisez un autre email.'
+          : 'Impossible de créer votre profil. Veuillez réessayer.',
       };
+    }
+
+    // Auto-sign in the user after successful registration
+    const supabase = await createServerSupabaseClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: user.password,
+    });
+
+    if (signInError) {
+      // Account was created but auto-signin failed
+      // User can still sign in manually
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.warn('Auto-signin failed after registration:', signInError);
+      }
     }
 
     return {
       success: true,
       data: {
         user: {
-          id: authUser.user.id,
-          email: authUser.user.email,
-          company_id: newCompany.id,
+          id: supabaseUser.id,
+          email: supabaseUser.email,
+          company_id: insertedCompany.id,
         },
-        requiresEmailConfirmation: !authUser.session,
+        requiresEmailConfirmation: false, // Email is auto-confirmed
+        autoSignedIn: !signInError, // Indicates if user was automatically signed in
       },
     };
   } catch (error) {
-    // Log error in development
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
       console.error('Registration error:', error);
     }
     return {
       success: false,
-      error: 'An unexpected error occurred',
+      error: 'Une erreur inattendue est survenue. Veuillez réessayer.',
     };
   }
 }
@@ -170,12 +236,14 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
     if (!validation.success) {
       return {
         success: false,
-        error: 'Invalid email or password',
+        error: 'Email ou mot de passe invalide.',
         fieldErrors: validation.error.flatten().fieldErrors,
       };
     }
 
     const { email, password } = validation.data;
+
+    const supabase = await createServerSupabaseClient();
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -183,9 +251,17 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
     });
 
     if (error) {
+      // Check if it's an authentication error
+      const isAuthError = error.message?.includes('Invalid login credentials') ||
+                           error.message?.includes('Email not confirmed') ||
+                           error.message?.includes('Invalid') ||
+                           error.message?.includes('credentials');
+
       return {
         success: false,
-        error: error.message,
+        error: isAuthError
+          ? 'Email ou mot de passe incorrect.'
+          : 'Impossible de se connecter. Veuillez réessayer.',
       };
     }
 
@@ -197,26 +273,135 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
       },
     };
   } catch (error) {
-    // Log error in development
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
       console.error('Sign in error:', error);
     }
     return {
       success: false,
-      error: 'An unexpected error occurred',
+      error: 'Une erreur inattendue est survenue. Veuillez réessayer.',
     };
   }
 }
 
 /**
- * Sign out user
+ * Send magic link for login
  */
-export async function signOut(): Promise<void> {
+export async function sendMagicLinkLogin(
+  email: string
+): Promise<ActionResult> {
+  try {
+    if (!email || typeof email !== 'string') {
+      return {
+        success: false,
+        error: 'Email requis',
+      };
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return {
+        success: false,
+        error: 'Email invalide',
+      };
+    }
+
+    if (!supabaseAdmin) {
+      return {
+        success: false,
+        error: 'Service non configuré',
+      };
+    }
+
+    // Check if user exists
+    const { data: userData, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('id, first_name, last_name, email, is_active')
+      .eq('email', email.toLowerCase())
+      .single();
+
+    if (userError || !userData) {
+      return {
+        success: false,
+        error: 'Aucun compte trouvé avec cet email',
+      };
+    }
+
+    if (!userData.is_active) {
+      return {
+        success: false,
+        error: 'Ce compte est désactivé',
+      };
+    }
+
+    // Generate magic link
+    const { data: linkData, error: linkError } =
+      await supabaseAdmin.auth.admin.generateLink({
+        type: 'magiclink',
+        email: userData.email,
+        options: {
+          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard`,
+        },
+      });
+
+    if (linkError || !linkData) {
+      console.error('❌ Error generating magic link:', linkError);
+      return {
+        success: false,
+        error: 'Erreur lors de la génération du lien de connexion',
+      };
+    }
+
+    // Send magic link email
+    try {
+      const { sendLoginMagicLink } = await import('@/lib/services/email');
+
+      await sendLoginMagicLink({
+        email: userData.email,
+        userName: `${userData.first_name} ${userData.last_name}`,
+        magicLink: linkData.properties.action_link,
+      });
+
+      console.log('✅ Magic link email sent successfully to:', userData.email);
+    } catch (emailError) {
+      console.error('❌ Error sending magic link email:', emailError);
+      return {
+        success: false,
+        error:
+          'Le lien a été généré mais l\'email n\'a pas pu être envoyé. Veuillez réessayer.',
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        message: 'Un lien de connexion a été envoyé à votre adresse email',
+      },
+    };
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('Magic link error:', error);
+    }
+    return {
+      success: false,
+      error: 'Une erreur inattendue est survenue',
+    };
+  }
+}
+
+/**
+ * Sign out action (server)
+ */
+export async function signOutAction(): Promise<void> {
+  const supabase = await createServerSupabaseClient();
   const { error } = await supabase.auth.signOut();
+
   if (error && process.env.NODE_ENV === 'development') {
     // eslint-disable-next-line no-console
     console.error('Sign out error:', error);
   }
+
   redirect('/');
 }

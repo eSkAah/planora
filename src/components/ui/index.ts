@@ -1,15 +1,140 @@
 /**
- * UI Components Exports
+ * UI Components Index
  *
- * This file exports all reusable UI components.
- * These are the building blocks of the application.
+ * Export de tous les composants ShadCN/UI pour Planora
  */
 
-// Note: ShadCN/UI components will be added here as they are created
-// export { Button } from './button';
-// export { Card, CardHeader, CardContent, CardFooter } from './card';
-// export { Input } from './input';
-// export { Label } from './label';
-// etc...
+// Composants de base
+export { Button } from './button';
+export { Input } from './input';
+export { Textarea } from './textarea';
+export { Label } from './label';
+export { Badge } from './badge';
+export {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from './form';
 
-export {}; // Temporary export to avoid empty file error
+// Composants de mise en page
+export {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardAction,
+} from './card';
+export { Separator } from './separator';
+
+// Tableaux
+export {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './table';
+
+// Composants de navigation
+export {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuIndicator,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  NavigationMenuViewport,
+  navigationMenuTriggerStyle,
+} from './navigation-menu';
+
+// Composants de sélection
+export {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectScrollDownButton,
+  SelectScrollUpButton,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from './select';
+
+// Composants de dialogue
+export {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from './dialog';
+
+export {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  AlertDialogPortal,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from './alert-dialog';
+
+// Composants de menu déroulant
+export {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from './dropdown-menu';
+
+// Composants d'affichage
+export { Avatar, AvatarFallback, AvatarImage } from './avatar';
+export { Progress } from './progress';
+export { Stepper } from './stepper';
+export { Calendar } from './calendar';
+export { Popover, PopoverTrigger, PopoverContent } from './popover';
+export { Checkbox } from './checkbox';
+
+// Toasts
+export {
+  Toast,
+  ToastAction,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+} from './toast';
+export { Toaster } from './toaster';
+export { useToast } from './use-toast';

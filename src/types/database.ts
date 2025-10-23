@@ -5,7 +5,7 @@
  * These types will be generated/updated when we set up Supabase.
  */
 
-import type { BaseEntity, UserRole, ThemeMode } from './global';
+import type { BaseEntity, LegacyUserRole, ThemeMode } from './global';
 
 /**
  * Company (Multi-tenant)
@@ -62,7 +62,7 @@ export interface User extends BaseEntity {
   first_name: string;
   last_name: string;
   avatar_url?: string;
-  role: UserRole;
+  role: LegacyUserRole;
   company_id: string;
   is_active: boolean;
   last_login_at?: string;
@@ -243,7 +243,7 @@ export interface Notification extends BaseEntity {
   category: 'schedule' | 'leave' | 'system' | 'reminder';
   is_read: boolean;
   action_url?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 /**
@@ -255,8 +255,8 @@ export interface AuditLog extends BaseEntity {
   action: string;
   entity_type: string;
   entity_id: string;
-  old_values?: Record<string, any>;
-  new_values?: Record<string, any>;
+  old_values?: Record<string, unknown>;
+  new_values?: Record<string, unknown>;
   ip_address?: string;
   user_agent?: string;
 }

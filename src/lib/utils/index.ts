@@ -7,6 +7,9 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+// Environment validation utilities
+export * from './env-validation';
+
 /**
  * Combines class names with Tailwind CSS class merging
  */

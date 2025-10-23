@@ -43,8 +43,8 @@ declare global {
    * Window object extensions
    */
   interface Window {
-    gtag?: (command: string, ...args: any[]) => void;
-    dataLayer?: any[];
+    gtag?: (command: string, ...args: unknown[]) => void;
+    dataLayer?: unknown[];
   }
 }
 
@@ -100,7 +100,7 @@ export type RequiredBy<T, K extends keyof T> = Omit<T, K> &
 /**
  * API Response wrapper type
  */
-export type ApiResponse<T = any> = {
+export type ApiResponse<T = unknown> = {
   data: T;
   success: boolean;
   message?: string;
@@ -110,7 +110,7 @@ export type ApiResponse<T = any> = {
 /**
  * Paginated response type
  */
-export type PaginatedResponse<T = any> = {
+export type PaginatedResponse<T = unknown> = {
   data: T[];
   pagination: {
     page: number;
@@ -134,7 +134,7 @@ export type BaseEntity = {
 /**
  * Form state type
  */
-export type FormState<T = any> = {
+export type FormState<T = unknown> = {
   data: T;
   errors: Partial<Record<keyof T, string>>;
   isSubmitting: boolean;
@@ -153,9 +153,10 @@ export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 /**
- * User role type
+ * Legacy user role type (replaced by Prisma UserRole enum)
+ * @deprecated Use UserRole from @/lib/database instead
  */
-export type UserRole =
+export type LegacyUserRole =
   | 'super_admin'
   | 'company_admin'
   | 'manager'

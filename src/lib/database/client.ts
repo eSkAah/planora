@@ -1,20 +1,45 @@
 /**
- * Supabase Client Configuration
+ * Database Client Configuration
  *
- * This module configures and exports the Supabase client for database operations.
+ * This module configure and exports database clients:
+ * - Prisma: Main ORM for database operations
+ * - Supabase: Authentication and real-time features
  */
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+import { PrismaClient } from '@/generated/prisma';
+import type { Database } from '@/lib/database/types';
+import { publicEnv } from '@/lib/env';
+import { serverEnv } from '@/lib/env/server';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+// Prisma Client (Main Database ORM)
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+const hasDatabaseUrl = Boolean(
+  typeof process.env.DATABASE_URL === 'string' &&
+    process.env.DATABASE_URL.trim().length > 0
+);
+
+const prismaClient = hasDatabaseUrl
+  ? (globalForPrisma.prisma ?? new PrismaClient())
+  : null;
+
+if (prismaClient && process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prismaClient;
 }
 
-// For now, using untyped client until we have actual Supabase schema
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const prisma = prismaClient;
+export const isDatabaseConfigured = () => hasDatabaseUrl;
+
+export const getPrismaClient = () => prismaClient;
+
+// Supabase Client (Authentication & Real-time)
+const supabaseUrl = publicEnv.supabaseUrl;
+const supabaseAnonKey = publicEnv.supabaseAnonKey;
+
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
@@ -22,11 +47,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-// Admin client for server-side operations (if needed)
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Admin client for server-side operations
+const supabaseServiceKey = serverEnv.supabaseServiceRoleKey;
 
 export const supabaseAdmin = supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey, {
+  ? createClient<Database>(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
