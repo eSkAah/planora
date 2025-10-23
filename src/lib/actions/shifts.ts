@@ -97,8 +97,8 @@ export async function getShifts(
     }
 
     // Build query
-    let dbQuery = supabase
-      .from('shifts')
+    let dbQuery = (supabase
+      .from('shifts') as any)
       .select(
         `
         id,
@@ -203,7 +203,7 @@ export async function createShift(
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0]?.message || 'Données invalides',
+        error: validation.error.issues[0]?.message || 'Données invalides',
       };
     }
 
@@ -238,8 +238,8 @@ export async function createShift(
     );
 
     // Create shift
-    const { data, error } = await supabase
-      .from('shifts')
+    const { data, error } = await (supabase
+      .from('shifts') as any)
       .insert({
         company_id: userData.company_id,
         employee_id: validatedData.employeeId,
@@ -327,15 +327,15 @@ export async function updateShift(
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0]?.message || 'Données invalides',
+        error: validation.error.issues[0]?.message || 'Données invalides',
       };
     }
 
     const validatedData = validation.data;
 
     // Get existing shift to verify company and get current values
-    const { data: existingShift, error: shiftError } = await supabase
-      .from('shifts')
+    const { data: existingShift, error: shiftError } = await (supabase
+      .from('shifts') as any)
       .select('company_id, start_time, end_time, break_duration')
       .eq('id', shiftId)
       .single();
@@ -373,8 +373,8 @@ export async function updateShift(
     }
 
     // Update shift
-    const { data, error } = await supabase
-      .from('shifts')
+    const { data, error } = await (supabase
+      .from('shifts') as any)
       .update(updateData)
       .eq('id', shiftId)
       .select()
@@ -445,8 +445,8 @@ export async function deleteShift(shiftId: string): Promise<ActionResult> {
     }
 
     // Verify shift belongs to company
-    const { data: shiftData, error: shiftError } = await supabase
-      .from('shifts')
+    const { data: shiftData, error: shiftError } = await (supabase
+      .from('shifts') as any)
       .select('company_id')
       .eq('id', shiftId)
       .single();
@@ -466,7 +466,7 @@ export async function deleteShift(shiftId: string): Promise<ActionResult> {
     }
 
     // Delete shift
-    const { error } = await supabase.from('shifts').delete().eq('id', shiftId);
+    const { error } = await (supabase.from('shifts') as any).delete().eq('id', shiftId);
 
     if (error) {
       return {

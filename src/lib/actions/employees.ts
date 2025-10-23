@@ -355,11 +355,11 @@ export async function createEmployee(
     // Get company legal settings for default hours per week
     const { data: companyData } = await supabaseAdmin
       .from('companies')
-      .select('legal_hours_per_week')
+      .select('legal_work_hours_per_week')
       .eq('id', userData.company_id as string)
       .single();
 
-    const defaultHoursPerWeek = companyData?.legal_hours_per_week || 35;
+    const defaultHoursPerWeek = companyData?.legal_work_hours_per_week || 35;
 
     // Create contract record with all required fields
     const { error: insertContractError } = await supabaseAdmin
@@ -368,7 +368,7 @@ export async function createEmployee(
         employee_id: employeeData.id,
         company_id: userData.company_id as string,
         contract_type: validation.data.contractType,
-        title: `Contrat ${validation.data.contractType === 'full_time' ? 'Temps plein' : validation.data.contractType === 'part_time' ? 'Temps partiel' : validation.data.contractType === 'temporary' ? 'Temporaire' : validation.data.contractType === 'internship' ? 'Stage' : 'Apprentissage'}`,
+        title: `Contrat ${validation.data.contractType === 'full_time' ? 'Temps plein' : validation.data.contractType === 'part_time' ? 'Temps partiel' : validation.data.contractType === 'temporary' ? 'Temporaire' : validation.data.contractType === 'intern' ? 'Stage' : validation.data.contractType === 'freelance' ? 'Freelance' : 'Apprentissage'}`,
         hours_per_week: defaultHoursPerWeek,
         start_date: validation.data.hireDate.toISOString().split('T')[0],
         effective_from: validation.data.hireDate.toISOString().split('T')[0],

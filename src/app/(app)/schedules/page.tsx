@@ -55,7 +55,7 @@ interface Schedule {
 export default function SchedulesPage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string | 'all'>('all');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [showGenerateForm, setShowGenerateForm] = useState(false);
@@ -89,13 +89,13 @@ export default function SchedulesPage() {
         .order('start_date', { ascending: false });
 
       if (filterStatus !== 'all') {
-        query = query.eq('status', filterStatus);
+        query = query.eq('status', filterStatus as 'draft' | 'published' | 'archived');
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
-      setSchedules(data || []);
+      setSchedules((data as any) || []);
     } catch (error) {
       console.error('Error loading schedules:', error);
     } finally {

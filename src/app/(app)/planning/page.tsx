@@ -186,9 +186,9 @@ export default function PlanningPage() {
   const handleOpenCreateModal = (employeeId?: string, date?: number) => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    const shiftDate = date
+    const shiftDate = (date
       ? `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`
-      : new Date().toISOString().split('T')[0];
+      : new Date().toISOString().split('T')[0]) as string;
 
     setModalMode('create');
     setModalDefaultValues({

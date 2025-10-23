@@ -66,7 +66,7 @@ export default function ShiftModal({
   mode = 'create',
 }: ShiftModalProps) {
   const form = useForm<CreateShiftInput>({
-    resolver: zodResolver(createShiftSchema),
+    resolver: zodResolver(createShiftSchema) as any,
     defaultValues: {
       employeeId: defaultValues?.employeeId || '',
       shiftDate: defaultValues?.shiftDate || new Date().toISOString().split('T')[0],
@@ -75,7 +75,7 @@ export default function ShiftModal({
       shiftType: defaultValues?.shiftType || 'morning',
       breakDuration: defaultValues?.breakDuration || 0,
       notes: defaultValues?.notes || '',
-    },
+    } as any,
   });
 
   // Reset form when defaultValues change
@@ -89,7 +89,7 @@ export default function ShiftModal({
         shiftType: defaultValues.shiftType || 'morning',
         breakDuration: defaultValues.breakDuration || 0,
         notes: defaultValues.notes || '',
-      });
+      } as any);
     }
   }, [defaultValues, form]);
 

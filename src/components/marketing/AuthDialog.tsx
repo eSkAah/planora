@@ -109,7 +109,7 @@ export default function AuthDialog({
       toast({
         variant: 'success',
         title: 'Compte créé',
-        description: response.data?.autoSignedIn
+        description: (response.data as any)?.autoSignedIn
           ? 'Vous êtes maintenant connecté. Redirection...'
           : 'Vous pouvez maintenant vous connecter.',
       });
@@ -120,7 +120,7 @@ export default function AuthDialog({
       onOpenChange(false);
 
       // If auto-signed in, redirect to dashboard
-      if (response.data?.autoSignedIn) {
+      if ((response.data as any)?.autoSignedIn) {
         window.location.href = '/dashboard';
       } else {
         // Fallback to old behavior if auto-signin failed

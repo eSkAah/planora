@@ -39,7 +39,7 @@ export function GenerateScheduleForm({ onSuccess }: GenerateScheduleFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<GenerateScheduleInput>({
-    resolver: zodResolver(generateScheduleSchema),
+    resolver: zodResolver(generateScheduleSchema) as any,
     defaultValues: {
       title: '',
       startDate: new Date(),
@@ -218,7 +218,7 @@ export function GenerateScheduleForm({ onSuccess }: GenerateScheduleFormProps) {
         />
 
         <div className="space-y-3">
-          <FormLabel className="text-white">Objectifs d&apos;optimisation</FormLabel>
+          <label className="text-sm font-medium text-white">Objectifs d&apos;optimisation</label>
           <FormField
             control={form.control}
             name="optimizationGoals"
@@ -287,7 +287,7 @@ export function GenerateScheduleForm({ onSuccess }: GenerateScheduleFormProps) {
         </div>
 
         <div className="space-y-3">
-          <FormLabel className="text-white">Contraintes</FormLabel>
+          <label className="text-sm font-medium text-white">Contraintes</label>
           <FormField
             control={form.control}
             name="constraints.respectAvailability"

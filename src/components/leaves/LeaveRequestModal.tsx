@@ -55,14 +55,14 @@ export default function LeaveRequestModal({
   onOpenChange,
   employees,
   onSubmit,
-  isSubmitting,
+  isSubmitting: _isSubmitting,
   defaultValues,
 }: LeaveRequestModalProps) {
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<CreateLeaveRequestInput>({
-    resolver: zodResolver(createLeaveRequestSchema),
+    resolver: zodResolver(createLeaveRequestSchema) as any,
     defaultValues: {
       employeeId: defaultValues?.employeeId || '',
       leaveType: defaultValues?.leaveType || 'vacation',
@@ -70,7 +70,7 @@ export default function LeaveRequestModal({
       endDate: defaultValues?.endDate || new Date().toISOString().split('T')[0],
       daysCount: defaultValues?.daysCount || 1,
       reason: defaultValues?.reason || '',
-    },
+    } as any,
   });
 
   // Auto-calculate days count when dates change

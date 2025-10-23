@@ -69,7 +69,7 @@ export async function createSchedule(formData: FormData) {
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0]?.message || 'Données invalides',
+        error: validation.error.issues[0]?.message || 'Données invalides',
       };
     }
 
@@ -137,7 +137,7 @@ export async function updateSchedule(formData: FormData) {
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0]?.message || 'Données invalides',
+        error: validation.error.issues[0]?.message || 'Données invalides',
       };
     }
 
@@ -257,7 +257,7 @@ export async function createScheduleAssignment(formData: FormData) {
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0]?.message || 'Données invalides',
+        error: validation.error.issues[0]?.message || 'Données invalides',
       };
     }
 
@@ -328,7 +328,7 @@ export async function updateScheduleAssignment(formData: FormData) {
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0]?.message || 'Données invalides',
+        error: validation.error.issues[0]?.message || 'Données invalides',
       };
     }
 
@@ -507,7 +507,7 @@ export async function generateSchedule(formData: FormData) {
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0]?.message || 'Données invalides',
+        error: validation.error.issues[0]?.message || 'Données invalides',
       };
     }
 
@@ -560,12 +560,12 @@ export async function generateSchedule(formData: FormData) {
     // Get company data for legal constraints
     const { data: companyData } = await supabase
       .from('companies')
-      .select('country, legal_hours_per_week')
+      .select('country, legal_work_hours_per_week')
       .eq('id', userData.company_id)
       .single();
 
     const country = (companyData?.country as 'FR' | 'LU') || 'FR';
-    const legalHoursPerWeek = companyData?.legal_hours_per_week || (country === 'FR' ? 35 : 40);
+    const legalHoursPerWeek = companyData?.legal_work_hours_per_week || (country === 'FR' ? 35 : 40);
 
     // Prepare data for AI generation
     const employeesData: EmployeeData[] = employees.map((emp) => {
