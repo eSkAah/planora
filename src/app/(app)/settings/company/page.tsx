@@ -76,14 +76,18 @@ export default function CompanySettingsPage() {
 
     if (result.success && result.data) {
       setCompanyId(result.data.id);
-      setCreatedAt(new Date(result.data.createdAt).toLocaleDateString('fr-FR'));
+      setCreatedAt(
+        result.data.createdAt
+          ? new Date(result.data.createdAt).toLocaleDateString('fr-FR')
+          : ''
+      );
       form.reset({
         name: result.data.name,
         country: result.data.country,
         sector: result.data.sector,
-        sizeCategory: result.data.sizeCategory as any,
-        legalWorkHoursPerWeek: result.data.legalWorkHoursPerWeek,
-        timezone: result.data.timezone,
+        sizeCategory: (result.data.sizeCategory as any) || 'small',
+        legalWorkHoursPerWeek: result.data.legalWorkHoursPerWeek || 35,
+        timezone: result.data.timezone || 'Europe/Paris',
       });
     } else if (result.error) {
       toast({

@@ -11,6 +11,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : 5,
   reporter: 'html',
   timeout: 180000, // 3 minutes per test
+  globalTeardown: require.resolve('./e2e/global-teardown'),
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',

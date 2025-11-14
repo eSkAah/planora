@@ -28,10 +28,10 @@ export async function getCompany(): Promise<
     name: string;
     country: string;
     sector: string;
-    sizeCategory: string;
-    legalWorkHoursPerWeek: number;
-    timezone: string;
-    createdAt: string;
+    sizeCategory: string | null;
+    legalWorkHoursPerWeek: number | null;
+    timezone: string | null;
+    createdAt: string | null;
   }>
 > {
   try {

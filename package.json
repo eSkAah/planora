@@ -23,8 +23,12 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:debug": "playwright test --debug"
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:clean": "npx tsx scripts/cleanTestData.ts --yes",
+    "test:e2e:verify": "npx tsx scripts/verifyCleanup.ts",
+    "db:stats": "npx tsx scripts/dbStats.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

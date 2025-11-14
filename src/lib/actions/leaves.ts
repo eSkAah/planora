@@ -49,10 +49,10 @@ export async function getLeaveRequests(
     }
 
     // Get user's company and role
-    const { data: userData, error: userError } = await supabase
+    const { data: userData, error: userError } = await (supabase
       .from('users')
       .select('company_id, role')
-      .eq('id', user.id)
+      .eq('id', user.id))
       .single();
 
     if (userError || !userData) {
@@ -76,8 +76,8 @@ export async function getLeaveRequests(
     }
 
     // Build query
-    let dbQuery = supabase
-      .from('leave_requests')
+    let dbQuery = (supabase
+      .from('leave_requests') as any)
       .select(
         `
         id,
@@ -176,10 +176,10 @@ export async function createLeaveRequest(
     }
 
     // Get user's company and role
-    const { data: userData, error: userError } = await supabase
+    const { data: userData, error: userError } = await (supabase
       .from('users')
       .select('company_id, role')
-      .eq('id', user.id)
+      .eq('id', user.id))
       .single();
 
     if (userError || !userData) {
@@ -194,7 +194,7 @@ export async function createLeaveRequest(
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0]?.message || 'Données invalides',
+        error: validation.error.issues[0]?.message || 'Données invalides',
       };
     }
 
@@ -213,10 +213,10 @@ export async function createLeaveRequest(
     }
 
     // Verify employee belongs to same company
-    const { data: employeeData, error: employeeError } = await supabase
+    const { data: employeeData, error: employeeError } = await (supabase
       .from('users')
       .select('company_id')
-      .eq('id', validatedData.employeeId)
+      .eq('id', validatedData.employeeId))
       .single();
 
     if (employeeError || !employeeData) {
@@ -234,14 +234,14 @@ export async function createLeaveRequest(
     }
 
     // Check for overlapping leave requests
-    const { data: overlapping, error: overlapError } = await supabase
-      .from('leave_requests')
+    const { data: overlapping, error: overlapError } = await ((supabase
+      .from('leave_requests') as any)
       .select('id')
       .eq('employee_id', validatedData.employeeId)
       .eq('status', 'approved')
       .or(
         `and(start_date.lte.${validatedData.endDate},end_date.gte.${validatedData.startDate})`
-      );
+      ));
 
     if (overlapError) {
       console.error('Error checking overlaps:', overlapError);
@@ -255,8 +255,8 @@ export async function createLeaveRequest(
     }
 
     // Create leave request
-    const { data, error } = await supabase
-      .from('leave_requests')
+    const { data, error } = await (supabase
+      .from('leave_requests') as any)
       .insert({
         company_id: userData.company_id,
         employee_id: validatedData.employeeId,
@@ -317,10 +317,10 @@ export async function updateLeaveStatus(
     }
 
     // Get user's company and role
-    const { data: userData, error: userError } = await supabase
+    const { data: userData, error: userError } = await (supabase
       .from('users')
       .select('company_id, role')
-      .eq('id', user.id)
+      .eq('id', user.id))
       .single();
 
     if (userError || !userData) {
@@ -335,15 +335,15 @@ export async function updateLeaveStatus(
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0]?.message || 'Données invalides',
+        error: validation.error.issues[0]?.message || 'Données invalides',
       };
     }
 
     const validatedData = validation.data;
 
     // Get existing leave request
-    const { data: existingLeave, error: leaveError } = await supabase
-      .from('leave_requests')
+    const { data: existingLeave, error: leaveError } = await (supabase
+      .from('leave_requests') as any)
       .select('company_id, employee_id, status')
       .eq('id', leaveRequestId)
       .single();
@@ -407,8 +407,8 @@ export async function updateLeaveStatus(
     }
 
     // Update leave request
-    const { data, error } = await supabase
-      .from('leave_requests')
+    const { data, error } = await (supabase
+      .from('leave_requests') as any)
       .update(updateData)
       .eq('id', leaveRequestId)
       .select()
@@ -461,10 +461,10 @@ export async function updateLeaveRequest(
     }
 
     // Get user's company and role
-    const { data: userData, error: userError } = await supabase
+    const { data: userData, error: userError } = await (supabase
       .from('users')
       .select('company_id, role')
-      .eq('id', user.id)
+      .eq('id', user.id))
       .single();
 
     if (userError || !userData) {
@@ -479,15 +479,15 @@ export async function updateLeaveRequest(
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0]?.message || 'Données invalides',
+        error: validation.error.issues[0]?.message || 'Données invalides',
       };
     }
 
     const validatedData = validation.data;
 
     // Get existing leave request
-    const { data: existingLeave, error: leaveError } = await supabase
-      .from('leave_requests')
+    const { data: existingLeave, error: leaveError } = await (supabase
+      .from('leave_requests') as any)
       .select('company_id, employee_id, status')
       .eq('id', leaveRequestId)
       .single();
@@ -526,8 +526,8 @@ export async function updateLeaveRequest(
     }
 
     // Update leave request
-    const { data, error } = await supabase
-      .from('leave_requests')
+    const { data, error } = await (supabase
+      .from('leave_requests') as any)
       .update(validatedData)
       .eq('id', leaveRequestId)
       .select()
@@ -579,10 +579,10 @@ export async function deleteLeaveRequest(
     }
 
     // Get user's company and role
-    const { data: userData, error: userError } = await supabase
+    const { data: userData, error: userError } = await (supabase
       .from('users')
       .select('company_id, role')
-      .eq('id', user.id)
+      .eq('id', user.id))
       .single();
 
     if (userError || !userData) {
@@ -593,8 +593,8 @@ export async function deleteLeaveRequest(
     }
 
     // Get leave request
-    const { data: leaveData, error: leaveError } = await supabase
-      .from('leave_requests')
+    const { data: leaveData, error: leaveError } = await (supabase
+      .from('leave_requests') as any)
       .select('company_id, employee_id, status')
       .eq('id', leaveRequestId)
       .single();
@@ -633,8 +633,8 @@ export async function deleteLeaveRequest(
     }
 
     // Delete leave request
-    const { error } = await supabase
-      .from('leave_requests')
+    const { error } = await (supabase
+      .from('leave_requests') as any)
       .delete()
       .eq('id', leaveRequestId);
 

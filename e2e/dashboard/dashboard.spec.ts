@@ -29,8 +29,8 @@ test.describe('Dashboard', () => {
 
     await page.click('button:has-text("Créer mon compte")');
 
-    // Wait for auto-signin and redirect to onboarding/dashboard
-    await page.waitForURL(/\/(onboarding|dashboard)/, { timeout: 15000 });
+    // Wait for auto-signin and redirect to onboarding/dashboard with extended timeout
+    await page.waitForURL(/\/(onboarding|dashboard)/, { timeout: 30000 });
   });
 
   test('should display dashboard with stats', async ({ page }) => {

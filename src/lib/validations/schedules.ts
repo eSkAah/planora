@@ -3,17 +3,11 @@ import { z } from 'zod';
 export const createScheduleSchema = z.object({
   title: z.string().min(1, 'Le titre est requis'),
   description: z.string().optional(),
-  startDate: z.date({
-    required_error: 'La date de début est requise',
-  }),
-  endDate: z.date({
-    required_error: 'La date de fin est requise',
-  }),
-  generationMethod: z.enum(['manual', 'ai', 'template'], {
-    required_error: 'La méthode de génération est requise',
-  }),
+  startDate: z.date(),
+  endDate: z.date(),
+  generationMethod: z.enum(['manual', 'ai', 'template']),
   aiPrompt: z.string().optional(),
-  aiConstraints: z.record(z.unknown()).optional(),
+  aiConstraints: z.record(z.string(), z.unknown()).optional(),
   aiOptimizationGoals: z.array(z.string()).optional(),
 });
 
@@ -49,12 +43,8 @@ export const updateScheduleAssignmentSchema = z.object({
 
 export const generateScheduleSchema = z.object({
   title: z.string().min(1, 'Le titre est requis'),
-  startDate: z.date({
-    required_error: 'La date de début est requise',
-  }),
-  endDate: z.date({
-    required_error: 'La date de fin est requise',
-  }),
+  startDate: z.date(),
+  endDate: z.date(),
   includeWeekends: z.boolean().default(false),
   optimizationGoals: z
     .array(
@@ -74,7 +64,12 @@ export const generateScheduleSchema = z.object({
       respectAvailability: z.boolean().default(true),
       respectSkills: z.boolean().default(true),
     })
-    .default({}),
+    .default({
+      minRestHoursBetweenShifts: 11,
+      maxConsecutiveDays: 6,
+      respectAvailability: true,
+      respectSkills: true,
+    }),
 });
 
 export type CreateScheduleInput = z.infer<typeof createScheduleSchema>;
