@@ -11,6 +11,7 @@ export async function middleware(req: NextRequest) {
     },
   });
 
+  // Create Supabase client
   const supabase = createServerClient<Database>(
     publicEnv.supabaseUrl,
     publicEnv.supabaseAnonKey,
@@ -36,14 +37,29 @@ export async function middleware(req: NextRequest) {
     }
   );
 
-  // Use getUser() instead of getSession() for security
-  // getSession() reads from cookies and may not be authentic
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  // Check if user has auth tokens before making API call
+  const hasAuthTokens =
+    req.cookies.has('sb-zwqpnhprptpbbxzmnbku-auth-token') ||
+    req.cookies
+      .getAll()
+      .some(
+        cookie =>
+          cookie.name.startsWith('sb-') && cookie.name.includes('-auth-token')
+      );
 
-  const session = user && !authError ? { user } : null;
+  let session: { user: any } | null = null;
+
+  // Only validate user authentication if auth tokens exist
+  if (hasAuthTokens) {
+    // Use getUser() instead of getSession() for security
+    // getSession() reads from cookies and may not be authentic
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    session = user && !authError ? { user } : null;
+  }
 
   const protectedRoutes = [
     '/dashboard',
@@ -82,7 +98,10 @@ export async function middleware(req: NextRequest) {
           .eq('id', userData.company_id)
           .single();
 
-        const settings = companyData?.settings as Record<string, unknown> | null;
+        const settings = companyData?.settings as Record<
+          string,
+          unknown
+        > | null;
         const onboardingCompleted = settings?.onboarding_completed === true;
 
         // Redirect to onboarding if not completed
@@ -112,7 +131,10 @@ export async function middleware(req: NextRequest) {
           .eq('id', userData.company_id)
           .single();
 
-        const settings = companyData?.settings as Record<string, unknown> | null;
+        const settings = companyData?.settings as Record<
+          string,
+          unknown
+        > | null;
         const onboardingCompleted = settings?.onboarding_completed === true;
 
         if (onboardingCompleted) {
@@ -122,7 +144,10 @@ export async function middleware(req: NextRequest) {
         }
       }
     } catch (error) {
-      console.error('Error checking onboarding status for auth redirect:', error);
+      console.error(
+        'Error checking onboarding status for auth redirect:',
+        error
+      );
       // Default to dashboard if there's an error
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
